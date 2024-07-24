@@ -60,11 +60,10 @@ Game_Worldspawn(void)
 	Sound_Precache("item.respawn");
 	Sound_Precache("weapon.pickup");
 
-	Weapons_Init();
 	FX_Corpse_Init();
 
-	clientstat(STAT_MONEY, EV_INTEGER, player::money);
-	clientstat(STAT_PROGRESS, EV_FLOAT, player::progress);
+	clientstat(STAT_MONEY, EV_INTEGER, CSPlayer::money);
+	clientstat(STAT_PROGRESS, EV_FLOAT, CSPlayer::progress);
 
 	pointerstat(STAT_GAMETIME, EV_FLOAT, &g_cs_gametime);
 	pointerstat(STAT_GAMESTATE, EV_INTEGER, &g_cs_gamestate);

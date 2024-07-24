@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Marco Cawthorne <marco@icculus.org>
+ * Copyright (c) 2016-2024 Marco Cawthorne <marco@icculus.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,14 +14,36 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define PMOVE_STEPHEIGHT 18
+#define PMOVE_AIRSTEPHEIGHT 0
+#define PMOVE_FRICTION 4
+#define PMOVE_EDGEFRICTION 1
+#define PMOVE_STOPSPEED 75
+#define PMOVE_GRAVITY 800
+#define PMOVE_AIRACCELERATE 10
+#define PMOVE_WATERACCELERATE 8
+#define PMOVE_ACCELERATE 4
+#define PMOVE_MAXSPEED 250
+#define PMOVE_STEP_WALKSPEED 270
+#define PMOVE_STEP_CROUCHSPEED 90
+#define PMOVE_BOXCENTER true
+#define PMOVE_NORMAL_HEIGHT 72
+#define PMOVE_NORMAL_VIEWHEIGHT 54
+#define PMOVE_CROUCH_HEIGHT 36
+#define PMOVE_CROUCH_VIEWHEIGHT 30
+
+/* disable prone, run and lean */
+#define PMOVE_STEP_RUNSPEED 0
+#define PMOVE_PRONE_HEIGHT 0
+
 .float waterlevel;
 .float watertype;
 
 /* values courtesy of https://wiki.alliedmods.net/Cs_weapons_information */
 float
-player::Physics_MaxSpeed(void)
+CSPlayer::Physics_MaxSpeed(void)
 {
-	float spd = serverkeyfloat("phy_maxspeed");
+	float spd = super::Physics_MaxSpeed();
 
 	switch (activeweapon)
 	{
@@ -109,21 +131,17 @@ player::Physics_MaxSpeed(void)
 	default:
 	}
 
-	if (flags & FL_CROUCHING) {
-		spd *= 0.5f;
-	}
-
 	return spd;
 }
 
 void
-player::Physics_Fall(float impactspeed)
+CSPlayer::Physics_Fall(float impactspeed)
 {
 	impactspeed *= 1.25f;
 	if (impactspeed > 580) {
 #ifdef SERVER
 		float fFallDamage = (impactspeed - 580) * (100 / (1024 - 580)) * 0.75f;
-		Damage_Apply(this, world, fFallDamage, 0, DMG_FALL | DMG_SKIP_ARMOR);
+		//Damage_Apply(this, world, fFallDamage, 0, DMG_FALL | DMG_SKIP_ARMOR);
 
 		if (random() < 0.5)
 			sound(this, CHAN_AUTO, "player/pl_pain2.wav", 1.0, ATTN_NORM);
@@ -134,7 +152,7 @@ player::Physics_Fall(float impactspeed)
 }
 
 void
-player::Physics_Jump(void)
+CSPlayer::Physics_Jump(void)
 {
 	if (waterlevel >= 2) {
 		if (watertype == CONTENT_WATER) {

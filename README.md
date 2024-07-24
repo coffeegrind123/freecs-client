@@ -1,4 +1,4 @@
-# FreeCS
+# Tactical Retreat (FreeCS)
 [As seen on phoronix.com](https://phoronix.com/scan.php?page=news_item&px=FreeCS-Open-Counter-Strike)
 
 Clean-room reimplementation of Counter-Strike 1.5 (mod-version).

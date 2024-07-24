@@ -40,7 +40,7 @@ void Animation_Print(string sWow) {
 }
 
 void
-Animation_TimerUpdate(player pl, float ftime)
+Animation_TimerUpdate(CSPlayer pl, float ftime)
 {
 	makevectors([0, pl.v_angle[1], 0]);
 
@@ -65,28 +65,28 @@ depending on what the player is doing
 =================
 */
 void
-Animation_PlayerUpdate(player pl)
+Animation_PlayerUpdate(CSPlayer pl)
 {
 	pl.basebone = gettagindex(pl, "-- R shoulder outside");
 
 	if (pl.anim_top_delay <= 0.0f) {
-		pl.anim_top = Weapons_GetAim(pl, pl.activeweapon);
+		pl.anim_top = 0;//Weapons_GetAim(pl, pl.activeweapon);
 	}
 
 	if (vlen(pl.velocity) == 0) {
-		if (pl.flags & FL_CROUCHING) {
+		if (pl.IsCrouching()) {
 			pl.anim_bottom = ANIM_IDLE_CROUCH;
 		} else {
 			pl.anim_bottom = ANIM_IDLE;
 		}
 	} else if (vlen(pl.velocity) < 150) {
-		if (pl.flags & FL_CROUCHING) {
+		if (pl.IsCrouching()) {
 			pl.anim_bottom = ANIM_RUN_CROUCH;
 		} else {
 			pl.anim_bottom = ANIM_WALK;
 		}
 	} else if (vlen(pl.velocity) > 150) {
-		if (pl.flags & FL_CROUCHING) {
+		if (pl.IsCrouching()) {
 			pl.anim_bottom = ANIM_RUN_CROUCH;
 		} else {
 			pl.anim_bottom = ANIM_RUN;
@@ -128,7 +128,7 @@ Animation_PlayerUpdate(player pl)
 }
 
 void
-Animation_PlayerTop(player pl, float topanim, float timer)
+Animation_PlayerTop(CSPlayer pl, float topanim, float timer)
 {
 #if 0
 	pl.anim_top = topanim;
@@ -138,7 +138,7 @@ Animation_PlayerTop(player pl, float topanim, float timer)
 }
 
 void
-Animation_PlayerBottom(player pl, float botanim, float timer)
+Animation_PlayerBottom(CSPlayer pl, float botanim, float timer)
 {
 	pl.anim_bottom = botanim;
 }

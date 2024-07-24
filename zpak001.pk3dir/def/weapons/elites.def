@@ -1,0 +1,66 @@
+entityDef weapon_elites
+{
+	"inherit"			"CSBasePistol"
+	"editor_usage"		"Dual Beretta 96G (Elites) Weapon - Uses ammo_9mm"
+
+	"model"				"models/w_elite.mdl"
+	"model_view"		"models/v_elite.mdl"
+
+	"inv_name"			"Dual Beretta 96G (Elites) Weapon"
+	"def_fireInfo"	"fireInfo_elites"
+	"def_altFireInfo"	"fireInfo_elites_alt"
+	"clipSize"			"30"
+
+	"actFire"			"2,3,4,5,6"
+	"actFireLast"		"7"
+	"actReload"			"14"
+	"actDraw"			"15"
+	"actIdle"			"0"
+
+	"snd_fire"		"Weapon_ELITE.Single"
+	"snd_altfire"		"Weapon_ELITE.Single"
+
+	"altAlternates"		"1"
+	"speed_mod"			"1.0"
+	"price"				"1000"
+	"crossMinDist"				"4"
+	"crossDeltaDist"			"3"
+	"accuracyDivisor"			"150"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.002"
+	"rangeModifier"				"1.875"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.9"
+	"multiplierShots"			"3"
+	"multiplierStrength"		"0.85"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"1"
+	"hudSlotPos"	"4"
+	"weight"		"5"
+}
+
+entityDef projectile_elites
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_elites_dmg"
+}
+
+entityDef fireInfo_elites
+{
+	"def_onFire"	"projectile_elites"
+	"ammoType"			"ammo_9mm"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.13"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}
+
+entityDef fireInfo_elites_alt
+{
+	"inherit"		"fireInfo_elites"
+	"actFire"		"8,9,10,11,12"
+	"actFireLast"	"13"
+}

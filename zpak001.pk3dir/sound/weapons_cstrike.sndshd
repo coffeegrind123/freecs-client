@@ -1,42 +1,52 @@
-weapon_ak47.fire
+Default.ClipEmpty_Rifle
+{
+	sample weapons/dryfire_rifle.wav
+}
+
+Default.ClipEmpty_Pistol
+{
+	sample weapons/dryfire_pistol.wav
+}
+
+Weapon_AK47.Single
 {
 	sample weapons/ak47-1.wav
 	sample weapons/ak47-2.wav
 }
 
-weapon_aug.fire
+Weapon_AUG.Single
 {
 	sample weapons/aug-1.wav
 }
 
-weapon_awp.fire
+Weapon_AWP.Single
 {
 	sample weapons/awp1.wav
 }
 
-weapon_awp.zoom
+Default.Zoom
 {
 	sample weapons/zoom.wav
 }
 
-weapon_c4bomb.disarm
+c4.disarmstart
 {
 	attenuation none
 	sample weapons/c4_disarm.wav
 }
 
-weapon_c4bomb.disarmed
+c4.disarmfinish
 {
 	sample weapons/c4_disarmed.wav
 }
 
-weapon_c4bomb.explode
+c4.explode
 {
 	attenuation none
 	sample weapons/c4_explode1.wav
 }
 
-weapon_c4bomb.plant
+c4.plant
 {
 	sample weapons/c4_plant.wav
 }
@@ -67,19 +77,19 @@ weapon_c4bomb.beep5
 	sample weapons/c4_beep5.wav
 }
 
-weapon_deagle.fire
+Weapon_DEagle.Single
 {
 	sample weapons/deagle-1.wav
 	sample weapons/deagle-2.wav
 }
 
-weapon_elites.fire
+Weapon_ELITE.Single
 {
 	sample weapons/elite_fire.wav
 	sample weapons/elite_fire.wav
 }
 
-weapon_fiveseven.fire
+Weapon_FiveSeven.Single
 {
 	sample weapons/fiveseven-1.wav
 }
@@ -89,17 +99,27 @@ weapon_flashbang.explode
 	sample weapons/flashbang-1.wav
 }
 
-weapon_g3sg1.fire
+Weapon_FAMAS.Single
+{
+	sample weapons/famas-1.wav
+}
+
+Weapon_G3SG1.Single
 {
 	sample weapons/g3sg1-1.wav
 }
 
-weapon_glock18.fire
+Weapon_Galil.Single
+{
+	sample weapons/galil-1.wav
+}
+
+Weapon_Glock.Single
 {
 	sample weapons/glock18-2.wav
 }
 
-weapon_glock18.burstfire
+Weapon_Glock.Burst
 {
 	sample weapons/glock18-1.wav
 }
@@ -140,12 +160,12 @@ weapon_flashbang.explode
 	sample weapons/flashbang-2.wav
 }
 
-weapon_knife.hit
+Weapon_Knife.HitWall
 {
 	sample weapons/knife_hitwall1.wav
 }
 
-weapon_knife.hitbody
+Weapon_Knife.Hit
 {
 	sample weapons/knife_hit1.wav
 	sample weapons/knife_hit2.wav
@@ -153,70 +173,69 @@ weapon_knife.hitbody
 	sample weapons/knife_hit4.wav
 }
 
-weapon_knife.hithard
+Weapon_Knife.Stab
 {
 	sample weapons/knife_stab.wav
 }
 
-weapon_knife.miss
+Weapon_Knife.Slash
 {
 	sample weapons/knife_slash1.wav
 }
 
-weapon_m3.fire
+Weapon_M3.Single
 {
 	sample weapons/m3-1.wav
 }
 
-weapon_m4a1.fire
+Weapon_M4A1.Single
 {
 	sample weapons/m4a1_unsil-1.wav
 	sample weapons/m4a1_unsil-2.wav
 }
 
-weapon_m4a1.silenced
+Weapon_M4A1.Silenced
 {
 	sample weapons/m4a1-1.wav
 }
 
-weapon_mac10.fire
+Weapon_MAC10.Single
 {
 	sample weapons/mac10-1.wav
 }
 
-weapon_mp5.fire
+Weapon_MP5Navy.Single
 {
 	sample weapons/mp5-1.wav
 }
 
-weapon_p228.fire
+Weapon_P228.Single
 {
 	sample weapons/p228-1.wav
 }
 
-weapon_p90.fire
+Weapon_P90.Single
 {
 	sample weapons/p90-1.wav
 }
 
-
-weapon_para.fire
+Weapon_M249.Single
 {
 	sample weapons/m249-1.wav
 	sample weapons/m249-2.wav
 }
 
-weapon_scout.fire
+Weapon_Scout.Single
 {
 	sample weapons/scout_fire-1.wav
 }
 
-weapon_sg550.fire
+Weapon_SG550.Single
 {
 	sample weapons/sg550-1.wav
 }
 
-weapon_sg552.fire
+Weapon_SG552.Single
 {
 	sample weapons/sg552-1.wav
 }
@@ -226,34 +245,34 @@ weapon_smokegrenade.explode
 	sample weapons/sg_explode.wav
 }
 
-weapon_tmp.fire
+Weapon_TMP.Single
 {
 	sample weapons/tmp-1.wav
 	sample weapons/tmp-2.wav
 }
 
-weapon_ump45.fire
+Weapon_UMP45.Single
 {
 	sample weapons/ump45-1.wav
 }
 
-weapon_usp45.fire
+Weapon_USP.Single
 {
 	sample weapons/usp_unsil-1.wav
 }
 
-weapon_usp45.silenced
+Weapon_USP.SilencedShot
 {
 	sample weapons/usp1.wav
 	sample weapons/usp2.wav
 }
 
-weapon_xm1014.fire
+Weapon_XM1014.Single
 {
 	sample weapons/xm1014-1.wav
 }
 
-weapon_xm1014.insertshell
+Weapon_XM1014.InsertShell
 {
 	sample weapons/m3_insertshell.wav
 }

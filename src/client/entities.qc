@@ -21,6 +21,12 @@ ClientGame_EntityUpdate(float id, float new)
 	case ENT_C4BOMB:
 		w_c4bomb_parse();
 		break;
+	case ENT_PLAYER:
+		NSENTITY_READENTITY(CSPlayer, new)
+		break;
+	case ENT_WEAPON:
+		NSENTITY_READENTITY(CSWeapon, new)
+		break;
 	default:
 		return (0);
 	}

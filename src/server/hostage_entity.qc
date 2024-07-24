@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*!QUAKED hostage_entity (0 1 0) (-16 -16 0) (16 16 72)
+/*!QUAKED CSHostage (0 1 0) (-16 -16 0) (16 16 72)
 # OVERVIEW
 Hostage NPC.
 Used in the Hostage Rescue mode (cs_* maps).
@@ -79,23 +79,23 @@ enum
 	HOSA_DEADTABLE3
 };
 
-class hostage_entity:NSTalkMonster
+class CSHostage:NSTalkMonster
 {
 	int m_iUsedOnce;
 
-	void(void) hostage_entity;
+	void CSHostage(void);
 
-	virtual void(void) Respawn;
-	virtual void(void) OnPlayerUse;
-	virtual void(void) Pain;
-	virtual void(void) Death;
+	virtual void OnPlayerUse(void);
+	virtual void Pain(entity, entity, int, vector, int);
+	virtual void Death(entity, entity, int, vector, int);
+
 };
 
 void
-hostage_entity::OnPlayerUse(void)
+CSHostage::OnPlayerUse(void)
 {
 	if (eActivator.team == TEAM_T) {
-		player pl = (player)eActivator;
+		CSPlayer pl = (CSPlayer)eActivator;
 
 		if (g_csMode.ShowHints() == true)
 		if (pl.m_hostMessageT == false) {
@@ -110,7 +110,7 @@ hostage_entity::OnPlayerUse(void)
 
 	/* CT reward, first time only */
 	if (m_iUsedOnce == FALSE) {
-		Money_AddMoney((player)eActivator, 150);
+		Money_AddMoney((CSPlayer)eActivator, 150);
 		m_iUsedOnce = TRUE;
 	}
 
@@ -118,12 +118,14 @@ hostage_entity::OnPlayerUse(void)
 }
 
 void
-hostage_entity::Pain(void)
+CSHostage::Pain(entity inflictor, entity attacker, int damage, vector dir, int location)
 {
+	super::Pain(inflictor, attacker, damage, dir, location);
+
 	if (IsAlive() == false)
 		return;
 
-	switch (g_dmg_iHitBody) {
+	switch (location) {
 	case BODY_HEAD:
 	case BODY_DEFAULT:
 	case BODY_CHEST:
@@ -145,19 +147,19 @@ hostage_entity::Pain(void)
 	}
 
 	/* penalties */
-	if (g_dmg_eAttacker.classname != "player")
+	if (attacker.classname != "player")
 		return;
 
-	Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -(g_dmg_iDamage * 25));
+	Money_AddMoney((NSClientPlayer)attacker, -(damage * 25i));
 }
 
 void
-hostage_entity::Death(void)
+CSHostage::Death(entity inflictor, entity attacker, int damage, vector dir, int location)
 {
 	WarnAllies();
 
 	if (IsAlive() == true) {
-		switch (g_dmg_iHitBody) {
+		switch (location) {
 		case BODY_HEAD:
 			SetFrame(HOSA_DIE_HEADSHOT);
 			break;
@@ -169,11 +171,11 @@ hostage_entity::Death(void)
 			break;
 		}
 
-		if (g_dmg_eAttacker.classname == "player") {
-			if (g_dmg_iDamage >= 100)
-				Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -2500);
+		if (attacker.classname == "player") {
+			if (damage >= 100)
+				Money_AddMoney((NSClientPlayer)attacker, -2500);
 			else
-				Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -500);
+				Money_AddMoney((NSClientPlayer)attacker, -500);
 
 			Radio_BroadcastMessage(RADIO_HOSDOWN);
 		}
@@ -183,52 +185,13 @@ hostage_entity::Death(void)
 	SetHealth(0);
 
 	/* now mark our state as 'dead' */
-	super::Death();
+	super::Death(inflictor, attacker, damage, dir, location);
 	SetSolid(SOLID_NOT);
 }
 
 void
-hostage_entity::Respawn(void)
-{
-	spawnflags |= MSF_MULTIPLAYER;
-	model = "models/hostage.mdl";
-	netname = "Hostage";
-	base_health = 100;
-	base_mins = [-16,-16,0];
-	base_maxs = [16,16,72];
-
-	super::Respawn();
-
-	m_iFlags |= MONSTER_CANFOLLOW;
-	m_iUsedOnce = FALSE;
-	PlayerUse = OnPlayerUse;
-}
-
-void
-hostage_entity::hostage_entity(void)
+CSHostage::CSHostage(void)
 {
 	Sound_Precache("hostage_entity.follow");
-
-	m_talkAnswer = "";
-	m_talkAsk = "";
-	m_talkAllyShot = "";
-	m_talkGreet = "";
-	m_talkIdle = "";
-	m_talkHearing = "";
-	m_talkSmelling = "";
-	m_talkStare = "";
-	m_talkSurvived = "";
-	m_talkWounded = "";
-
-	m_talkPlayerAsk = "";
-	m_talkPlayerGreet = "";
-	m_talkPlayerIdle = "";
-	m_talkPlayerWounded1 = "";
-	m_talkPlayerWounded2 = "";
-	m_talkPlayerWounded3 = "";
-	m_talkUnfollow = "";
-	m_talkFollow = "";
-	m_talkStopFollow = "";
-
 	g_cs_hostagestotal++;
 }

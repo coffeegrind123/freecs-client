@@ -1,0 +1,54 @@
+entityDef weapon_ak47
+{
+	"inherit"			"CSBaseRifle"
+	"editor_usage"		"AK-47 Weapon - Uses ammo_762nato"
+
+	"model"				"models/w_ak47.mdl"
+	"model_view"		"models/v_ak47.mdl"
+
+	"inv_name"			"AK-47 Weapon"
+	"def_fireInfo"	"fireInfo_ak47"
+	"clipSize"			"30"
+
+	"actFire"		"3,4,5"
+	"actReload"		"1"
+	"actDraw"		"2"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_AK47.Single"
+
+	"speed_mod"			"0.884"
+	"price"				"2500"
+	"crossMinDist"				"4"
+	"crossDeltaDist"			"4"
+	"accuracyDivisor"			"30"
+	"accuracyMovementPenalty"	"3"
+	"accuracyMultiplier"		"1.5"
+	"rangeModifier"				"2.375"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"1.2"
+	"multiplierShots"			"1.1"
+	"multiplierStrength"		"0.92"
+	"multiplierInaccuracy"		"0.5"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"7"
+	"weight"		"25"
+}
+
+entityDef projectile_ak47
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_ak47_dmg"
+}
+
+entityDef fireInfo_ak47
+{
+	"def_onFire"	"projectile_ak47"
+	"ammoType"			"ammo_762nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			".0975"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

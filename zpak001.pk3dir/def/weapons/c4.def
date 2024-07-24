@@ -1,0 +1,33 @@
+entityDef weapon_c4
+{
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_usage"		"C4 Bomb Weapon, Bomb Defusal Gamemode Entity"
+	"editor_rotatable"	"1"
+
+	"spawnclass"		"CSWeapon"
+	"model"				"models/w_backpack.mdl"
+	"model_view"		"models/v_c4.mdl"
+	"snd_acquire"		"weapon.pickup"
+	"snd_respawn"		"item.respawn"
+
+	"def_plant"			"item_c4"
+	"inv_name"			"C4 Bomb Weapon"
+	"clipSize"			"1"
+	"trigger_delay"		"3"	// takes three seconds to charge
+
+	"actFire"			"2"
+	"actDraw"			"1"
+	"actIdle"			"0"
+	"actDelay"			"3"
+
+	"snd_fire"			"C4.PlantSound"
+
+	"speed_mod"			"1.0"
+
+	"hudSlot"			"4"
+	"hudSlotPos"		"0"
+	"weight"			"0"
+	"team"				"1"	// Terrorists only!
+}

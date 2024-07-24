@@ -52,7 +52,7 @@ func_vip_safetyzone::Touch(entity eToucher)
 {
 	CSMultiplayerRules rule = (CSMultiplayerRules)g_grMode;
 
-	player pl = (player)eToucher;
+	CSPlayer pl = (CSPlayer)eToucher;
 
 	if (pl.classname != "player")
 		return;

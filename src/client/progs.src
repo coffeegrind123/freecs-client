@@ -1,6 +1,6 @@
 #pragma target fte_5768
 //#pragma flag enable assumeint
-#pragma progs_dat  "../../csprogs.dat"
+#pragma progs_dat  "../../zpak001.pk3dir/csprogs.dat"
 
 #define CSQC
 #define CLIENT
@@ -36,8 +36,8 @@ crosshair.qc
 hud_ammonotify.qc
 vgui_spectator.qc
 hud.qc
-hud_weaponselect.qc
 ../../../valve/src/client/hud_sprite.qc
+../../../valve/src/client/hud_weaponselect.qc
 ../../../valve/src/client/scoreboard.qc
 radio.qc
 

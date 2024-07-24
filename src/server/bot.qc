@@ -159,31 +159,8 @@ void csbot::Roam(vector roamOrigin, int maxDistance) {
 	randLoc.x += sin(radian) * distance;
 	randLoc.y += cos(radian) * distance;
 
-	/* Find closest waypoint to our random location. */
-	float flBestDist = COST_INFINITE;
-	int iBestNodeIndex = -1;
-	for (int i = 0; i < g_iNodes; i++) {
-		float fDist = vlen(g_pNodes[i].origin - randLoc) - g_pNodes[i].radius;
-
-		if (fDist > (float)maxDistance) {
-			/* Distance is greater then our maxDistance */
-			continue;
-		}
-
-		if (fDist < flBestDist) {
-			flBestDist = fDist;
-			iBestNodeIndex = i;
-		}
-	}
-
-	if (iBestNodeIndex == -1) {
-		/* TODO No waypoint in range found */
-		print("WARNING!: Roaming failed, could not find waypoint in range.\n");
-		return;
-	}
-
 	/* Go to the random waypoint. */
-	RouteToPosition(g_pNodes[iBestNodeIndex].origin);
+	RouteToPosition(Nodes_PositionOfClosestNode(randLoc));
 }
 
 void
@@ -236,7 +213,7 @@ csbot::CreateObjective(void)
 					} else {
 						/* Aim at the bomb. */
 						input_buttons |= INPUT_BUTTON8; // duck
-						if ((flags & FL_ONUSABLE)) {
+						if ((HasVFlags(VFL_ONUSABLE))) {
 							// Aimed at the bomb, ready to defuse!
 							ChatSayTeam("Defusing!");
 							input_buttons |= INPUT_BUTTON5;
@@ -262,13 +239,14 @@ csbot::CreateObjective(void)
 		else {
 			if (team == TEAM_T) {
 				/* T-bot: plant bomb */
-				if ((g_items & ITEM_C4BOMB)) {
+				if (HasItem("weapon_c4")) {
 					/* We carry the bomb */
 					if (m_gflagsBackup & GF_BOMBZONE) {
 						/* We are at a bombsite and ready to plant the bomb */
 						if (activeweapon != WEAPON_C4BOMB) {
+						/* TODO: REPLACE THIS WITH NSNAVAI METHOD */
 							activeweapon = WEAPON_C4BOMB;
-							Weapons_Draw((player)self);
+							//Weapons_Draw((CSPlayer)self);
 						}
 
 						if (!m_actionIsPlanting) {
@@ -346,27 +324,17 @@ void csbot::AimLerp(vector aimpos, float flLerp) {
 	vector oldAngle = v_angle;
 
 	/* that's the old angle */
-	makevectors(v_angle);
-	vecNewAngles = v_forward;
+	vecNewAngles = anglesToForward(v_angle);
 
 	/* aimdir = new final angle */
-	aimdir = vectoangles(aimpos - origin);
-	makevectors(aimdir);
+	aimdir = vectorToAngles(aimpos - origin);
 
 	/* slowly lerp towards the final angle */
-	vecNewAngles[0] = Math_Lerp(vecNewAngles[0], v_forward[0], flLerp);
-	vecNewAngles[1] = Math_Lerp(vecNewAngles[1], v_forward[1], flLerp);
-	vecNewAngles[2] = Math_Lerp(vecNewAngles[2], v_forward[2], flLerp);
+	vecNewAngles = vectorLerp(vecNewAngles, anglesToForward(aimdir), flLerp);
 
 	/* make sure we're aiming tight */
-	v_angle = vectoangles(vecNewAngles);
-	v_angle[0] = Math_FixDelta(v_angle[0]);
-	v_angle[1] = Math_FixDelta(v_angle[1]);
-	v_angle[2] = Math_FixDelta(v_angle[2]);
-	angles[0] = Math_FixDelta(v_angle[0]);
-	angles[1] = Math_FixDelta(v_angle[1]);
-	angles[2] = Math_FixDelta(v_angle[2]);
-	input_angles = v_angle;
+	v_angle = vectorToAngles(vecNewAngles);
+	input_angles = angles = v_angle = fixAngle(v_angle);
 }
 
 void
@@ -386,6 +354,7 @@ csbot::WeaponThink(void)
 	if (activeweapon == WEAPON_KNIFE)
 		return;
 
+#if FIXME
 	/* clip empty */
 	if (a_ammo1 == 0) {
 		/* still got ammo left, reload! */
@@ -396,6 +365,7 @@ csbot::WeaponThink(void)
 			Weapons_SwitchBest(this);
 		}
 	}
+#endif
 };
 
 /** @brief Get entity by class name and index **/
@@ -491,7 +461,7 @@ CSBot_BuyStart_Shop(void)
 {
 	int done = 0;
 	int count = 0;
-	player pl = (player)self;
+	CSPlayer pl = (CSPlayer)self;
 
 	pl.team = infokeyf(pl, "*team");
 
@@ -546,6 +516,7 @@ CSBot_BuyStart_Shop(void)
 			CSEv_BuyEquipment_f(1);
 	}
 
+#if FIXME
 	/* make SURE we switch to it */
 	for (int i = 0; i < g_weapons.length; i++)
 		if (pl.g_items & g_weapons[i].id) {
@@ -553,6 +524,7 @@ CSBot_BuyStart_Shop(void)
 			Weapons_Draw(pl);
 			return;
 		}
+#endif
 
 	/* force buy right now */
 	CSEv_AmmoBuyPrimary();

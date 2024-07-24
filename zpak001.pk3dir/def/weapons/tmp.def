@@ -1,0 +1,56 @@
+entityDef weapon_tmp
+{
+	"inherit"		"CSBaseRifle"
+	"editor_usage"	"Steyr Tactical Weapon - Uses ammo_9mm"
+
+	"model"			"models/w_tmp.mdl"
+	"model_view"	"models/v_tmp.mdl"
+
+	"inv_name"		"Steyr Tactical Weapon"
+	"def_fireInfo"	"fireInfo_tmp"
+	"clipSize"		"30"
+
+
+	"actFire"	"3,4,5"
+	"actReload"	"1"
+	"actDraw"	"2"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_TMP.Single"
+
+	"speed_mod"	"1.0"
+	"price"		"1250"
+
+	"crossMinDist"			"7"
+	"crossDeltaDist"		"3"
+	"accuracyDivisor"		"30"
+	"accuracyMovementPenalty"	"0.95"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.0035"
+	"rangeModifier"			"1.25"
+	"penetrationPower"		"1.0"
+	"bulletStrength"		"0.8"
+	"multiplierShots"		"0.95"
+	"multiplierStrength"		"1.25"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"6"
+	"weight"		"25"
+}
+
+entityDef projectile_tmp
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_tmp_dmg"
+}
+
+entityDef fireInfo_tmp
+{
+	"def_onFire"	"projectile_tmp"
+	"ammoType"		"ammo_9mm"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.07"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

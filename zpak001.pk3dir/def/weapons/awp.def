@@ -1,0 +1,64 @@
+entityDef weapon_awp
+{
+	"inherit"			"CSBaseRifle"
+	"editor_usage"		"AWP (AI Arctic Warfare/Magnum) Weapon - Uses ammo_338magnum"
+
+	"model"				"models/w_awp.mdl"
+	"model_view"		"models/v_awp.mdl"
+
+	"inv_name"			"AWP (AI Arctic Warfare/Magnum) Weapon"
+	"def_fireInfo"	"fireInfo_awp"
+	"clipSize"			"5"
+
+	"actFire"		"1,2,3"
+	"actAltFire"	""
+	"actHolster"	""
+	"actReload"		"4"
+	"actDraw"		"5"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_AWP.Single"
+
+	"speed_mod"			"0.84"
+	"price"				"4750"
+	"crossMinDist"				"8"
+	"crossDeltaDist"			"3"
+	"accuracyDivisor"			"-1"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"1.375"
+	"penetrationPower"			"2.0"
+	"bulletStrength"			"1"
+	"multiplierShots"			"1.0"
+	"multiplierStrength"		"1.0"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"12"
+	"weight"		"30"
+
+	"zoomDuration"			"0.075"
+	"zoomFov"				"20"
+	"zoomFovStep"			"5"
+	"zoomFovMin"			"5"
+	"zoomFovMax"			"40"
+	"snd_raise_scope"		"Default.Zoom"
+	"snd_lower_scope"		"Default.Zoom"
+}
+
+entityDef projectile_awp
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_awp_dmg"
+}
+
+entityDef fireInfo_awp
+{
+	"def_onFire"	"projectile_awp"
+	"ammoType"			"ammo_338magnum"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"1.2"
+	"punchAngle"		"-5 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

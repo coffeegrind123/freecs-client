@@ -1,0 +1,86 @@
+#define USP45_IDLE			0
+#define USP45_SHOOT1		1
+#define USP45_SHOOT2		2
+#define USP45_SHOOT3		3
+#define USP45_SHOOTLAST		4
+#define USP45_RELOAD		5
+#define USP45_DRAW			6
+#define USP45_ADDSIL		7
+#define USP45_IDLEUNSIL		8
+#define USP45_SHOOT1UNSIL	9
+#define USP45_SHOOT2UNSIL	10
+#define USP45_SHOOT3UNSIL	11
+#define USP45_SHOOTLASTUNSIL	12
+#define USP45_RELOADUNSIL	13
+#define USP45_DRAWUNSIL		14
+#define USP45_DETACHSIL		15
+
+entityDef weapon_usp
+{
+	"inherit"			"CSBasePistol"
+	"editor_usage"		"usp45"
+
+	"model"				"models/w_usp.mdl"
+	"model_view"		"models/v_usp.mdl"
+
+	"def_fireInfo"		"fireInfo_usp45_unsil"
+	"def_altFireInfo"	"fireInfo_usp45_sil"
+	"inv_name"			"USP .45"
+	"clipSize"			"12"
+	"ammoType"			"ammo_45acp"
+	"fireRate"			".15"
+	"semiAuto"			"1"
+	"ammoRequired" 		"1"
+
+	"altSilences"		"1"
+	"actAddSil"			"7"
+	"actDetachSil"		"15"
+
+	"crossMinDist"				"4"
+	"crossDeltaDist"			"4"
+	"accuracyDivisor"			"25"
+	"accuracyMovementPenalty"	"2.2"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"0.79"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.625"
+	"multiplierShots"			"2.5"
+	"multiplierStrength"		"0.5"
+	"multiplierInaccuracy"		"0.5"
+
+	// Unsilenced
+	"actDraw"			"14"
+	"actIdle"			"8"
+	"actFire"			"9,10,11"
+	"actFireLast"		"12"
+	"actReload"			"13"
+	"snd_fire"			"Weapon_USP.Single"
+
+	"hudSlot"		"1"
+	"hudSlotPos"	"0"
+	"weight"		"5"
+}
+
+entityDef projectile_usp45
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_usp45_dmg"
+}
+
+entityDef fireInfo_usp45_unsil
+{
+	"def_onFire"	"projectile_usp45"
+	"model_flash"	"sprites/muzzleflash2.spr"
+}
+
+entityDef fireInfo_usp45_sil
+{
+	"def_onFire"	"projectile_usp45"
+	"model_flash"	"sprites/muzzleflash2.spr"
+	"actDraw"		"6"
+	"actIdle"		"0"
+	"actReload"		"5"
+	"actFire"		"1,2,3"
+	"actFireLast"	"4"
+	"snd_fire"		"Weapon_USP.SilencedShot"
+}

@@ -17,10 +17,11 @@
 void
 CSEv_BuyWeapon_f(float fWeapon)
 {
+#if 0
 	CSGameRules rules = (CSGameRules)g_grMode;
 
 	int iWeapon;
-	player pl = (player)self;
+	CSPlayer pl = (CSPlayer)self;
 	iWeapon = (int)fWeapon;
 
 	if (rules.BuyingPossible(pl) == FALSE) {
@@ -77,15 +78,17 @@ CSEv_BuyWeapon_f(float fWeapon)
 	} else {
 		//centerprint(pl, "You have insufficient funds!");
 	}
+#endif
 }
 
 void
 CSEv_BuyEquipment_f(float fUtil)
 {
+#if 0
 	CSGameRules rules = (CSGameRules)g_grMode;
 
 	int iUtil;
-	player pl = (player)self;
+	CSPlayer pl = (CSPlayer)self;
 	iUtil = (int)fUtil;
 
 	if (rules.BuyingPossible(pl) == FALSE) {
@@ -162,10 +165,10 @@ CSEv_BuyEquipment_f(float fUtil)
 			Sound_Play(pl, CHAN_ITEM, "buy.weapon");
 			break;
 		case 6:
-			if (pl.g_items & ITEM_NIGHTVISION)
+			if (pl.m_bHasNightvision == true)
 				return;
 
-			pl.g_items |= ITEM_NIGHTVISION;
+			pl.m_bHasNightvision = true;
 			Sound_Play(pl, CHAN_ITEM, "buy.weapon");
 			break;
 		}
@@ -173,4 +176,5 @@ CSEv_BuyEquipment_f(float fUtil)
 	} else {
 		centerprint(pl, "You have insufficient funds!");
 	}
+#endif
 } 

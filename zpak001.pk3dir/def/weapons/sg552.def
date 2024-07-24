@@ -1,0 +1,56 @@
+entityDef weapon_sg552
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"SIG SG 552 Commando Weapon - Uses ammo_556nato"
+
+	"model"		"models/w_sg552.mdl"
+	"model_view"	"models/v_sg552.mdl"
+
+	"inv_name"	"SIG SG 552 Commando Weapon"
+	"def_fireInfo"	"fireInfo_sg552"
+	"clipSize"	"30"
+
+
+	"actFire"	"3,4,5"
+	"actReload"	"1"
+	"actDraw"	"2"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_SG552.Single"
+
+	"speed_mod"	"0.94"
+	"price"		"3500"
+
+	"crossMinDist"				"5.0"
+	"crossDeltaDist"			"3.0"
+	"accuracyDivisor"			"75"
+	"accuracyMovementPenalty"	"3"
+	// we actually want to * viewzoom here...
+	"accuracyMultiplier"		"1" 
+	"rangeModifier"				"2.125"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.726"
+	"multiplierShots"			"2.2"
+	"multiplierStrength"		"0.9"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"8"
+	"weight"		"25"
+}
+
+entityDef projectile_sg552
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_sg552_dmg"
+}
+
+entityDef fireInfo_sg552
+{
+	"def_onFire"	"projectile_sg552"
+	"ammoType"		"ammo_556nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.0825"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

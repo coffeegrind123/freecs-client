@@ -1,0 +1,70 @@
+entityDef weapon_m4a1
+{
+	"inherit"		"CSBaseRifle"
+	"editor_usage"	"Colt M4A1 Carbine Weapon - Uses ammo_556nato"
+
+	"model"			"models/w_m4a1.mdl"
+	"model_view"	"models/v_m4a1.mdl"
+
+	"inv_name"			"Colt M4A1 Carbine Weapon"
+	"def_fireInfo"		"fireInfo_m4a1"
+	"def_altFireInfo"	"fireInfo_m4a1_silenced"
+	"clipSize"			"30"
+	"ammoType"			"ammo_556nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.0875"
+
+	"altSilences"		"1"
+	"actAddSil"			"6"
+	"actDetachSil"		"13"
+
+	// Unsilenced
+	"actFire"	"8,9,10"
+	"actReload"	"11"
+	"actDraw"	"12"
+	"actIdle"	"7"
+	"snd_fire"	"Weapon_M4A1.Single"
+
+
+	"speed_mod"	"0.92"
+	"price"		"3100"
+
+	"crossMinDist"				"4.0"
+	"crossDeltaDist"			"3.0"
+	"accuracyDivisor"			"60"
+	"accuracyMovementPenalty"	"3"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"2.125"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.96"
+	"multiplierShots"			"0.8"
+	"multiplierStrength"		"1.025"
+	"multiplierInaccuracy"		"0.8"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"9"
+	"weight"		"25"
+}
+
+entityDef projectile_m4a1
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_m4a1_dmg"
+}
+
+entityDef fireInfo_m4a1
+{
+	"def_onFire"	"projectile_m4a1"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}
+
+entityDef fireInfo_m4a1_silenced
+{
+	"inherit"	"fireInfo_m4a1"
+	"actFire"	"1,2,3"
+	"actReload"	"4"
+	"actDraw"	"5"
+	"actIdle"	"0"
+	"snd_fire"	"Weapon_M4A1.Silenced"
+}

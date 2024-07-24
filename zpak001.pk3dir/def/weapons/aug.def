@@ -1,0 +1,54 @@
+entityDef weapon_aug
+{
+	"inherit"			"CSBaseRifle"
+	"editor_usage"		"Steyr AUG Weapon - Uses ammo_762nato"
+
+	"model"				"models/w_aug.mdl"
+	"model_view"		"models/v_aug.mdl"
+
+	"inv_name"			"Steyr AUG Weapon"
+	"def_fireInfo"	"fireInfo_aug"
+	"clipSize"			"30"
+
+	"actFire"		"3,4,5"
+	"actReload"		"1"
+	"actDraw"		"2"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_AUG.Single"
+
+	"speed_mod"			"0.96"
+	"price"				"3500"
+	"crossMinDist"				"3"
+	"crossDeltaDist"			"3"
+	"accuracyDivisor"			"35"
+	"accuracyMovementPenalty"	"2"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"2.125"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"1.03"
+	"multiplierShots"			"1.1"
+	"multiplierStrength"		"1.1"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"10"
+	"weight"		"25"
+}
+
+entityDef projectile_aug
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_aug_dmg"
+}
+
+entityDef fireInfo_aug
+{
+	"def_onFire"	"projectile_aug"
+	"ammoType"			"ammo_762nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.0825f"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

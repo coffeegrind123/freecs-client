@@ -1,0 +1,54 @@
+entityDef weapon_g3sg1
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"Heckler & Koch G3/SG-1 Weapon - Uses ammo_762nato"
+
+	"model"		"models/w_g3sg1.mdl"
+	"model_view"	"models/v_g3sg1.mdl"
+
+	"inv_name"	"Heckler & Koch G3/SG-1 Weapon"
+	"def_fireInfo"	"fireInfo_g3sg1"
+	"clipSize"	"20"
+
+	"actFire"	"1,2"
+	"actReload"	"3"
+	"actDraw"	"4"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_G3SG1.Single"
+
+	"speed_mod"	"0.84"
+	"price"		"5000"
+
+	"crossMinDist"				"6"
+	"crossDeltaDist"			"4"
+	"accuracyDivisor"			"200"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"2.375"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			""
+	"multiplierShots"			"1.0"
+	"multiplierStrength"		"1.0"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"13"
+	"weight"		"25"
+}
+
+entityDef projectile_g3sg1
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_g3sg1_dmg"
+}
+
+entityDef fireInfo_g3sg1
+{
+	"def_onFire"	"projectile_g3sg1"
+	"ammoType"		"ammo_762nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.25"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

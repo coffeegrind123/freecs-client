@@ -1,0 +1,55 @@
+entityDef weapon_mp5navy
+{
+	"inherit"		"CSBaseRifle"
+	"editor_usage"	"Heckler & Koch MP5-Navy Weapon - Uses ammo_9mm"
+
+	"model"			"models/w_mp5.mdl"
+	"model_view"	"models/v_mp5.mdl"
+
+	"inv_name"		"Heckler & Koch MP5-Navy Weapon"
+	"def_fireInfo"	"fireInfo_mp5navy"
+	"clipSize"		"30"
+
+	"actFire"		"3,4,5"
+	"actReload"		"1"
+	"actDraw"		"2"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_MP5Navy.Single"
+
+	"speed_mod"		"1.0"
+	"price"			"1500"
+
+	"crossMinDist"				"5.0"
+	"crossDeltaDist"			"2.0"
+	"accuracyDivisor"			"60"
+	"accuracyMovementPenalty"	"1.25"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.0045"
+	"rangeModifier"				"1.25"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.825"
+	"multiplierShots"			"0.5"
+	"multiplierStrength"		"1.25"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"2"
+	"weight"		"25"
+}
+
+entityDef projectile_mp5navy
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_mp5_dmg"
+}
+
+entityDef fireInfo_mp5navy
+{
+	"def_onFire"	"projectile_mp5navy"
+	"ammoType"			"ammo_9mm"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.08"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

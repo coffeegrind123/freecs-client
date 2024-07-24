@@ -220,5 +220,5 @@ VGUI_BuyMenu(void)
 	}
 
 	winBuyMenu.Show();
-	winBuyMenu.SetPos((video_res / 2) - (winBuyMenu.GetSize() / 2));
+	winBuyMenu.SetPos((g_vidsize / 2) - (winBuyMenu.GetSize() / 2));
 }

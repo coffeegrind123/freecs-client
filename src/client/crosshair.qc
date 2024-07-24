@@ -27,19 +27,18 @@ var bool autocvar_cl_crosshair_additive = true;
 #define CS_CROSS_THICKNESS autocvar_cl_crosshair_thickness
 
 void
-Cstrike_DrawCrosshair(void)
+Cstrike_DrawCrosshair(CSPlayer pl)
 {
-	player pl = (player)self;
 	int cross_dist;
 	int line_length;
 
 	/* these are defined in the weapon-code files */
-	float distance = pl.cs_cross_mindist; 
-	float delta = pl.cs_cross_deltadist;
+	float distance = (float)pl.cs_cross_mindist; 
+	float delta = (float)pl.cs_cross_deltadist;
 
 	if (!(pl.flags & FL_ONGROUND)) {
 		distance = distance * 2.0f;
-	} else if (pl.flags & FL_CROUCHING) { /* crouching... */
+	} else if (pl.IsCrouching()) { /* crouching... */
 		distance = distance * 0.5f;
 	} else if (vlen(pl.velocity) > 120) { /* running, not walking */
 		distance = distance * 1.5f;

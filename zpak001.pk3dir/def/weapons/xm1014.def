@@ -1,0 +1,59 @@
+entityDef weapon_xm1014
+{
+	"inherit"			"CSBaseShotgun"
+	"editor_usage"		"Benneli XM1014 Weapon - Uses ammo_buckshot"
+
+	"model"				"models/w_xm1014.mdl"
+	"model_view"		"models/v_xm1014.mdl"
+
+	"inv_name"			"Benneli XM1014 Weapon"
+	"def_fireInfo"	"fireInfo_xm1014"
+	"clipSize"			"7"
+
+	"ammoType"			"ammo_buckshot"
+
+	"actFire"		"1,2"
+	"actReloadStart"	"5"
+	"actReload"		"3"
+	"actReloadEnd"		"4"
+	"actDraw"		"6"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_XM1014.Single"
+
+	"speed_mod"			"0.96"
+	"price"				"3000"
+	"crossMinDist"				""
+	"crossDeltaDist"			""
+	"accuracyDivisor"			""
+	"accuracyMovementPenalty"	""
+	"accuracyMultiplier"		""
+	"rangeModifier"				""
+	"penetrationPower"			"0"
+	"bulletStrength"			""
+	"multiplierShots"			""
+	"multiplierStrength"		""
+	"multiplierInaccuracy"		""
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"1"
+	"weight"		"20"
+}
+
+entityDef projectile_xm1014
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_xm1014_dmg"
+}
+
+entityDef fireInfo_xm1014
+{
+	"def_onFire"	"projectile_xm1014"
+	"ammoType"			"ammo_buckshot"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.25"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+	"numProjectiles"	"6"
+}

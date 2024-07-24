@@ -45,16 +45,15 @@ info_hostage_rescue::info_hostage_rescue(void)
 void
 info_hostage_rescue::Respawn(void)
 {
-	SetSolid(SOLID_TRIGGER);
+	super::Respawn();
 	SetSize([-128,-128,-128], [128,128,128]);
-	SetOrigin(GetSpawnOrigin());
 }
 
 void
 info_hostage_rescue::Touch(entity eToucher)
 {
 	if (eToucher.flags & FL_CLIENT) {
-		player pl = (player)eToucher;
+		CSPlayer pl = (CSPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}
@@ -70,14 +69,14 @@ info_hostage_rescue::Touch(entity eToucher)
 	}
 
 	/* some custom maps are very smart... */
-	if (!((player)hosty.m_eFollowing))
+	if (!((CSPlayer)hosty.m_eFollowing))
 		return;
 
 	Radio_BroadcastMessage(RADIO_RESCUED);
 	CSBot_HostageRescueNotify();
 	g_cs_hostagesrescued++;
 
-	Money_AddMoney((player)hosty.m_eFollowing, 1000);
+	Money_AddMoney((CSPlayer)hosty.m_eFollowing, 1000);
 
 	/* In Hostage Rescue, all Counter-Terrorists receive an $850
 	 * bonus for every hostage they rescue, even if they lose the round. */

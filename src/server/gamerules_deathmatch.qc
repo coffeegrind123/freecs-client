@@ -119,7 +119,7 @@ CSDeathmatchRules::PlayerDeath(NSClientPlayer pl)
 	/* explode all satchels */
 	s_satchel_detonate((entity)pl);
 	/* drop their posessions into a weaponbox item */
-	weaponbox_spawn((player)pl);
+	weaponbox_spawn((CSPlayer)pl);
 #endif
 
 	/* either gib, or make a corpse */
@@ -128,12 +128,12 @@ CSDeathmatchRules::PlayerDeath(NSClientPlayer pl)
 		float gibStrength = g_dmg_iDamage * 2.0f;
 		BreakModel_Entity(pl, gibDir, gibStrength);
 	} else {
-		FX_Corpse_Spawn((player)pl, ANIM_DEATH1);
-		//FX_Corpse_Spawn((player)pl, ANIM_DIESIMPLE);
+		FX_Corpse_Spawn((CSPlayer)pl, ANIM_DEATH1);
+		//FX_Corpse_Spawn((CSPlayer)pl, ANIM_DIESIMPLE);
 	}
 
 	/* now let's make the real client invisible */
-	pl.Death();
+	//pl.Death();
 	pl.SetTakedamage(DAMAGE_NO);
 	pl.gflags &= ~GF_FLASHLIGHT;
 
@@ -149,7 +149,7 @@ CSDeathmatchRules::PlayerDeath(NSClientPlayer pl)
 void
 CSDeathmatchRules::PlayerSpawn(NSClientPlayer pp)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 	/* this is where the mods want to deviate */
 	entity spot;
 
@@ -223,7 +223,7 @@ CSDeathmatchRules::PlayerSpawn(NSClientPlayer pp)
 	pl.SetInfoKey("*dead", "0");
 	pl.SetInfoKey("*deaths", ftos(pl.deaths));
 	pl.SetPropData("actor_human");
-	pl.SetCanBleed(true);
+	pl.EnableBleeding();
 
 	LevelNewParms();
 	LevelDecodeParms(pl);
@@ -232,9 +232,9 @@ CSDeathmatchRules::PlayerSpawn(NSClientPlayer pp)
 	pl.activeweapon = WEAPON_KNIFE;
 
 	int randomGun = (int)rint(random(WEAPON_USP45, WEAPON_FIVESEVEN));
-	Weapons_AddItem(pl, randomGun, -1);
+	//Weapons_AddItem(pl, randomGun, -1);
 	randomGun = (int)rint(random(WEAPON_M3, WEAPON_PARA));
-	Weapons_AddItem(pl, randomGun, -1);
+	//Weapons_AddItem(pl, randomGun, -1);
 	pl.activeweapon = randomGun;
 
 	Ammo_BuyPrimary(pl, TRUE);
@@ -242,7 +242,6 @@ CSDeathmatchRules::PlayerSpawn(NSClientPlayer pp)
 
 	spot = Spawn_SelectRandom("info_player_deathmatch");
 	pl.Transport(spot.origin, spot.angles);
-	Weapons_RefreshAmmo(pl);
 	Client_FixAngle(pl, pl.angles);
 }
 

@@ -1,6 +1,6 @@
 #pragma target fte_5768
 //#pragma flag enable assumeint
-#pragma progs_dat  "../../progs.dat"
+#pragma progs_dat  "../../zpak001.pk3dir/progs.dat"
 
 #define QWSSQC
 #define SERVER
@@ -34,7 +34,6 @@ info_hostage_rescue.qc
 func_vip_safetyzone.qc
 info_map_parameters.qc
 item_suit.qc
-../../../valve/src/server/items.qc
 
 ../../../src/botlib/include.src
 bot.qc
@@ -49,9 +48,7 @@ radio.qc
 ammo.qc
 buy.qc
 server.qc
-../../../valve/src/server/damage.qc
 ../../../valve/src/server/flashlight.qc
-../../../valve/src/server/modelevent.qc
 
 spawn.qc
 

@@ -1,0 +1,116 @@
+// these have to be defined by the game.
+entityDef ammo_types {
+	"ammo_none"				"0"
+	"ammo_338magnum"		"1"
+	"ammo_357sig"			"2"
+	"ammo_45acp"			"3"
+	"ammo_50ae"				"4"
+	"ammo_556nato"			"5"
+	"ammo_556natobox"		"6"
+	"ammo_57mm"				"7"
+	"ammo_762nato"			"8"
+	"ammo_9mm"				"9"
+	"ammo_buckshot"			"10"
+	"ammo_hegrenade"		"11"
+	"ammo_smokegrenade"		"12"
+	"ammo_flashbang"		"13"
+}
+
+entityDef ammo_names {
+	"ammo_none"				"None"
+	"ammo_338magnum"		".338 Lapua Magnum"
+	"ammo_357sig"			".357 SIG"
+	"ammo_45acp"			".45 ACP"
+	"ammo_50ae"				".50 Action Express"
+	"ammo_556nato"			"5.56×45mm NATO"
+	"ammo_556natobox"		"5.56×45mm NATO BOX"
+	"ammo_57mm"				"FN 5.7×28mm"
+	"ammo_762nato"			"7.62×51mm NATO"
+	"ammo_9mm"				"9×19mm Parabellum"
+	"ammo_buckshot"			"Buckshot"
+	"ammo_hegrenade"		"HE Grenade"
+	"ammo_smokegrenade"		"Smoke Grenade"
+	"ammo_flashbang"		"Flashbang"
+}
+
+entityDef ammo_base
+{
+	"spawnclass"	"NSItem"
+	"snd_acquire"	"ammo.pickup"
+	"snd_respawn"	"ammo.respawn"
+	"mins"			"-16 -16 0"
+	"maxs"			"16 16 16"
+	"model"			"models/w_backpack.mdl"
+}
+
+// these don't exist as pickups in the game, but 
+// might be helpful nonetheless
+entityDef ammo_338magnum
+{
+	"editor_usage"			"Ammo used by weapon_awp"
+	"inherit"				"ammo_base"
+	"inv_ammo_338magnum"	"10"
+}
+
+entityDef ammo_357sig
+{
+	"editor_usage"		"Ammo used by weapon_p228"
+	"inherit"			"ammo_base"
+	"inv_ammo_357sig"	"13"
+}
+
+entityDef ammo_45acp
+{
+	"editor_usage"		"Ammo used by weapon_mac10, weapon_ump45, weapon_usp45"
+	"inherit"			"ammo_base"
+	"inv_ammo_45acp"	"12"
+}
+
+entityDef ammo_50ae
+{
+	"editor_usage"		"Ammo used by weapon_deagle"
+	"inherit"			"ammo_base"
+	"inv_ammo_50ae"		"7"
+}
+
+entityDef ammo_556nato
+{
+	"editor_usage"		"Ammo used by weapon_m4a1, weapon_sg550, weapon_sg552"
+	"inherit"			"ammo_base"
+	"inv_ammo_556nato"	"30"
+}
+
+entityDef ammo_556natobox
+{
+	"editor_usage"			"Ammo used by weapon_m249"
+	"inherit"				"ammo_base"
+	"inv_ammo_556natobox"	"30"
+}
+
+entityDef ammo_57mm
+{
+	"editor_usage"		"Ammo used by weapon_fiveseven, weapon_p90"
+	"inherit"			"ammo_base"
+	"inv_ammo_57mm"		"50"
+}
+
+entityDef ammo_762nato
+{
+	"editor_usage"		"Ammo used by weapon_aug, weapon_famas, weapon_g3sg1, weapon_galil, weapon_ak47, weapon_scout"
+	"inherit"			"ammo_base"
+	"inv_ammo_762nato"	"30"
+}
+
+entityDef ammo_9mm
+{
+	"editor_usage"		"Ammo used by weapon_elites, weapon_glock18, weapon_mp5navy, weapon_tmp"
+	"inherit"			"ammo_base"
+	"inv_ammo_9mm"		"30"
+}
+
+entityDef ammo_buckshot
+{
+	"editor_usage"		"Ammo used by weapon_m3, weapon_xm1014"
+	"inherit"			"ammo_base"
+	"inv_ammo_buckshot"	"8"
+}

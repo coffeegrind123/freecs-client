@@ -30,6 +30,10 @@ typedef enum
 	BUYITEM_FIVESEVEN,
 	BUYITEM_M3,
 	BUYITEM_XM1014,
+#if defined(CZERO) || defined(CSSOURCE)
+	BUYITEM_FAMAS,
+	BUYITEM_GALIL,
+#endif
 	BUYITEM_AK47,
 	BUYITEM_SG552,
 	BUYITEM_M4A1,
@@ -62,7 +66,7 @@ typedef struct
 	string titleName; /* the name of the titles.txt entry */
 } buyItems_t;
 
-const buyItems_t g_buyItemList [29] = {
+const buyItems_t g_buyItemList [] = {
 	{ "BuyWeapon", WEAPON_USP45, "classes/usp.txt", "gfx/vgui/640_usp", "USP45" },
 	{ "BuyWeapon", WEAPON_GLOCK18, "classes/glock18.txt", "gfx/vgui/640_glock18", "Glock18" },
 	{ "BuyWeapon", WEAPON_DEAGLE, "classes/deagle.txt", "gfx/vgui/640_deagle", "DesertEagle" },
@@ -71,6 +75,10 @@ const buyItems_t g_buyItemList [29] = {
 	{ "BuyWeapon", WEAPON_FIVESEVEN, "classes/fiveseven.txt", "gfx/vgui/640_fiveseven", "FiveSeven" },
 	{ "BuyWeapon", WEAPON_M3, "classes/m3.txt", "gfx/vgui/640_m3", "Super90" },
 	{ "BuyWeapon", WEAPON_XM1014, "classes/xm1014.txt", "gfx/vgui/640_xm1014", "XM1014" },
+#if defined(CZERO) || defined(CSSOURCE)
+	{ "BuyWeapon", WEAPON_FAMAS, "classes/famas.txt", "gfx/vgui/640_famas", "Famas" },
+	{ "BuyWeapon", WEAPON_GALIL, "classes/galil.txt", "gfx/vgui/640_galil", "Galil" },
+#endif
 	{ "BuyWeapon", WEAPON_AK47, "classes/ak47.txt", "gfx/vgui/640_ak47", "AK47" },
 	{ "BuyWeapon", WEAPON_SG552, "classes/sg552.txt", "gfx/vgui/640_sg552", "SG552" },
 	{ "BuyWeapon", WEAPON_M4A1, "classes/m4a1.txt", "gfx/vgui/640_m4a1", "M4A1" },
@@ -156,7 +164,7 @@ VGUI_BuyMenu_Page(int buyPage)
 	static CSBuyItemButton btnBuyItem8;
 	static CSBuyItemButton btnBuyItem9;
 
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	int inTeam = getplayerkeyfloat(pl.entnum-1, "*team");
 
@@ -284,7 +292,7 @@ VGUI_BuyMenu_Page(int buyPage)
 	imgBuyItemPic.SetImage("");
 
 	winBuyMenuPage.Show();
-	winBuyMenuPage.SetPos((video_res / 2) - (winBuyMenuPage.GetSize() / 2));
+	winBuyMenuPage.SetPos((g_vidsize / 2) - (winBuyMenuPage.GetSize() / 2));
 
 	switch (buyPage) {
 	case BUYPAGE_PISTOLS:
@@ -385,6 +393,18 @@ VGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem6.Show();
 		btnBuyItem8.Show();
 		btnBuyItem9.Hide();
+
+#if defined(CZERO) || defined(CSSOURCE)
+		if (inTeam == TEAM_CT) {
+			btnBuyItem9.SetTitle(Titles_GetTextBody("Famas"));
+			btnBuyItem9.SetTag(BUYITEM_FAMAS);
+			btnBuyItem9.Show();
+		} else {
+			btnBuyItem9.SetTitle(Titles_GetTextBody("Galil"));
+			btnBuyItem9.SetTag(BUYITEM_GALIL);
+			btnBuyItem9.Show();
+		}
+#endif
 
 		btnBuyItem1.SetTitle(Titles_GetTextBody("AK47"));
 		btnBuyItem1.SetTag(BUYITEM_AK47);

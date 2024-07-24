@@ -61,7 +61,7 @@ func_escapezone::Touch(entity eToucher)
 	if (to_escape > 3)
 		to_escape = 3;
 
-	player pl = (player)eToucher;
+	CSPlayer pl = (CSPlayer)eToucher;
 
 	/* don't matter when rules are not active */
 	if (g_cs_gamestate != GAME_ACTIVE)
@@ -78,7 +78,7 @@ func_escapezone::Touch(entity eToucher)
 	/* balancing tweak: for every escaped T, each and every CT will lose funds */
 	if (autocvar_fcs_escapepenalty != 0) {
 		for (entity eFind = world; (eFind = find(eFind, ::classname, "player"));) { 
-			player ct = (player)eFind;
+			CSPlayer ct = (CSPlayer)eFind;
 
 			if (ct.team == TEAM_CT) {
 				Money_AddMoney(ct, autocvar_fcs_escapepenalty);

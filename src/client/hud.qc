@@ -284,7 +284,7 @@ void
 HUD_DrawHealth(void)
 {
 	vector pos;
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	if (pl.health != pSeatLocal->m_iHealthOld) {
 		pSeatLocal->m_flHealthAlpha = 1.0;
@@ -331,7 +331,7 @@ void
 HUD_DrawArmor(void)
 {
 	vector pos;
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	pos = g_hudmins + [198, g_hudres[1] - 42];
 	
@@ -405,7 +405,7 @@ HUD_DrawArmor(void)
 void
 HUD_DrawAmmo1(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
 	if (pl.a_ammo1 != pSeatLocal->m_iAmmo1Old) {
@@ -428,7 +428,7 @@ HUD_DrawAmmo1(void)
 void
 HUD_DrawAmmo2(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
 	if (pl.a_ammo2 != pSeatLocal->m_iAmmo2Old) {
@@ -450,7 +450,7 @@ HUD_DrawAmmo2(void)
 void
 HUD_DrawAmmo3(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
 	if (pl.a_ammo3 != pSeatLocal->m_iAmmo3Old) {
@@ -486,7 +486,7 @@ void
 HUD_DrawFlashlight(void)
 {
 	vector pos;
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	pos = g_hudmins + [g_hudres[0] - 48, 16];
 
 	/* both on, draw both sprites at full intensity */
@@ -531,7 +531,7 @@ HUD_DrawZones(void)
 {
 	int zc = 0;
 	vector pos = [0,0,0];
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	if (pl.gflags & GF_BUYZONE) {
 		zc++;
@@ -652,7 +652,7 @@ HUD_DrawProgress(void)
 void
 HUD_DrawNotify(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 	float a;
 
@@ -666,7 +666,7 @@ HUD_DrawNotify(void)
 	}
 
 	a = bound(0.0, pSeatLocal->m_flPickupAlpha, 1.0);
-	Weapons_HUDPic(pl, pSeatLocal->m_iPickupWeapon, 1, pos, a);
+	//Weapons_HUDPic(pl, pSeatLocal->m_iPickupWeapon, 1, pos, a);
 	pos[0] += 148;
 	pos[1] -= 32;
 	HUD_AmmoNotify_Draw(pos);
@@ -720,12 +720,14 @@ HUD_PlayerNames(void)
 void
 HUD_Draw(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	g_hud_color = autocvar_con_color * (1 / 255);
 
 	/* little point in not drawing these, even if you don't have a suit */
-	Weapons_DrawCrosshair(pl);
+	if (pl.m_activeWeapon)
+		pl.m_activeWeapon.UpdateGUI();
+
 	HUD_DrawWeaponSelect();
 	Obituary_Draw();
 
@@ -734,7 +736,7 @@ HUD_Draw(void)
 	HUD_DrawMoney();
 	HUD_DrawTimer(0);
 
-	if (!(pl.g_items & ITEM_SUIT)) {
+	if (pl.HasItem("item_suit") == false) {
 		return;
 	}
 
@@ -761,7 +763,7 @@ HUD_DrawSpectator(void)
 		g_specHUD = spawn(CSSpectateHUD);
 
 	g_specHUD.SetPos(video_mins);
-	g_specHUD.SetSize(video_res);
+	g_specHUD.SetSize(g_vidsize);
 	g_specHUD.Draw();
 
 }

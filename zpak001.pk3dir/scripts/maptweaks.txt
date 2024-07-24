@@ -1,0 +1,6 @@
+// allows you to play Counter-Strike: Source levels (needs hl2 engine plugin)
+css_tweaks
+{
+	replace info_player_counterterrorist info_player_start
+	replace info_player_terrorist info_player_deathmatch
+}

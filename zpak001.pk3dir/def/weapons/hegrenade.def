@@ -1,0 +1,63 @@
+
+entityDef weapon_hegrenade
+{
+	"inherit"			"CSBasePistol"
+	"editor_usage"		"HE Grenade"
+
+	"model"				"models/w_hegrenade.mdl"
+	"model_view"		"models/v_hegrenade.mdl"
+
+	"inv_name"				"HE Grenade"
+	"inv_ammo_hegrenade"	"5"
+	"def_onFire"		"projectile_handgrenade"
+	"def_explode_inhand"	"env_handgrenade_explodeinhand"
+	"def_damage_inhand"		"damage_handgrenadeSplash"
+	"ammoType"				"ammo_hegrenade"
+	"ammoRequired"			"1"
+	"silent_fire"			"1"
+	"primed_fuse"			"4"
+
+	"actIdle"		"0"
+	"actDraw"		"3"
+	"actPull"		"1"
+	"actThrow"		"2"
+
+	// HLWeapon specific
+	"hudSlot"		"3"
+	"hudSlotPos"	"0"
+}
+
+entityDef projectile_handgrenade
+{
+	"spawnclass"		"NSProjectile"
+	"model"				"models/w_grenade.mdl"
+	"frame"				"1"
+	"fuse"				"4"
+	"detonate_on_fuse"	"1"
+	"bounce"			"1"
+	"angular_velocity"	"-350 0 0"
+	"model_detonate"	"fx_explosion.main"
+	"snd_explode"		"fx.explosion"
+	"snd_bounce"		"weapon_handgrenade.bounce"
+	"decal_detonate"	"ExplosionScorch"
+
+	"def_damage"		"damage_handgrenadeDirect"
+	"def_splash_damage"	"damage_handgrenadeSplash"
+}
+
+entityDef damage_handgrenadeDirect
+{
+	"damage"	"1"
+}
+
+entityDef damage_handgrenadeSplash
+{
+	"damage"	"skill:plr_hand_grenade"
+	"radius"	"250"
+}
+
+entityDef env_handgrenade_explodeinhand
+{
+	"spawnclass"				"idAnimatedEntity"
+	"model"						"grenadeExplosion.prt"
+}

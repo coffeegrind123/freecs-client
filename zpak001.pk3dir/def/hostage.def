@@ -1,0 +1,16 @@
+entityDef hostage_entity
+{
+	"spawnclass" "CSHostage"
+	"model"		"models/hostage.mdl"
+	"netname"		"Hostage"
+	"health"		"skill:hostage_health"
+	"mins"		"-16 -16 0"
+	"maxs"		"16 16 72"
+	"eye_height"		"64"
+	"team"		"0"
+	"propdata"		"actor_human"
+
+	"follow_on_use"		"1"
+	"speed_walk"		"64"
+	"speed_run"		"364"
+}

@@ -1,0 +1,46 @@
+entityDef weapon_flashbang
+{
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_usage"		"Flashbang"
+	"editor_rotatable"	"1"
+
+	"spawnclass"		"CSWeapon"
+	"model"				"models/w_flashbang.mdl"
+	"model_view"		"models/v_flashbang.mdl"
+	"snd_acquire"		"weapon.pickup"
+	"snd_respawn"		"item.respawn"
+
+	"def_onFire"		"projectile_flashgrenade"
+	"inv_name"				"Flashbang"
+	"ammoType"				"ammo_flashbang"
+	"ammoRequired"			"1"
+	"silent_fire"			"1"
+	"primed_fuse"			"4"
+
+	"actIdle"		"0"
+	"actDraw"		"3"
+	"actPull"		"1"
+	"actThrow"		"2"
+
+	"hudSlot"		"3"
+	"hudSlotPos"	"1"
+}
+
+entityDef projectile_flashgrenade
+{
+	"spawnclass"		"CSProjectile"
+	"model"				"models/w_smokegrenade.mdl"
+	"frame"				"1"
+	"fuse"				"4"
+	"detonate_on_fuse"	"1"
+	"bounce"			"1"
+	"angular_velocity"	"-350 0 0"
+
+	"snd_explode"		"Flashbang.Explode"
+	"snd_bounce"		"Flashbang.Bounce"
+	"decal_detonate"	"ExplosionScorch"
+
+	"flashTime"			"4"
+}

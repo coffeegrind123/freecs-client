@@ -101,9 +101,9 @@ enum
 	ANIM_RELOAD_AK47,
 	ANIM_GUT_FLINCH,
 	ANIM_HEAD_FLINCH,
-	ANIM_DEATH1,
-	ANIM_DEATH2,
-	ANIM_DEATH3,
+	ANIM_DEATH1,	/* land on stomach */
+	ANIM_DEATH2,	/* land on back */
+	ANIM_DEATH3,	/* dramatic death */
 	ANIM_DIE_HEAD,
 	ANIM_DIE_GUT,
 	ANIM_DIE_LEFT,

@@ -42,18 +42,17 @@ item_suit::Spawned(void)
 void
 item_suit::Respawn(void)
 {
+	super::Respawn();
 	SetSolid(SOLID_TRIGGER);
 	SetMovetype(MOVETYPE_TOSS);
-	SetModel(GetSpawnModel());
 	SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
-	SetOrigin(GetSpawnOrigin());
 	ReleaseThink();
 }
 
 void
 item_suit::Touch(entity eToucher)
 {
-	player pl = (player)eToucher;
+	CSPlayer pl = (CSPlayer)eToucher;
 
 	if (pl.classname != "player") {
 		return;

@@ -1,0 +1,65 @@
+entityDef weapon_glock18
+{
+	"inherit"			"CSBasePistol"
+	"editor_usage"		"Glock 18 Select Fire Weapon - Uses ammo_9mm"
+
+	"model"				"models/w_glock18.mdl"
+	"model_view"		"models/v_glock18.mdl"
+
+	"inv_name"			"Glock 18 Select Fire Weapon"
+	"def_fireInfo"		"fireInfo_glock18"
+	"def_altFireInfo"	"fireInfo_altglock18"
+	"clipSize"			"20"
+	"ammoRequired"		"1"
+	"model_flash"		"sprites/muzzleflash2.spr"
+
+	"actFire"	"5"
+	"actFireLast"	"6"
+	"actHolster"	"9"
+	"actReload"	"7,12"
+	"actDraw"	"9,11"
+	"actIdle"	"0,1,2"
+
+	"snd_fire"		"Weapon_Glock.Single"
+
+	"speed_mod"	"1.0"
+	"price"		"400"
+
+	"crossMinDist"				"8.0"
+	"crossDeltaDist"			"3.0"
+	"accuracyMovementPenalty"	"1.2"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"				"1.25"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.6"
+	"multiplierShots"			"2.0"
+	"multiplierStrength"		"0.7"
+	"multiplierInaccuracy"		"1.0"
+}
+
+entityDef projectile_glock
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_glock18_dmg"
+}
+
+entityDef fireInfo_glock18
+{
+	"def_onFire"	"projectile_glock"
+	"ammoType"			"ammo_9mm"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.13"
+	"accuracyDivisor"	"120"
+}
+
+entityDef fireInfo_altglock18
+{
+	"def_onFire"	"projectile_glock"
+	"ammoType"			"ammo_9mm"
+	"ammoPerShot"		"3"
+	"numProjectiles"	"3"
+	"fireRate"			"0.5"
+	"accuracyDivisor"	"75"
+	"actFire"	"3,4"
+	"snd_fire"	"Weapon_Glock.Burst"
+}

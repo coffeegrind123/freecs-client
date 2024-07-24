@@ -1,0 +1,57 @@
+entityDef weapon_m3
+{
+	"inherit"			"CSBaseShotgun"
+	"editor_usage"		"Benneli M3 Super90 Weapon - Uses ammo_buckshot"
+
+	"model"				"models/w_m3.mdl"
+	"model_view"		"models/v_m3.mdl"
+
+	"inv_name"			"Benneli M3 Super90 Weapon"
+	"def_fireInfo"	"fireInfo_m3"
+	"clipSize"			"8"
+
+	"actFire"		"1,2"
+	"actReloadStart"	"5"
+	"actReload"		"3"
+	"actReloadEnd"		"4"
+	"actDraw"		"6"
+	"actIdle"		"0"
+
+	"snd_fire"		"Weapon_M3.Single"
+
+	"speed_mod"			"0.92"
+	"price"				"1700"
+	"crossMinDist"				""
+	"crossDeltaDist"			""
+	"accuracyDivisor"			""
+	"accuracyMovementPenalty"	""
+	"accuracyMultiplier"		""
+	"rangeModifier"				""
+	"penetrationPower"			"0"
+	"bulletStrength"			""
+	"multiplierShots"			""
+	"multiplierStrength"		""
+	"multiplierInaccuracy"		""
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"0"
+	"weight"		"20"
+}
+
+entityDef projectile_m3
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_m3_dmg"
+}
+
+entityDef fireInfo_m3
+{
+	"def_onFire"	"projectile_m3"
+	"ammoType"			"ammo_buckshot"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"1.0"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+	"numProjectiles"	"9"
+}

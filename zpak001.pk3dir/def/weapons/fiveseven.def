@@ -1,0 +1,57 @@
+entityDef weapon_fiveseven
+{
+	"inherit"			"CSBasePistol"
+	"editor_usage"		"Five-SeveN Weapon - Uses ammo_57mm"
+
+	"model"				"models/w_fiveseven.mdl"
+	"model_view"		"models/v_fiveseven.mdl"
+
+	"inv_name"			"Five-SeveN Weapon"
+	"def_fireInfo"	"fireInfo_fiveseven"
+	"clipSize"			"20"
+
+	"actFire"		"1,2"
+	"actFireLast"		"3"
+	"actReload"		"4"
+	"actDraw"		"5"
+	"actIdle"		"0"
+
+
+	"snd_fire"		"Weapon_FiveSeven.Single"
+
+	"speed_mod"			"1.0"
+	"price"				"750"
+	"crossMinDist"				"8"
+	"crossDeltaDist"			"3"
+	"accuracyDivisor"			"200"
+	"accuracyMovementPenalty"	"1.4"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.0055"
+	"rangeModifier"				"1.875"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"0.5"
+	"multiplierShots"			"10"
+	"multiplierStrength"		"0.4"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"1"
+	"hudSlotPos"	"5"
+	"weight"		"5"
+}
+
+entityDef projectile_fiveseven
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_fiveseven_dmg"
+}
+
+entityDef fireInfo_fiveseven
+{
+	"def_onFire"	"projectile_fiveseven"
+	"ammoType"			"ammo_57mm"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.155"
+	"punchAngle"		"-2 0 0"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

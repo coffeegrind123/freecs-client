@@ -1,0 +1,12 @@
+entityDef item_c4
+{
+	"spawnclass"	"CSBombEntity"
+	"model"			"models/w_c4.mdl"
+	"model_led"		"sprites/ledglow.spr"
+	"snd_beep1"		"weapon_c4bomb.beep1"
+	"snd_beep2"		"weapon_c4bomb.beep2"
+	"snd_beep3"		"weapon_c4bomb.beep3"
+	"snd_beep4"		"weapon_c4bomb.beep4"
+	"snd_beep5"		"weapon_c4bomb.beep5"
+	"snd_planted"	"c4.plant"
+}

@@ -42,15 +42,14 @@ info_buyzone::info_buyzone(void)
 void
 info_buyzone::Respawn(void)
 {
-	SetSolid(SOLID_TRIGGER);
+	super::Respawn();
 	SetSize([-128,-128,-128], [128,128,128]);
-	SetOrigin(GetSpawnOrigin());
 }
 
 void
 info_buyzone::Touch(entity eToucher)
 {
-	player pl = (player)eToucher;
+	CSPlayer pl = (CSPlayer)eToucher;
 
 	if (!(eToucher.flags & FL_CLIENT))
 		return;

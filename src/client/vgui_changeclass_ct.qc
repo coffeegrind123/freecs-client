@@ -192,5 +192,5 @@ VGUI_ChooseClassCT(void)
 	}
 
 	winClassSelectionCT.Show();
-	winClassSelectionCT.SetPos((video_res / 2) - (winClassSelectionCT.GetSize() / 2));
+	winClassSelectionCT.SetPos((g_vidsize / 2) - (winClassSelectionCT.GetSize() / 2));
 }

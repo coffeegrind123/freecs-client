@@ -1,0 +1,40 @@
+entityDef weapon_knife
+{
+	"inherit"		"CSBaseMelee"
+	"editor_usage"		"Knife Weapon"
+
+	"model"			"models/w_knife.mdl"
+	"model_view"		"models/v_knife.mdl"
+
+	// weapon specific
+	"def_melee"		"damage_knife"
+	"melee_distance"	"48"
+	"inv_name"		"Knife Weapon"
+	"clipSize"		"6"
+	"ammoType"		""
+	"ammoRequired"		"0"
+	"clipSize"		"0"
+	"silent_fire"		"1"
+
+	"meleeRateMiss"		"0.7"
+	"meleeRateHit"		"0.7"
+
+	"actIdle"		"0"
+	"actDraw"		"3"
+	"actMeleeMiss"		"1,2"
+	"actMeleeHit"		"1,2"
+
+	"hudSlot"		"2"
+	"hudSlotPos"	"0"
+}
+
+entityDef damage_knife
+{
+	"damage"			"skill:plr_knife"
+//	"kickDir"			"-1 0 0"
+//	"knockback"			"20"
+//	"push"				"20000"
+
+	"snd_hit"			"Weapon_Knife.Hit"
+	"snd_miss"			"Weapon_Knife.Slash"
+}

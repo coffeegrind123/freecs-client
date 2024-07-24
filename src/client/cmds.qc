@@ -33,7 +33,7 @@ CMD_ChooseTeam(void)
 void
 CMD_BuyMenu(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	/* only in buy zones... */
 	if (!(pl.gflags & GF_BUYZONE)) {

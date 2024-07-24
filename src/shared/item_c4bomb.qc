@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class item_c4:NSRenderableEntity
+class CSBombEntity:NSRenderableEntity
 {
 #ifdef SERVER
 	entity m_eUser;
@@ -24,7 +24,7 @@ class item_c4:NSRenderableEntity
 #endif
 
 #ifdef SERVER
-	void item_c4(void);
+	void CSBombEntity(void);
 
 	virtual void Spawned(void);
 	virtual float SendEntity(entity, float);
@@ -35,14 +35,14 @@ class item_c4:NSRenderableEntity
 #endif
 
 #ifdef CLIENT
-	void item_c4(void);
+	void CSBombEntity(void);
 	virtual void DrawLED(void);
 	virtual float predraw(void);
 #endif
 };
 
 void
-item_c4::item_c4(void)
+CSBombEntity::CSBombEntity(void)
 {
 #ifdef SERVER
 	m_eUser = __NULL__;
@@ -54,7 +54,7 @@ item_c4::item_c4(void)
 
 #ifdef SERVER
 float
-item_c4::SendEntity(entity pvsent, float flags)
+CSBombEntity::SendEntity(entity pvsent, float flags)
 {
 	WriteByte(MSG_ENTITY, ENT_C4BOMB);
 	WriteCoord(MSG_ENTITY, origin[0]);
@@ -68,19 +68,19 @@ item_c4::SendEntity(entity pvsent, float flags)
 }
 
 void
-item_c4::ClearProgress(void)
+CSBombEntity::ClearProgress(void)
 {
 	if (m_eUser != world) {
-		player pl = (player)m_eUser;
+		CSPlayer pl = (CSPlayer)m_eUser;
 		pl.progress = 0.0f;
-		pl.flags &= ~FL_FROZEN;
+		pl.RemoveVFlags(VFL_FROZEN);
 	}
 }
 
 void
-item_c4::OnPlayerUse(void)
+CSBombEntity::OnPlayerUse(void)
 {
-	player pl = (player)eActivator;
+	CSPlayer pl = (CSPlayer)eActivator;
 
 	/* obvious check */
 	if (pl.team != TEAM_CT) {
@@ -95,13 +95,13 @@ item_c4::OnPlayerUse(void)
 }
 
 void
-item_c4::Logic(void)
+CSBombEntity::Logic(void)
 {
 	CSMultiplayerRules rules = (CSMultiplayerRules)g_grMode;
 
 	/* check if we're being used */
 	if (m_eUser != world) {
-		player pl = (player)m_eUser;
+		CSPlayer pl = (CSPlayer)m_eUser;
 
 		/* we need to check if the user has changed every frame. */
 		if (!m_eUser.button5) {
@@ -121,7 +121,7 @@ item_c4::Logic(void)
 
 			/* tracked stat */
 			pl.progress = m_flDefusalState;
-			pl.flags |= FL_FROZEN;
+			pl.AddVFlags(VFL_FROZEN);
 
 			g_cs_bombbeingdefused = TRUE;
 		}
@@ -143,7 +143,11 @@ item_c4::Logic(void)
 		/* In Bomb Defusal, all Terrorists receive $3500
 		 * if they won by detonating the bomb. */
 		rules.RoundOver(TEAM_T, 3500, FALSE);
-		Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
+
+		radiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner);
+		//Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
+
+
 		StartSoundDef("weapon_c4bomb.explode", CHAN_VOICE, true);
 
 		for (entity e = world; (e = find(e, ::classname, "func_bomb_target"));) {
@@ -183,7 +187,7 @@ item_c4::Logic(void)
 }
 
 void
-item_c4::OnRemoveEntity(void)
+CSBombEntity::OnRemoveEntity(void)
 {
 	ClearProgress();
 	m_flBeepTime = 0.0f;
@@ -193,7 +197,7 @@ item_c4::OnRemoveEntity(void)
 }
 
 void
-item_c4::Spawned(void)
+CSBombEntity::Spawned(void)
 {
 	super::Spawned();
 
@@ -208,33 +212,13 @@ item_c4::Spawned(void)
 	customphysics = Logic;
 	PlayerUse = OnPlayerUse;
 	m_flExplodeTime = time + 45.0f;
-	StartSoundDef("weapon_c4bomb.plant", CHAN_WEAPON, true);
-}
-
-void
-C4Bomb_Plant(NSClientPlayer planter)
-{
-	item_c4 bomb = spawn(item_c4);
-	bomb.Spawned();
-	bomb.real_owner = planter;
-
-	/* place directly below */
-	traceline(planter.origin, planter.origin + [0,0,-64], FALSE, planter);
-	setorigin(bomb, trace_endpos);
-	bomb.SendFlags = -1;
-
-	/* push the player out if we're on top */
-	setorigin_safe(planter, planter.origin);
-
-	Radio_BroadcastMessage(RADIO_BOMBPL);
-	CSBot_BombPlantedNotify();
-	g_cs_bombplanted = TRUE;
+	StartSoundDef("c4.plant", CHAN_WEAPON, true);
 }
 #endif
 
 #ifdef CLIENT
 void
-item_c4::DrawLED(void)
+CSBombEntity::DrawLED(void)
 {
 	vector cameraPos = g_view.GetCameraOrigin();
 	float ledAlpha = 1.0 - (time - floor(time));
@@ -266,7 +250,7 @@ item_c4::DrawLED(void)
 }
 
 float
-item_c4::predraw(void)
+CSBombEntity::predraw(void)
 {
 	DrawLED();
 	addentity(this);
@@ -276,8 +260,8 @@ item_c4::predraw(void)
 void
 w_c4bomb_parse(void)
 {
-	item_c4 tm = (item_c4)self;
-	spawnfunc_item_c4();
+	CSBombEntity tm = (CSBombEntity)self;
+	spawnfunc_CSBombEntity();
 
 	g_c4bombled_spr = spriteframe("sprites/ledglow.spr", 0, 0.0f);
 

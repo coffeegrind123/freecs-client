@@ -52,7 +52,6 @@ CSSingleplayerRules::PlayerSpawn(NSClientPlayer pl)
 	setmodel(pl, pl.model);
 
 	setsize(pl, VEC_HULL_MIN, VEC_HULL_MAX);
-	pl.view_ofs = PHY_VIEWPOS;
 	pl.velocity = [0,0,0];
 	pl.gravity = __NULL__;
 	pl.frame = 1;
@@ -75,6 +74,5 @@ CSSingleplayerRules::PlayerSpawn(NSClientPlayer pl)
 		pl.angles = spot.angles;
 	}
 
-	Weapons_RefreshAmmo(pl);
 	Client_FixAngle(pl, pl.angles);
 } 

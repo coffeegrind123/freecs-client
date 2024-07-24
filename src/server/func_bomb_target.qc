@@ -51,7 +51,7 @@ func_bomb_target::Respawn(void)
 void
 func_bomb_target::Touch(entity eToucher)
 {
-	player pl = (player)eToucher;
+	CSPlayer pl = (CSPlayer)eToucher;
 
 	if (!(eToucher.flags & FL_CLIENT)) {
 		return;

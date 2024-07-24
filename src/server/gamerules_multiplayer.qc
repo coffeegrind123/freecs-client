@@ -14,6 +14,14 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef CSSOURCE
+	#define SPAWNPOINT_CT "info_player_counterterrorist"
+	#define SPAWNPOINT_T "info_player_terrorist"
+#else
+	#define SPAWNPOINT_CT "info_player_start"
+	#define SPAWNPOINT_T "info_player_deathmatch"
+#endif
+
 string
 CSMultiplayerRules::Title(void)
 {
@@ -42,12 +50,12 @@ CSMultiplayerRules::PlayerDisconnect(NSClientPlayer pl)
 void
 CSMultiplayerRules::PlayerDeath(NSClientPlayer pl)
 {
-	player targ = (player)g_dmg_eTarget;
-	player attk = (player)g_dmg_eAttacker;
+	CSPlayer targ = (CSPlayer)g_dmg_eTarget;
+	CSPlayer attk = (CSPlayer)g_dmg_eAttacker;
 	NSRenderableEntity newCorpse;
 	float deathAnimation = ANIM_DEATH1;
 
-	if (targ.flags & FL_CROUCHING) {
+	if (targ.IsCrouching()) {
 		deathAnimation = ANIM_CROUCH_DIE;
 	} else {
 		switch (g_dmg_iHitBody) {
@@ -128,21 +136,25 @@ CSMultiplayerRules::PlayerDeath(NSClientPlayer pl)
 		targ.SetInfoKey("*icon1_b", "0");
 	}
 
-	Weapon_DropCurrentWeapon(targ);
+	/* TODO: implement this in NSNavAI */
+	//targ.DropActiveWeapon();
+
+	///Weapon_DropCurrentWeapon(targ);
 
 	/* if we're the bomb carrier, make sure we drop the bomb. */
-	if (targ.g_items & ITEM_C4BOMB) {
-		targ.activeweapon = WEAPON_C4BOMB;
-		Weapon_DropCurrentWeapon(targ);
+	if (targ.HasItem("weapon_c4")) {
+		//targ.SwitchToWeapon("weapon_c4");
+		//Weapon_DropCurrentWeapon(targ);
 	} else {
-		targ.activeweapon = Cstrike_WeaponToDropUponDeath(targ);
-		Weapon_DropCurrentWeapon(targ);
+		//targ.activeweapon = Cstrike_WeaponToDropUponDeath(targ);
+		//Weapon_DropCurrentWeapon(targ);
 	}
 
 	/* clear all ammo and inventory... */
-	PlayerClearWeaponry(targ);
-	targ.Death();
+	targ.RemoveAllWeapons();
+//	targ.Death();
 	targ.gflags &= ~GF_FLASHLIGHT;
+	targ.m_bHasNightvision = false;
 
 	targ.StartSoundDef("Player.Death", CHAN_AUTO, true);
 
@@ -170,7 +182,7 @@ CSMultiplayerRules::PlayerPreFrame(NSClientPlayer pl)
 	   happen here */
 	{
 		vector sourcePos, destPos;
-		player p = (player)pl;
+		CSPlayer p = (CSPlayer)pl;
 
 		sourcePos = pl.GetEyePos();
 		destPos = sourcePos + (pl.GetForward() * 512);
@@ -235,7 +247,7 @@ CSMultiplayerRules::CreateRescueZones(void)
 		return;
 
 	/* hostage zones need to go somewhere */
-	for (entity e = world; (e = find(e, ::classname, "info_player_start"));) {
+	for (entity e = world; (e = find(e, ::classname, SPAWNPOINT_CT));) {
 		info_hostage_rescue newzone = spawn(info_hostage_rescue, origin: e.origin);
 		newzone.Respawn();
 	}
@@ -258,7 +270,7 @@ CSMultiplayerRules::CreateCTBuyzones(void)
 		return;
 
 	/* since no buyzones are available, let's create one around every CT spawn */
-	for (entity e = world; (e = find(e, ::classname, "info_player_start"));) {
+	for (entity e = world; (e = find(e, ::classname, SPAWNPOINT_CT));) {
 		info_buyzone newzone = spawn(info_buyzone, origin: e.origin);
 		newzone.Respawn();
 		newzone.team = TEAM_CT;
@@ -282,7 +294,7 @@ CSMultiplayerRules::CreateTBuyzones(void)
 		return;
 
 	/* since no buyzones are available, let's create one around every T spawn */
-	for (entity e = world; (e = find(e, ::classname, "info_player_deathmatch"));) {
+	for (entity e = world; (e = find(e, ::classname, SPAWNPOINT_T));) {
 		info_buyzone newzone = spawn(info_buyzone, origin: e.origin);
 		newzone.Respawn();
 		newzone.team = TEAM_T;
@@ -292,6 +304,39 @@ CSMultiplayerRules::CreateTBuyzones(void)
 void
 CSMultiplayerRules::InitPostEnts(void)
 {
+	EntityDef_Precache("CSBasePistol");
+	EntityDef_Precache("CSBaseRifle");
+	EntityDef_Precache("CSBaseShotgun");
+	EntityDef_Precache("weapon_ak47");
+	EntityDef_Precache("weapon_aug");
+	EntityDef_Precache("weapon_awp");
+	EntityDef_Precache("weapon_c4");
+	EntityDef_Precache("weapon_deagle");
+	EntityDef_Precache("weapon_elites");
+	EntityDef_Precache("weapon_famas");
+	EntityDef_Precache("weapon_fiveseven");
+	EntityDef_Precache("weapon_flashbang");
+	EntityDef_Precache("weapon_g3sg1");
+	EntityDef_Precache("weapon_galil");
+	EntityDef_Precache("weapon_glock18");
+	EntityDef_Precache("weapon_hegrenade");
+	EntityDef_Precache("weapon_knife");
+	EntityDef_Precache("weapon_m249");
+	EntityDef_Precache("weapon_m3");
+	EntityDef_Precache("weapon_m4a1");
+	EntityDef_Precache("weapon_mac10");
+	EntityDef_Precache("weapon_mp5navy");
+	EntityDef_Precache("weapon_p228");
+	EntityDef_Precache("weapon_p90");
+	EntityDef_Precache("weapon_scout");
+	EntityDef_Precache("weapon_sg550");
+	EntityDef_Precache("weapon_sg552");
+	EntityDef_Precache("weapon_smokegrenade");
+	EntityDef_Precache("weapon_tmp");
+	EntityDef_Precache("weapon_ump45");
+	EntityDef_Precache("weapon_usp");
+	EntityDef_Precache("weapon_xm1014");
+
 	MOTD_LoadDefault();
 
 	/* let's check if we need to create buyzones */
@@ -482,7 +527,7 @@ CSMultiplayerRules::BuyingPossible(NSClientPlayer pl)
 void
 CSMultiplayerRules::MakeBomber(NSClientPlayer pl)
 {
-	Weapons_AddItem(pl, WEAPON_C4BOMB, -1);
+	pl.GiveItem("weapon_c4");
 	env_message_single(pl, "Hint_you_have_the_bomb");
 }
 
@@ -511,7 +556,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		m_iSwapTeamRoundCounter = 0;
 
 		for (entity eFind = world; (eFind = find(eFind, ::classname, "player"));) { 
-			player pl = (player)eFind;
+			CSPlayer pl = (CSPlayer)eFind;
 
 			if (pl.team == TEAM_T) {
 				pl.team = TEAM_CT; /* temp for CT */
@@ -532,7 +577,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		if (!(eFind.flags & FL_CLIENT))
 			continue;
 
-		player pl = (player)eFind;
+		CSPlayer pl = (CSPlayer)eFind;
 
 		if (pl.health > 0 && iWipe == FALSE) {
 			PlayerRespawn(pl, pl.team);
@@ -551,7 +596,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		if (!(eFind.flags & FL_CLIENT))
 			continue;
 
-		player pl = (player)eFind;
+		CSPlayer pl = (CSPlayer)eFind;
 
 		if (pl.health > 0 && iWipe == FALSE) {
 			PlayerRespawn(pl, pl.team);
@@ -572,7 +617,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		if (!(eFind.flags & FL_CLIENT))
 			continue;
 
-		player pl = (player)eFind;
+		CSPlayer pl = (CSPlayer)eFind;
 		pl.team = TEAM_CT;
 
 		if (pl.health > 0 && iWipe == FALSE) {
@@ -590,19 +635,13 @@ CSMultiplayerRules::RestartRound(int iWipe)
 	}
 
 	for (entity eFind = world; (eFind = find(eFind, ::classname, "tempdecal"));) {
-		decal dec = (decal)eFind;
+		NSDecal dec = (NSDecal)eFind;
 		dec.m_strTexture = "";
 		dec.SendFlags = -1;
 	}
 	for (entity eFind = world; (eFind = find(eFind, ::classname, "item_c4"));) {
 		NSEntity e = (NSEntity)eFind;
 		e.Destroy();
-	}
-	// Remove potential bomb backpack model from the world, else bots will go
-	// chase a ghost.
-	entity e = find(world, ::model, "models/w_backpack.mdl");
-	if (e != world) {
-		remove(e);
 	}
 
 	WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
@@ -620,7 +659,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 				iPickT++;
 
 				if (iPickT == iRandomT) {
-					MakeBomber((player)eFind);
+					MakeBomber((CSPlayer)eFind);
 				}
 			}
 		}
@@ -635,7 +674,7 @@ CSMultiplayerRules::RestartRound(int iWipe)
 			if (eFind.team == TEAM_CT) {
 				iPickCT++;
 				if (iPickCT == iRandomCT) {
-					MakeVIP((player)eFind);
+					MakeVIP((CSPlayer)eFind);
 				}
 			}
 		}
@@ -658,7 +697,10 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		}
 	}
 
+#ifdef BOT
 	CSBot_BuyStart();
+#endif
+
 	TimerBegin(autocvar_mp_freezetime, GAME_FREEZE);
 	Money_ResetTeamReward();
 }
@@ -751,7 +793,7 @@ CSMultiplayerRules::SwitchTeams(void)
 	int iCTW, iTW;
 
 	for (entity eFind = world; (eFind = find(eFind, ::classname, "player"));) { 
-		player pl = (player)eFind;
+		CSPlayer pl = (CSPlayer)eFind;
 		if (pl.team == TEAM_CT) {
 			pl.team = TEAM_T;
 			pl.charmodel -= 4;
@@ -866,24 +908,24 @@ CSMultiplayerRules::PlayerFindSpawn(float t)
 	entity point = world;
 
 	if (t == TEAM_T) {
-		m_eLastTSpawn = find(m_eLastTSpawn, ::classname, "info_player_deathmatch");
+		m_eLastTSpawn = find(m_eLastTSpawn, ::classname, SPAWNPOINT_T);
 
 		if (m_eLastTSpawn == world) {
-			m_eLastTSpawn = find(m_eLastTSpawn, ::classname, "info_player_deathmatch");
+			m_eLastTSpawn = find(m_eLastTSpawn, ::classname, SPAWNPOINT_T);
 		}
 		point = m_eLastTSpawn;
 	} else if (t == TEAM_CT) {
-		m_eLastCTSpawn = find(m_eLastCTSpawn, ::classname, "info_player_start");
+		m_eLastCTSpawn = find(m_eLastCTSpawn, ::classname, SPAWNPOINT_CT);
 
 		if (m_eLastCTSpawn == world) {
-			m_eLastCTSpawn = find(m_eLastCTSpawn, ::classname, "info_player_start");
+			m_eLastCTSpawn = find(m_eLastCTSpawn, ::classname, SPAWNPOINT_CT);
 		}
 		point = m_eLastCTSpawn;
 	} else if (t == TEAM_VIP) {
 		point = find(world, ::classname, "info_vip_start");
 
 		if (!point)
-			point = find(m_eLastTSpawn, ::classname, "info_player_start");
+			point = find(m_eLastTSpawn, ::classname, SPAWNPOINT_CT);
 	}
 
 	if (point == world) {
@@ -903,35 +945,29 @@ Called whenever a player survived a round and needs a basic respawn.
 void
 CSMultiplayerRules::PlayerRespawn(NSClientPlayer pp, int fTeam)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
+	NSEntity eSpawn = (NSEntity)PlayerFindSpawn(pl.team);
 
-	entity eSpawn;
-	forceinfokey(pl, "*spec", "0");
-	eSpawn = PlayerFindSpawn(pl.team);
-
-	pl.classname = "player";
-	pl.health = pl.max_health = 100;
-	forceinfokey(pl, "*dead", "0");
-	CountPlayers();
-
-	pl.takedamage = DAMAGE_YES;
-	pl.solid = SOLID_SLIDEBOX;
-	pl.movetype = MOVETYPE_WALK;
-	pl.flags = FL_CLIENT;
-	pl.iBleeds = TRUE;
-	pl.viewzoom = 1.0;
-	pl.g_items &= ~ITEM_C4BOMB;
-
+	pl.MakePlayer();
+	pl.GiveItem("item_suit");
 	pl.SetOrigin(eSpawn.origin);
-	pl.angles = eSpawn.angles;
-	pl.SendFlags = UPDATE_ALL;
+	pl.SetAngles(eSpawn.angles);
 	Client_FixAngle(pl, pl.angles);
+
+	CountPlayers();
 
 	pl.SetInfoKey("*icon1", "");
 	pl.SetInfoKey("*icon1_r", "1");
 	pl.SetInfoKey("*icon1_g", "1");
 	pl.SetInfoKey("*icon1_b", "1");
 
+	/* VIP starts with 200 armor and an extra mag */
+	if (pl.team == TEAM_VIP) {
+		pl.SetArmor(200);
+		pl.GiveItem("weapon_usp");
+	}
+
+#ifndef CSSOURCE
 	switch (pl.charmodel) {
 	case 1:
 		pl.model = "models/player/terror/terror.mdl";
@@ -960,118 +996,89 @@ CSMultiplayerRules::PlayerRespawn(NSClientPlayer pp, int fTeam)
 	default:
 		pl.model = "models/player/vip/vip.mdl";
 	}
+#else
+	switch (pl.charmodel) {
+	case 1:
+		pl.model = "models/player/t_phoenix.mdl";
+		break;
+	case 2:
+		pl.model = "models/player/t_leet.mdl";
+		break;
+	case 3:
+		pl.model = "models/player/t_arctic.mdl";
+		break;
+	case 4:
+		pl.model = "models/player/t_guerilla.mdl";
+		break;
+	case 5:
+		pl.model = "models/player/ct_urban.mdl";
+		break;
+	case 6:
+		pl.model = "models/player/ct_gsg9.mdl";
+		break;
+	case 7:
+		pl.model = "models/player/ct_sas.mdl";
+		break;
+	case 8:
+		pl.model = "models/player/ct_gign.mdl";
+		break;
+	default:
+		pl.model = "models/player/vip/vip.mdl";
+	}
+#endif
 
 	pl.SetModel(pl.model);
 	pl.SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 
-	pl.velocity = [0,0,0];
+	pl.ClearVelocity();
 	pl.progress = 0.0f;
-	Weapons_SwitchBest(pl);
+	/* TODO: Implement this in NSNavAI*/
+	//Weapons_SwitchBest(pl);
 	Ammo_AutoFill(pl);
 }
 
 void
 CSMultiplayerRules::PlayerClearWeaponry(NSClientPlayer pp)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 
 	pl.g_items = 0x0;
 	pl.activeweapon = 0;
-	pl.ammo_50ae = 0;
-	pl.ammo_762mm = 0;
-	pl.ammo_556mm = 0;
-	pl.ammo_556mmbox = 0;
-	pl.ammo_338mag = 0;
-	pl.ammo_9mm = 0;
-	pl.ammo_buckshot = 0;
-	pl.ammo_45acp = 0;
-	pl.ammo_357sig = 0;
-	pl.ammo_57mm = 0;
-	pl.ammo_hegrenade = 0;
-	pl.ammo_fbgrenade = 0;
-	pl.ammo_smokegrenade = 0;
-	pl.usp45_mag = 0;
-	pl.glock18_mag = 0;
-	pl.deagle_mag = 0;
-	pl.p228_mag = 0;
-	pl.elites_mag = 0;
-	pl.fiveseven_mag = 0;
-	pl.m3_mag = 0;
-	pl.xm1014_mag = 0;
-	pl.mp5_mag = 0;
-	pl.p90_mag = 0;
-	pl.ump45_mag = 0;
-	pl.mac10_mag = 0;
-	pl.tmp_mag = 0;
-	pl.ak47_mag = 0;
-	pl.sg552_mag = 0;
-	pl.m4a1_mag = 0;
-	pl.aug_mag = 0;
-	pl.scout_mag = 0;
-	pl.awp_mag = 0;
-	pl.g3sg1_mag = 0;
-	pl.sg550_mag = 0;
-	pl.para_mag = 0;
 	pl.viewzoom = 1.0f;
-	pl.mode_temp = 0;
-}
-
-/*
-=================
-PlayerMakePlayable
-
-Called whenever need a full-reinit of a player.
-This may be after a player had died or when the game starts for the first time.
-=================
-*/
-
-static void
-MakePlayable(entity targ)
-{
-	entity oself = self;
-	self = targ;
-
-	if (clienttype(targ) != CLIENTTYPE_REAL)
-		spawnfunc_csbot();
-	else
-		spawnfunc_player();
-
-	self = oself;
+	pl.m_bHasNightvision = false;
 }
 
 void
 CSMultiplayerRules::PlayerMakePlayable(NSClientPlayer pp, int chara)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 	/* spectator */
 	if (chara == 0) {
 		PlayerSpawn(pl);
 		return;
 	}
 
-	MakePlayable(pp);
-	pl.g_items |= ITEM_SUIT;
-	Weapons_AddItem(pl, WEAPON_KNIFE, -1);
+	pl.ingame = TRUE;
+	forceinfokey(pl, "*team", ftos(pl.team)); 
+	PlayerRespawn(pl, pl.team);
 
 	/* terrorists */
 	if (chara < 5) {
 		pl.team = TEAM_T;
 		if (autocvar_fcs_knifeonly == FALSE) {
-			Weapons_AddItem(pl, WEAPON_GLOCK18, -1);
-			pl.ammo_9mm = 40;
+			pl.GiveItem("weapon_glock18");
+			//pl.ammo_9mm = 40;
 		}
 	} else {
 		pl.team = TEAM_CT;
 
 		if (autocvar_fcs_knifeonly == FALSE) {
-			Weapons_AddItem(pl, WEAPON_USP45, -1);
-			pl.ammo_45acp = 24;
+			pl.GiveItem("weapon_usp");
+			//pl.ammo_45acp = 24;
 		}
 	}
 
-	pl.ingame = TRUE;
-	forceinfokey(pl, "*team", ftos(pl.team)); 
-	PlayerRespawn(pl, pl.team);
+	pl.GiveItem("weapon_knife");
 }
 
 /*
@@ -1084,7 +1091,7 @@ Force the player to become an observer.
 void
 CSMultiplayerRules::PlayerMakeSpectator(NSClientPlayer pp)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 	pl.MakeTempSpectator();
 	PlayerClearWeaponry(pl);
 	pl.view_ofs = g_vec_null;
@@ -1101,7 +1108,7 @@ another player joins and causes the game rules/scores to reset fully
 void
 CSMultiplayerRules::PlayerReset(NSClientPlayer pl)
 {
-	player p = (player)pl;
+	CSPlayer p = (CSPlayer)pl;
 
 	/* give the initial server-joining money */
 	p.money = 0;
@@ -1111,6 +1118,7 @@ CSMultiplayerRules::PlayerReset(NSClientPlayer pl)
 	p.m_seenFriend = false;
 	p.m_seenEnemy = false;
 	p.m_seenHostage = false;
+	p.m_bHasNightvision = false;
 }
 
 /*
@@ -1177,7 +1185,7 @@ void
 CSEv_JoinTeam_f(float flChar)
 {
 	CSMultiplayerRules rules;
-	player pl;
+	CSPlayer pl;
 
 	/* matches Game_InitRules() */
 	if (cvar("sv_playerslots") == 1 || cvar("coop") == 1) {
@@ -1185,7 +1193,7 @@ CSEv_JoinTeam_f(float flChar)
 	}
 
 	rules = (CSMultiplayerRules)g_grMode;
-	pl = (player)self;
+	pl = (CSPlayer)self;
 
 	if (pl.team == TEAM_VIP) {
 		centerprint(pl, "You are the VIP!\nYou cannot switch roles now.\n");

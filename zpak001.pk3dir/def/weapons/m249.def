@@ -1,0 +1,54 @@
+entityDef weapon_m249
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"FN M249 Para Weapon - Uses ammo_556natobox"
+
+	"model"		"models/w_m249.mdl"
+	"model_view"	"models/v_m249.mdl"
+
+	"inv_name"	"FN M249 Para Weapon"
+	"def_fireInfo"	"fireInfo_m249"
+	"clipSize"	"100"
+
+	"actFire"	"1,2"
+	"actReload"	"3"
+	"actDraw"	"4"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_M249.Single"
+
+	"speed_mod"	"0.88"
+	"price"		"5750"
+
+	"crossMinDist"			"6"
+	"crossDeltaDist"		"3"
+	"accuracyDivisor"		"70"
+	"accuracyMovementPenalty"	"3"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"			"2.125"
+	"penetrationPower"		"1.0"
+	"bulletStrength"		"1.0"
+	"multiplierShots"		"1.0"
+	"multiplierStrength"		"1.0"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"15"
+	"weight"		"25"
+}
+
+entityDef projectile_m249
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_m249_dmg"
+}
+
+entityDef fireInfo_m249
+{
+	"def_onFire"	"projectile_m249"
+	"ammoType"			"ammo_556natobox"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"			"0.1"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

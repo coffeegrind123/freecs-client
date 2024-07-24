@@ -1,0 +1,220 @@
+
+#ifdef CLIENT
+void Cstrike_DrawCrosshair(CSPlayer);
+#endif
+
+class
+CSWeapon:NSWeapon
+{
+	void CSWeapon(void);
+
+#ifdef CLIENT
+	int m_iHudSlot;
+	int m_iHudSlotPos;
+
+	string m_ammoIcon;
+	string m_crossHair;
+	NSWeapon m_nextWeapon;
+	virtual void AddedToInventory(void);
+	virtual void UpdateGUI(void);
+#endif
+
+	virtual void Draw(void);
+	virtual void PrimaryAttack(void);
+	virtual void SecondaryAttack(void);
+	virtual void Release(void);
+	virtual void HitscanAttack(string);
+	virtual void SwitchedToWeapon(void);
+};
+
+void
+CSWeapon::CSWeapon(void)
+{
+
+}
+
+void
+CSWeapon::SwitchedToWeapon(void)
+{
+	w_cstrke_switched((CSPlayer)owner);
+}
+
+void
+CSWeapon::PrimaryAttack(void)
+{
+	if (GetDefBool("altAlternates") == true) {
+		if (CanFire() == false) {
+			return;
+		}
+
+		m_iMode = 1 - m_iMode;
+	}
+
+	if (m_iMode) {
+		super::SecondaryAttack();
+		return;
+	}
+
+	super::PrimaryAttack();
+}
+
+void
+CSWeapon::SecondaryAttack(void)
+{
+	if (GetDefBool("altSilences") == true) {
+		if (CanFire() == false) {
+			return;
+		}
+
+		float silAnimation = 0;
+		float silTime;
+
+		m_iMode = 1 - m_iMode;
+
+		if (m_iMode)
+			silAnimation = GetDefAct("actAddSil");
+		else
+			silAnimation = GetDefAct("actDetachSil");
+
+		SetWeaponFrame(silAnimation);
+		silTime = frameduration(m_viewModel, silAnimation);
+		SetAttackNext(silTime);
+		SetIdleNext(silTime + 1.0f);
+		return;
+	}
+
+	super::SecondaryAttack();
+}
+
+void
+CSWeapon::HitscanAttack(string defName)
+{
+	CSPlayer ourOwner = (CSPlayer)owner;
+	int numProjectiles = GetSubDefInt(defName, "numProjectiles");
+	string traceInfo = GetSubDefString(defName, "def_projectile");
+	float flAccuracyDivisor = GetSubDefFloat(defName,"accuracyDivisor");
+	float flAccuracyMovementPenalty = GetSubDefFloat(defName,"accuracyMovementPenalty");
+	float flAccuracyMultiplier = GetSubDefFloat(defName,"accuracyMultiplier");
+	float flAccuracyAdd= GetSubDefFloat(defName,"accuracyAdd");
+	float flRangeModifier = GetSubDefFloat(defName,"rangeModifier");
+	float flPenetrationPower = GetSubDefFloat(defName,"penetrationPower");
+	float flBulletStrength = GetSubDefFloat(defName,"bulletStrength");
+	float flMultiplierShots = GetSubDefFloat(defName,"multiplierShots");
+	float flMultiplierStrength = GetSubDefFloat(defName,"multiplierStrength");
+	float flMultiplierInaccuracy = GetSubDefFloat(defName,"multiplierInaccuracy");
+	float accuracy = Cstrike_CalculateAccuracy(ourOwner, flAccuracyDivisor, flAccuracyMovementPenalty) / flAccuracyMultiplier;
+	accuracy += flAccuracyAdd;
+	vector bulletSpread = [accuracy, accuracy];
+
+	/* always fire at least 1 */
+	if (numProjectiles <= 0i) {
+		numProjectiles = 1i;
+	}
+
+	if (flBulletStrength) {
+		Cstrike_BulletRecoil_ApplyPre(ourOwner, flBulletStrength);
+	}
+
+#ifdef SERVER
+	float traceDamage = GetSubDefFloat(traceInfo, "damage");
+
+	/* don't bother with shotguns */
+	if (numProjectiles <= 3i) {
+		//TraceAttack_SetRangeModifier(flRangeModifier);
+		//TraceAttack_SetPenetrationPower(flPenetrationPower);
+	} else {
+		bulletSpread = [random(-1,1) * 0.1,random(-1,1) * 0.05];
+	}
+
+	for (int i = 0i; i < numProjectiles; i++) {
+	//	TraceAttack_FireBulletsWithDecal(1, ourOwner.GetEyePos(), traceDamage, bulletSpread, 0, "Impact.BigShot", ourOwner);
+	}
+#endif
+
+	if (flBulletStrength) {
+		Cstrike_BulletRecoil_ApplyPost(ourOwner, flBulletStrength);
+	}
+
+	/* don't bother with shotguns */
+	if (numProjectiles <= 3i) {
+		Cstrike_ShotMultiplierAdd(ourOwner, flMultiplierShots, flMultiplierStrength,accuracy* flMultiplierInaccuracy);
+	}
+}
+
+void
+CSWeapon::Draw(void)
+{
+	super::Draw();
+
+#ifdef CLIENT
+	CSPlayer ourOwner = (CSPlayer)owner;
+	ourOwner.cs_cross_mindist = GetDefInt("crossMinDist");
+	ourOwner.cs_cross_deltadist = GetDefInt("crossDeltaDist");
+
+	CStrikeView_UpdateGeomset(ourOwner);
+#endif
+}
+
+void
+CSWeapon::Release(void)
+{
+	owner.v_angle = input_angles;
+	w_cstrike_weaponrelease((CSPlayer)owner);
+	input_angles = owner.v_angle;
+	super::Release();
+}
+
+#ifdef CLIENT
+void
+CSWeapon::AddedToInventory(void)
+{
+	super::AddedToInventory();
+
+	m_ammoIcon = GetDefString("ammoIcon");
+
+	if (m_ammoIcon == "") {
+		m_ammoIcon = sprintf("%s.ammo", strtolower(classname));
+	}
+
+	m_crossHair = GetDefString("crosshair");
+
+	if (m_crossHair == "") {
+		m_crossHair = sprintf("%s.crosshair", strtolower(classname));
+	}
+
+	m_iHudSlot = GetDefInt("hudSlot");
+	m_iHudSlotPos = GetDefInt("hudSlotPos");
+}
+
+void
+CSWeapon::UpdateGUI(void)
+{
+	CSPlayer ourOwner = (CSPlayer)GetOwner();
+
+	/* draw crosshair */
+	Cstrike_DrawCrosshair(ourOwner);
+
+	/* draw ammo icon */
+	if (m_ammoIcon) {
+		vector ammoPos = g_hudmins + [g_hudres[0] - 48, g_hudres[1] - 42];
+		HLSprite_Draw_RGBA(m_ammoIcon, ammoPos, g_hud_color, pSeatLocal->m_flAmmo2Alpha, true);
+	}
+
+	if (m_bAmmoRequired == false) {
+		return;
+	}
+
+	if (m_iClipSize > 0i) {
+		ourOwner.a_ammo1 = m_iClip;
+		HUD_DrawAmmo1();
+	}
+
+	ourOwner.a_ammo2 = ourOwner.GetReserveAmmo(m_primaryAmmoType);
+	HUD_DrawAmmo2();
+
+	if (m_secondaryAmmoType && m_primaryAmmoType != m_secondaryAmmoType) {
+		ourOwner.a_ammo3 = ourOwner.GetReserveAmmo(m_secondaryAmmoType);
+		HUD_DrawAmmo3();
+	}
+}
+#endif

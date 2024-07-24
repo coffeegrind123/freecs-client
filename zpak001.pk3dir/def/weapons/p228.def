@@ -1,0 +1,57 @@
+entityDef weapon_p228
+{
+	"inherit"	"CSBasePistol"
+	"editor_usage"	"SIG P228 Weapon - Uses ammo_357sig"
+
+	"model"		"models/w_p228.mdl"
+	"model_view"	"models/v_p228.mdl"
+
+	"inv_name"	"SIG P228 Weapon"
+	"def_fireInfo"	"fireInfo_p228"
+	"clipSize"	"13"
+
+
+	"actFire"	"1,2,3"
+	"actFireLast"	"4"
+	"actReload"	"5"
+	"actDraw"	"6"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_P228.Single"
+
+	"speed_mod"	"1.0"
+	"price"		"600"
+
+	"crossMinDist"				"8.0"
+	"crossDeltaDist"			"3.0"
+	"accuracyDivisor"			"200"
+	"accuracyMovementPenalty"	"1.6"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.004"
+	"rangeModifier"				"1.5"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"1.05"
+	"multiplierShots"			"6.0"
+	"multiplierStrength"		"0.5"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"1"
+	"hudSlotPos"	"3"
+	"weight"		"5"
+}
+
+entityDef projectile_p228
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_p228_dmg"
+}
+
+entityDef fireInfo_p228
+{
+	"def_onFire"	"projectile_p228"
+	"ammoType"		"ammo_357sig"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.1425"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

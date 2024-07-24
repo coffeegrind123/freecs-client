@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-void View_ForceChange(player pl, int targetWeapon);
+void View_ForceChange(CSPlayer pl, int targetWeapon);
 
 vector g_vecHUDNums[6] =
 {
@@ -29,7 +29,7 @@ vector g_vecHUDNums[6] =
 void
 HUD_DrawWeaponSelect_Forward(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	if (!pl.activeweapon) {
 		return;
@@ -57,7 +57,7 @@ HUD_DrawWeaponSelect_Forward(void)
 void
 HUD_DrawWeaponSelect_Back(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	if (!pl.activeweapon) {
 		return;
@@ -85,7 +85,7 @@ HUD_DrawWeaponSelect_Back(void)
 void
 HUD_DrawWeaponSelect_Trigger(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 
 	if (pl.activeweapon != pSeat->m_iHUDWeaponSelected)
 		View_ForceChange(pl, pSeat->m_iHUDWeaponSelected);
@@ -98,7 +98,7 @@ HUD_DrawWeaponSelect_Trigger(void)
 void
 HUD_DrawWeaponSelect_Last(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	if (pl.g_items & g_weapons[pSeat->m_iOldWeapon].id) {
 		pl.activeweapon = pSeat->m_iOldWeapon;
 		sendevent("PlayerSwitchWeapon", "i", pSeat->m_iOldWeapon);
@@ -114,7 +114,7 @@ HUD_DrawWeaponSelect_Num(vector vecPos, int val)
 int
 HUD_InSlotPos(int slot, int pos)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	for (int i = 1; i < g_weapons.length; i++) {
 		if (g_weapons[i].slot == slot && g_weapons[i].slot_pos == pos) {
 			if (pl.g_items & g_weapons[i].id) {
@@ -130,7 +130,7 @@ HUD_InSlotPos(int slot, int pos)
 void
 HUD_SlotSelect(int slot)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	int curslot = g_weapons[pSeat->m_iHUDWeaponSelected].slot;
 	int i;
 
@@ -184,7 +184,7 @@ HUD_SlotSelect(int slot)
 void
 HUD_DrawWeaponSelect(void)
 {
-	player pl = (player)pSeat->m_ePlayer;
+	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	if (!pl.activeweapon) {
 		return;
 	}
@@ -211,13 +211,13 @@ HUD_DrawWeaponSelect(void)
 				slot_selected = TRUE;
 				if (x == wantpos) {
 					// Selected Sprite
-					Weapons_HUDPic(pl, pSeat->m_iHUDWeaponSelected, 1, vecPos, 1.0f);
+					//Weapons_HUDPic(pl, pSeat->m_iHUDWeaponSelected, 1, vecPos, 1.0f);
 					drawsubpic(vecPos, [170,45], g_hud3_spr, 
 								[0,180/256], [170/256,45/256], g_hud_color, 1, DRAWFLAG_ADDITIVE);
 					vecPos[1] += 50;
 				} else if ((b=HUD_InSlotPos(i, x)) != -1) {
 					// Unselected Sprite
-					Weapons_HUDPic(pl, b, 0, vecPos, 1.0f);
+					//Weapons_HUDPic(pl, b, 0, vecPos, 1.0f);
 					vecPos[1] += 50;
 				}
 			} else if (HUD_InSlotPos(i, x) != -1) {

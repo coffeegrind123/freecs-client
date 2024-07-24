@@ -108,11 +108,12 @@ ammoinfo_t cs_ammoinfo[11] = {
 };
 
 int
-Ammo_BuyCaliber(player pl, int cal, int free)
+Ammo_BuyCaliber(CSPlayer pl, int cal, int free)
 {
 	int *ptr_ammo = __NULL__;
 	int rv = 0;
 
+#if 0
 	while (pl.money - cs_ammoinfo[cal].price > 0 || free) {
 		switch (cal) {
 		case CALIBER_50AE:
@@ -166,6 +167,7 @@ Ammo_BuyCaliber(player pl, int cal, int free)
 		rv = 1;
 	}
 
+#endif
 	return rv;
 }
 
@@ -173,9 +175,10 @@ Ammo_BuyCaliber(player pl, int cal, int free)
 void
 Ammo_BuySecondary(NSClientPlayer pp, int free)
 {
+#if 0
 	int cal = 0;
 	int ps = 0;
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 
 	for (int i = 1; i < g_weapons.length; i++) {
 		if ((pl.g_items & g_weapons[i].id) && (g_weapons[i].slot == 1)) {
@@ -210,6 +213,7 @@ Ammo_BuySecondary(NSClientPlayer pp, int free)
 		Sound_Play(pl, CHAN_ITEM, "buy.ammo");
 	}
 	Weapons_RefreshAmmo(pl);
+#endif
 }
 
 /* We want to loop through all the possible weapons in case the server
@@ -217,7 +221,7 @@ Ammo_BuySecondary(NSClientPlayer pp, int free)
 void
 CSEv_AmmoBuySecondary(void)
 {
-	player pl = (player)self;
+	CSPlayer pl = (CSPlayer)self;
 
 	CSGameRules rules = (CSGameRules)g_grMode;
 	if (rules.BuyingPossible(pl) == FALSE) {
@@ -230,9 +234,10 @@ CSEv_AmmoBuySecondary(void)
 void
 Ammo_BuyPrimary(NSClientPlayer pp, int free)
 {
+#if 0
 	int ps = 0;
 	int cal = 0;
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 
 	for (int i = 1; i < g_weapons.length; i++) {
 		if ((pl.g_items & g_weapons[i].id) && (g_weapons[i].slot == 0)) {
@@ -258,6 +263,14 @@ Ammo_BuyPrimary(NSClientPlayer pp, int free)
 			case WEAPON_TMP:
 				cal = CALIBER_9MM;
 				break;
+#if defined(CZERO) || defined(CSSOURCE)
+			case WEAPON_GALIL:
+				cal = CALIBER_762MM;
+				break;
+			case WEAPON_FAMAS:
+				cal = CALIBER_762MM;
+				break;
+#endif
 			case WEAPON_AK47:
 				cal = CALIBER_762MM;
 				break;
@@ -298,12 +311,13 @@ Ammo_BuyPrimary(NSClientPlayer pp, int free)
 	}
 
 	Weapons_RefreshAmmo(pl);
+#endif
 }
 
 void
 CSEv_AmmoBuyPrimary(void)
 {
-	player pl = (player)self;
+	CSPlayer pl = (CSPlayer)self;
 
 	CSGameRules rules = (CSGameRules)g_grMode;
 	if (rules.BuyingPossible(pl) == FALSE) {
@@ -316,7 +330,7 @@ CSEv_AmmoBuyPrimary(void)
 void
 Ammo_AutoFill(NSClientPlayer pp)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 
 	if (autocvar_fcs_fillweapons == FALSE) {
 		return;

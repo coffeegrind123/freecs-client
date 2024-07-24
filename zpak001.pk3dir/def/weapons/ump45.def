@@ -1,0 +1,57 @@
+entityDef weapon_ump45
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"Heckler & Koch UMP .45 ACP Weapon - Uses ammo_45acp"
+
+	"model"		"models/w_ump45.mdl"
+	"model_view"	"models/v_ump45.mdl"
+
+	"inv_name"	"Heckler & Koch UMP .45 ACP Weapon"
+	"def_fireInfo"	"fireInfo_ump45"
+	"clipSize"	"25"
+
+
+	"actFire"	"3,4,5"
+	"actReload"	"1"
+	"actDraw"	"2"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_UMP45.Single"
+
+	"speed_mod"	"1.0"
+	"price"		"1700"
+
+	"crossMinDist"				"6.0"
+	"crossDeltaDist"			"3.0"
+	"accuracyDivisor"			"100"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"accuracyAdd"				"0.003"
+	"rangeModifier"				"0.875"
+	"penetrationPower"			"1.0"
+	"bulletStrength"			"1.2"
+	"multiplierShots"			"1.0"
+	"multiplierStrength"		"0.9"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"4"
+	"weight"		"25"
+}
+
+entityDef projectile_ump45
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_ump45_dmg"
+}
+
+entityDef fireInfo_ump45
+{
+	"def_onFire"	"projectile_ump45"
+	"ammoType"		"ammo_45acp"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.105"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}
+

@@ -20,7 +20,6 @@
 #include "items.h"
 #include "entities.h"
 #include "events.h"
-#include "pmove.h"
 
 #define TEAM_SPECTATOR	0
 #define TEAM_T		1

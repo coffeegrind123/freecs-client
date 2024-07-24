@@ -52,7 +52,7 @@ void
 func_hostage_rescue::Touch(entity eToucher)
 {
 	if (eToucher.flags & FL_CLIENT) {
-		player pl = (player)eToucher;
+		CSPlayer pl = (CSPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}
@@ -61,7 +61,7 @@ func_hostage_rescue::Touch(entity eToucher)
 		return;
 	}
 
-	hostage_entity hosty = (hostage_entity)eToucher;
+	CSHostage hosty = (CSHostage)eToucher;
 
 	if (hosty.GetSolid() == SOLID_NOT) {
 		return;
@@ -73,7 +73,7 @@ func_hostage_rescue::Touch(entity eToucher)
 	Radio_BroadcastMessage(RADIO_RESCUED);
 	g_cs_hostagesrescued++;
 
-	Money_AddMoney((player)hosty.m_eFollowing, 1000);
+	Money_AddMoney((CSPlayer)hosty.m_eFollowing, 1000);
 	CSBot_HostageRescueNotify();
 
 	/* In Hostage Rescue, all Counter-Terrorists receive an $850

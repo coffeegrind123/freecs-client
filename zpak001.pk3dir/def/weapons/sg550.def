@@ -1,0 +1,54 @@
+entityDef weapon_sg550
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"SIG SG 550 Weapon - Uses ammo_556nato"
+
+	"model"		"models/w_sg550.mdl"
+	"model_view"	"models/v_sg550.mdl"
+
+	"inv_name"	"SIG SG 550 Weapon"
+	"def_fireInfo"	"fireInfo_sg550"
+	"clipSize"	"30"
+
+	"actFire"	"1,2"
+	"actReload"	"3"
+	"actDraw"	"4"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_SG550.Single"
+
+	"speed_mod"	"0.84"
+	"price"		"4200"
+
+	"crossMinDist"			"5.0"
+	"crossDeltaDist"		"3.0"
+	"accuracyDivisor"		"200"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"			"2.125"
+	"penetrationPower"		"1.0"
+	"bulletStrength"		""
+	"multiplierShots"		"1.0"
+	"multiplierStrength"		"1.0"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"14"
+	"weight"		"20"
+}
+
+entityDef projectile_sg550
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_sg550_dmg"
+}
+
+entityDef fireInfo_sg550
+{
+	"def_onFire"	"projectile_sg550"
+	"ammoType"		"ammo_556nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.25"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

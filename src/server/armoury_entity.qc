@@ -53,26 +53,26 @@ List of available items:
 
 var int autocvar_fcs_nopickups = FALSE;
 
-int g_cstrike_armouryitems[19] = {
-	WEAPON_MP5,
-	WEAPON_TMP,
-	WEAPON_P90,
-	WEAPON_MAC10,
-	WEAPON_AK47,
-	WEAPON_SG552,
-	WEAPON_M4A1,
-	WEAPON_AUG,
-	WEAPON_SCOUT,
-	WEAPON_G3SG1,
-	WEAPON_AWP,
-	WEAPON_M3,
-	WEAPON_XM1014,
-	WEAPON_PARA,
-	WEAPON_FLASHBANG,
-	WEAPON_HEGRENADE,
-	0,/*EQUIPMENT_KEVLAR,*/
-	0,/*EQUIPMENT_HELMET,*/
-	WEAPON_SMOKEGRENADE
+string g_cstrike_armouryitems[19] = {
+	"weapon_mp5navy",
+	"weapon_tmp",
+	"weapon_p90",
+	"weapon_max10",
+	"weapon_ak47",
+	"weapon_sg552",
+	"weapon_m4a1",
+	"weapon_aug",
+	"weapon_scout",
+	"weapon_g3sg1",
+	"weapon_awp",
+	"weapon_m3",
+	"weapon_xm1014",
+	"weapon_m249",
+	"weapon_flashbang",
+	"weapon_hegrenade",
+	"equipment_kevlar",
+	"equipment_helmet",
+	"weapon_smokegrenade"
 };
 
 string g_cstrike_armourymodels[19] = {
@@ -165,12 +165,12 @@ armoury_entity::Restore(string strKey, string strValue)
 void
 armoury_entity::Touch(entity eToucher)
 {
-	player pl;
+	CSPlayer pl;
 	if (eToucher.classname != "player") {
 		return;
 	}
 
-	pl = (player)eToucher;
+	pl = (CSPlayer)eToucher;
 
 	/* armor is separate from weapons */
 	if (m_iID == 17 || m_iID == 16) {
@@ -194,7 +194,7 @@ armoury_entity::Touch(entity eToucher)
 
 		sound(pl, CHAN_ITEM, "items/tr_kevlar.wav", 1, ATTN_NORM);
 	} else { /* weapon pickup code */
-		if (Weapons_AddItem(pl, g_cstrike_armouryitems[m_iID], -1) == FALSE)
+		if (pl.GiveItem(g_cstrike_armouryitems[m_iID]) == FALSE)
 			return;
 
 		sound(pl, CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
@@ -211,7 +211,7 @@ armoury_entity::Touch(entity eToucher)
 void
 armoury_entity::Respawn(void)
 {
-	SetOrigin(GetSpawnOrigin());
+	super::Respawn();
 	SetSolid(SOLID_TRIGGER);
 	SetModel(g_cstrike_armourymodels[m_iID]);
 	SetSize([-16,-16,0], [16,16,16]);

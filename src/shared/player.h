@@ -101,58 +101,13 @@ string g_pbones[] =
 enumflags
 {
 	PLAYER_TOPFRAME = PLAYER_CUSTOMFIELDSTART,
-	PLAYER_BOTTOMFRAME,
-	PLAYER_AMMO1,
-	PLAYER_AMMO2,
-	PLAYER_AMMO3,
-	PLAYER_CSTIMERS
+	PLAYER_BOTTOMFRAME = PLAYER_CUSTOMFIELDSTART,
+	PLAYER_CSTIMERS = PLAYER_CUSTOMFIELDSTART
 };
 
-class player:NSClientPlayer
+class CSPlayer:NSClientPlayer
 {
 	int ingame;
-
-	PREDICTED_INT(usp45_mag)
-	PREDICTED_INT(glock18_mag)
-	PREDICTED_INT(deagle_mag)
-	PREDICTED_INT(p228_mag)
-	PREDICTED_INT(elites_mag)
-	PREDICTED_INT(fiveseven_mag)
-	PREDICTED_INT(m3_mag)
-	PREDICTED_INT(xm1014_mag)
-	PREDICTED_INT(mp5_mag)
-	PREDICTED_INT(p90_mag)
-	PREDICTED_INT(ump45_mag)
-	PREDICTED_INT(mac10_mag)
-	PREDICTED_INT(tmp_mag)
-	PREDICTED_INT(ak47_mag)
-	PREDICTED_INT(sg552_mag)
-	PREDICTED_INT(m4a1_mag)
-	PREDICTED_INT(aug_mag)
-	PREDICTED_INT(scout_mag)
-	PREDICTED_INT(awp_mag)
-	PREDICTED_INT(g3sg1_mag)
-	PREDICTED_INT(sg550_mag)
-	PREDICTED_INT(para_mag)
-
-	PREDICTED_INT(ammo_50ae)
-	PREDICTED_INT(ammo_762mm)
-	PREDICTED_INT(ammo_556mm)
-	PREDICTED_INT(ammo_556mmbox)
-	PREDICTED_INT(ammo_338mag)
-	PREDICTED_INT(ammo_9mm)
-	PREDICTED_INT(ammo_buckshot)
-	PREDICTED_INT(ammo_45acp)
-	PREDICTED_INT(ammo_357sig)
-	PREDICTED_INT(ammo_57mm)
-	PREDICTED_INT(ammo_hegrenade)
-	PREDICTED_INT(ammo_fbgrenade)
-	PREDICTED_INT(ammo_smokegrenade)
-
-	PREDICTED_INT(mode_usp45)
-	PREDICTED_INT(mode_m4a1)
-	PREDICTED_INT(mode_glock18)
-	PREDICTED_INT(mode_temp)
 
 	PREDICTED_FLOAT(cs_shotmultiplier)
 	PREDICTED_FLOAT(cs_shottime)
@@ -200,6 +155,7 @@ class player:NSClientPlayer
 	bool m_seenEnemy;
 	bool m_seenHostage;
 	bool m_seenBombSite;
+	bool m_bHasNightvision;
 #endif
 };
 
@@ -207,7 +163,7 @@ float punchangle_recovery(float punchangle) {
 	return 0.05 * (-0.2 * pow(1.2, fabs(punchangle)) + 4);
 }
 void
-player::Physics_InputPostMove(void)
+CSPlayer::Physics_InputPostMove(void)
 {
 	//start of this function is taken from super::Physics_InputPostMove
 	float punch;
@@ -224,15 +180,16 @@ player::Physics_InputPostMove(void)
 
 	/* player animation code */
 	UpdatePlayerAnimation(input_timelength);
-
-	RemoveFlags(FL_FROZEN);
+	RemoveVFlags(VFL_FROZEN);
+	RemoveVFlags(VFL_NOATTACK);
 
 #ifdef SERVER
 	if (g_cs_gamestate == GAME_FREEZE) {
 #else
 	if (getstati(STAT_GAMESTATE) == GAME_FREEZE) {
 #endif
-		flags |= FL_FROZEN;
+		AddVFlags(VFL_FROZEN);
+		AddVFlags(VFL_NOATTACK);
 
 		if (input_buttons & INPUT_BUTTON0) {
 			w_attack_next = (w_attack_next > 0.1) ? w_attack_next : 0.1f;
@@ -242,11 +199,11 @@ player::Physics_InputPostMove(void)
 	ProcessInput();
 }
 
-void Animation_PlayerUpdate(player); 
-void Animation_TimerUpdate(player, float); 
+void Animation_PlayerUpdate(CSPlayer); 
+void Animation_TimerUpdate(CSPlayer, float); 
 
 void
-player::UpdatePlayerAnimation(float timelength)
+CSPlayer::UpdatePlayerAnimation(float timelength)
 {
 	/* calculate our skeletal progression */
 	Animation_PlayerUpdate(this);
@@ -260,7 +217,7 @@ void Camera_StrafeRoll(__inout vector camera_angle);
 void Shake_Update(NSClientPlayer);
 
 void
-player::UpdateAliveCam(void)
+CSPlayer::UpdateAliveCam(void)
 {
 	vector cam_pos = GetEyePos();
 	Camera_RunPosBob(view_angles, cam_pos);
@@ -289,10 +246,10 @@ player::UpdateAliveCam(void)
 }
 
 .string oldmodel;
-string Weapons_GetPlayermodel(player, int);
+///string Weapons_GetPlayermodel(NSClientPlayer, int);
 
 void
-player::UpdatePlayerAttachments(bool visible)
+CSPlayer::UpdatePlayerAttachments(bool visible)
 {
 	/* draw the flashlight */
 	if (gflags & GF_FLASHLIGHT) {
@@ -324,7 +281,7 @@ player::UpdatePlayerAttachments(bool visible)
 		return;
 
 	/* what's the current weapon model supposed to be anyway? */
-	p_model.oldmodel = Weapons_GetPlayermodel(this, activeweapon);
+	p_model.oldmodel = 0;//Weapons_GetPlayermodel(this, activeweapon);
 
 	/* we changed weapons, update skeletonindex */
 	if (p_model.model != p_model.oldmodel) {
@@ -369,17 +326,16 @@ player::UpdatePlayerAttachments(bool visible)
 	}
 }
 
-void Weapons_AmmoUpdate(entity);
-void HUD_AmmoNotify_Check(player pl);
+void HUD_AmmoNotify_Check(CSPlayer pl);
 /*
 =================
-player::ReceiveEntity
+CSPlayer::ReceiveEntity
 =================
 */
 void
-player::ReceiveEntity(float flIsNew, float flChanged)
+CSPlayer::ReceiveEntity(float flIsNew, float flChanged)
 {
-	NSClientPlayer::ReceiveEntity(flIsNew, flChanged);
+	super::ReceiveEntity(flIsNew, flChanged);
 
 	/* animation */
 	READENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
@@ -387,110 +343,35 @@ player::ReceiveEntity(float flIsNew, float flChanged)
 	READENTITY_FLOAT(anim_top_delay, PLAYER_TOPFRAME)
 	READENTITY_BYTE(anim_bottom, PLAYER_BOTTOMFRAME)
 	READENTITY_FLOAT(anim_bottom_time, PLAYER_BOTTOMFRAME)
-	READENTITY_BYTE(usp45_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(glock18_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(deagle_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(p228_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(elites_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(fiveseven_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(m3_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(xm1014_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(mp5_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(p90_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(ump45_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(mac10_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(tmp_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(ak47_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(sg552_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(m4a1_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(aug_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(scout_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(awp_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(g3sg1_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(sg550_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(para_mag, PLAYER_AMMO1)
-	READENTITY_BYTE(ammo_50ae, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_762mm, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_556mm, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_556mmbox, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_338mag, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_9mm, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_buckshot, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_45acp, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_357sig, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_57mm, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_hegrenade, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_fbgrenade, PLAYER_AMMO2)
-	READENTITY_BYTE(ammo_smokegrenade, PLAYER_AMMO2)
-	READENTITY_BYTE(mode_usp45, PLAYER_AMMO3)
-	READENTITY_BYTE(mode_m4a1, PLAYER_AMMO3)
-	READENTITY_BYTE(mode_glock18, PLAYER_AMMO3)
-	READENTITY_BYTE(mode_temp, PLAYER_AMMO3)
+
 	READENTITY_BYTE(cs_shotmultiplier, PLAYER_CSTIMERS)
 	READENTITY_FLOAT(cs_shottime, PLAYER_CSTIMERS)
 	READENTITY_FLOAT(cs_prev_hor_rec, PLAYER_CSTIMERS)
 	READENTITY_BYTE(cs_hor_rec_sign, PLAYER_CSTIMERS)
 	READENTITY_FLOAT(cs_rec_reverse_chance, PLAYER_CSTIMERS)
-	if (flChanged & PLAYER_AMMO1 || flChanged & PLAYER_AMMO2 || flChanged & PLAYER_AMMO3) {
-		Weapons_AmmoUpdate(this);
+
+#if 0
+	if (flChanged & PLAYER_AMMOTYPE) {
 		HUD_AmmoNotify_Check(this);
 	}
+#endif
 
 	setorigin(this, origin);
 }
 
 /*
 =================
-player::PredictPostFrame
+CSPlayer::PredictPostFrame
 
 Save the last valid server values away in the _net variants of each field
 so we can roll them back later.
 =================
 */
 void
-player::PredictPreFrame(void)
+CSPlayer::PredictPreFrame(void)
 {
-	NSClientPlayer::PredictPreFrame();
+	super::PredictPreFrame();
 
-	SAVE_STATE(usp45_mag)
-	SAVE_STATE(glock18_mag)
-	SAVE_STATE(deagle_mag)
-	SAVE_STATE(p228_mag)
-	SAVE_STATE(elites_mag)
-	SAVE_STATE(fiveseven_mag)
-	SAVE_STATE(m3_mag)
-	SAVE_STATE(xm1014_mag)
-	SAVE_STATE(mp5_mag)
-	SAVE_STATE(p90_mag)
-	SAVE_STATE(ump45_mag)
-	SAVE_STATE(mac10_mag)
-	SAVE_STATE(tmp_mag)
-	SAVE_STATE(ak47_mag)
-	SAVE_STATE(sg552_mag)
-	SAVE_STATE(m4a1_mag)
-	SAVE_STATE(aug_mag)
-	SAVE_STATE(scout_mag)
-	SAVE_STATE(awp_mag)
-	SAVE_STATE(g3sg1_mag)
-	SAVE_STATE(sg550_mag)
-	SAVE_STATE(para_mag)
-	SAVE_STATE(ammo_50ae)
-	SAVE_STATE(ammo_762mm)
-	SAVE_STATE(ammo_556mm)
-	SAVE_STATE(ammo_556mmbox)
-	SAVE_STATE(ammo_338mag)
-	SAVE_STATE(ammo_9mm)
-	SAVE_STATE(ammo_buckshot)
-	SAVE_STATE(ammo_45acp)
-	SAVE_STATE(ammo_357sig)
-	SAVE_STATE(ammo_57mm)
-	SAVE_STATE(ammo_hegrenade)
-	SAVE_STATE(ammo_fbgrenade)
-	SAVE_STATE(ammo_smokegrenade)
-	SAVE_STATE(mode_usp45)
-	SAVE_STATE(mode_m4a1)
-	SAVE_STATE(mode_glock18)
-	SAVE_STATE(mode_temp)
 	SAVE_STATE(cs_shotmultiplier)
 	SAVE_STATE(cs_shottime)
 	SAVE_STATE(cs_prev_hor_rec)
@@ -505,55 +386,16 @@ player::PredictPreFrame(void)
 
 /*
 =================
-player::PredictPostFrame
+CSPlayer::PredictPostFrame
 
 Where we roll back our values to the ones last sent/verified by the server.
 =================
 */
 void
-player::PredictPostFrame(void)
+CSPlayer::PredictPostFrame(void)
 {
-	NSClientPlayer::PredictPostFrame();
+	super::PredictPostFrame();
 
-	ROLL_BACK(usp45_mag)
-	ROLL_BACK(glock18_mag)
-	ROLL_BACK(deagle_mag)
-	ROLL_BACK(p228_mag)
-	ROLL_BACK(elites_mag)
-	ROLL_BACK(fiveseven_mag)
-	ROLL_BACK(m3_mag)
-	ROLL_BACK(xm1014_mag)
-	ROLL_BACK(mp5_mag)
-	ROLL_BACK(p90_mag)
-	ROLL_BACK(ump45_mag)
-	ROLL_BACK(mac10_mag)
-	ROLL_BACK(tmp_mag)
-	ROLL_BACK(ak47_mag)
-	ROLL_BACK(sg552_mag)
-	ROLL_BACK(m4a1_mag)
-	ROLL_BACK(aug_mag)
-	ROLL_BACK(scout_mag)
-	ROLL_BACK(awp_mag)
-	ROLL_BACK(g3sg1_mag)
-	ROLL_BACK(sg550_mag)
-	ROLL_BACK(para_mag)
-	ROLL_BACK(ammo_50ae)
-	ROLL_BACK(ammo_762mm)
-	ROLL_BACK(ammo_556mm)
-	ROLL_BACK(ammo_556mmbox)
-	ROLL_BACK(ammo_338mag)
-	ROLL_BACK(ammo_9mm)
-	ROLL_BACK(ammo_buckshot)
-	ROLL_BACK(ammo_45acp)
-	ROLL_BACK(ammo_357sig)
-	ROLL_BACK(ammo_57mm)
-	ROLL_BACK(ammo_hegrenade)
-	ROLL_BACK(ammo_fbgrenade)
-	ROLL_BACK(ammo_smokegrenade)
-	ROLL_BACK(mode_usp45)
-	ROLL_BACK(mode_m4a1)
-	ROLL_BACK(mode_glock18)
-	ROLL_BACK(mode_temp)
 	ROLL_BACK(cs_shotmultiplier)
 	ROLL_BACK(cs_shottime)
 	ROLL_BACK(cs_prev_hor_rec)
@@ -568,60 +410,22 @@ player::PredictPostFrame(void)
 
 #else
 void
-player::ServerInputFrame(void)
+CSPlayer::ServerInputFrame(void)
 {
 	super::ServerInputFrame();
 }
 
 void
-player::EvaluateEntity(void)
+CSPlayer::EvaluateEntity(void)
 {
-	NSClientPlayer::EvaluateEntity();
+	super::EvaluateEntity();
 
 	EVALUATE_FIELD(anim_top, PLAYER_TOPFRAME)
 	EVALUATE_FIELD(anim_top_time, PLAYER_TOPFRAME)
 	EVALUATE_FIELD(anim_top_delay, PLAYER_TOPFRAME)
 	EVALUATE_FIELD(anim_bottom, PLAYER_BOTTOMFRAME)
 	EVALUATE_FIELD(anim_bottom_time, PLAYER_BOTTOMFRAME)
-	EVALUATE_FIELD(usp45_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(glock18_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(deagle_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(p228_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(elites_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(fiveseven_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(m3_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(xm1014_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(mp5_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(p90_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(ump45_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(mac10_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(tmp_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(ak47_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(sg552_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(m4a1_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(aug_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(scout_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(awp_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(g3sg1_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(sg550_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(para_mag, PLAYER_AMMO1)
-	EVALUATE_FIELD(ammo_50ae, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_762mm, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_556mm, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_556mmbox, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_338mag, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_9mm, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_buckshot, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_45acp, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_357sig, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_57mm, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_hegrenade, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_fbgrenade, PLAYER_AMMO2)
-	EVALUATE_FIELD(ammo_smokegrenade, PLAYER_AMMO2)
-	EVALUATE_FIELD(mode_usp45, PLAYER_AMMO3)
-	EVALUATE_FIELD(mode_m4a1, PLAYER_AMMO3)
-	EVALUATE_FIELD(mode_glock18, PLAYER_AMMO3)
-	EVALUATE_FIELD(mode_temp, PLAYER_AMMO3)
+
 	EVALUATE_FIELD(cs_shotmultiplier, PLAYER_CSTIMERS)
 	EVALUATE_FIELD(cs_shottime, PLAYER_CSTIMERS)
 	EVALUATE_FIELD(cs_prev_hor_rec, PLAYER_CSTIMERS)
@@ -631,11 +435,11 @@ player::EvaluateEntity(void)
 
 /*
 =================
-player::SendEntity
+CSPlayer::SendEntity
 =================
 */
 float
-player::SendEntity(entity ePEnt, float flChanged)
+CSPlayer::SendEntity(entity ePEnt, float flChanged)
 {
 	/* don't broadcast invisible players */
 	if (IsFakeSpectator() && ePEnt != this)
@@ -645,55 +449,14 @@ player::SendEntity(entity ePEnt, float flChanged)
 
 	flChanged = OptimiseChangedFlags(ePEnt, flChanged);
 
-	WriteByte(MSG_ENTITY, ENT_PLAYER);
-	WriteFloat(MSG_ENTITY, flChanged);
-
-	NSClientPlayer::SendEntity(ePEnt, flChanged);
+	super::SendEntity(ePEnt, flChanged);
 
 	SENDENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
 	SENDENTITY_FLOAT(anim_top_time, PLAYER_TOPFRAME)
 	SENDENTITY_FLOAT(anim_top_delay, PLAYER_TOPFRAME)
 	SENDENTITY_BYTE(anim_bottom, PLAYER_BOTTOMFRAME)
 	SENDENTITY_FLOAT(anim_bottom_time, PLAYER_BOTTOMFRAME)
-	SENDENTITY_BYTE(usp45_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(glock18_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(deagle_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(p228_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(elites_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(fiveseven_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(m3_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(xm1014_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(mp5_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(p90_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(ump45_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(mac10_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(tmp_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(ak47_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(sg552_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(m4a1_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(aug_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(scout_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(awp_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(g3sg1_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(sg550_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(para_mag, PLAYER_AMMO1)
-	SENDENTITY_BYTE(ammo_50ae, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_762mm, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_556mm, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_556mmbox, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_338mag, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_9mm, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_buckshot, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_45acp, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_357sig, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_57mm, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_hegrenade, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_fbgrenade, PLAYER_AMMO2)
-	SENDENTITY_BYTE(ammo_smokegrenade, PLAYER_AMMO2)
-	SENDENTITY_BYTE(mode_usp45, PLAYER_AMMO3)
-	SENDENTITY_BYTE(mode_m4a1, PLAYER_AMMO3)
-	SENDENTITY_BYTE(mode_glock18, PLAYER_AMMO3)
-	SENDENTITY_BYTE(mode_temp, PLAYER_AMMO3)
+
 	SENDENTITY_BYTE(cs_shotmultiplier, PLAYER_CSTIMERS)
 	SENDENTITY_FLOAT(cs_shottime, PLAYER_CSTIMERS)
 	SENDENTITY_FLOAT(cs_prev_hor_rec, PLAYER_CSTIMERS)

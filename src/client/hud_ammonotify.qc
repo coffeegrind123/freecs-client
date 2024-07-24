@@ -83,8 +83,9 @@ HUD_AmmoNotify_Insert(int type, int count)
 
 /* called whenever we should check for pickup updates */
 void
-HUD_AmmoNotify_Check(player pl)
+HUD_AmmoNotify_Check(CSPlayer pl)
 {
+#if 0
 	HUD_AmmoNotify_Insert(0, pl.ammo_50ae - pl.ammo_50ae_net);
 	HUD_AmmoNotify_Insert(1, pl.ammo_762mm - pl.ammo_762mm_net);
 	HUD_AmmoNotify_Insert(2, pl.ammo_556mm - pl.ammo_556mm_net);
@@ -98,4 +99,5 @@ HUD_AmmoNotify_Check(player pl)
 	HUD_AmmoNotify_Insert(10, pl.ammo_hegrenade - pl.ammo_hegrenade_net);
 	HUD_AmmoNotify_Insert(11, pl.ammo_fbgrenade - pl.ammo_fbgrenade_net);
 	HUD_AmmoNotify_Insert(12, pl.ammo_smokegrenade - pl.ammo_smokegrenade_net);
+#endif
 }

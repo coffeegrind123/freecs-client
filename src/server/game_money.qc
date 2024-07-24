@@ -17,7 +17,7 @@
 void
 Money_AddMoney(NSClientPlayer pp, int iMoneyValue)
 {
-	player pl = (player)pp;
+	CSPlayer pl = (CSPlayer)pp;
 	dprint(sprintf("^2Money_AddMoney^7: giving %s $%i\n", pl.netname, iMoneyValue));
 	pl.money += (float)iMoneyValue;
 

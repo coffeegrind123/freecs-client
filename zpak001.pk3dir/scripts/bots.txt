@@ -1,0 +1,59 @@
+{
+	name nothing
+	funname n0things
+}
+{
+	name goose
+	funname ^2Goose
+}
+{
+	name marco
+	funname "]I[ M4RC0 ]I["
+}
+{
+	name rich
+	funname "Rich"
+}
+{
+	name Getman
+}
+{
+	name pod
+	funname p0d
+}
+{
+	name leet
+	funname ^3l33t
+}
+{
+	name max
+	funname ^4Max^1well
+}
+{
+	name spike
+}
+{
+	name jub
+}
+{
+	name funkyboi
+}
+{
+	name error
+	funname ^1Error
+}
+{
+	name Shazbot
+}
+{
+	name BombGoBoom
+}
+{
+	name SgtMajor
+}
+{
+	name happy_camper
+}
+{
+	name DEViL
+}

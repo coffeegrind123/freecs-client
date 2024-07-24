@@ -1,0 +1,55 @@
+entityDef weapon_scout
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"Steyr Scout Weapon - Uses ammo_762nato"
+
+	"model"		"models/w_scout.mdl"
+	"model_view"	"models/v_scout.mdl"
+
+	"inv_name"	"Steyr Scout Weapon"
+	"def_fireInfo"	"fireInfo_scout"
+	"clipSize"	"10"
+
+
+	"actFire"	"1,2"
+	"actReload"	"3"
+	"actDraw"	"4"
+	"actIdle"	"0"
+
+	"snd_fire"	"Weapon_Scout.Single"
+
+	"speed_mod"	"1.04"
+	"price"		"1250"
+
+	"crossMinDist"			"5.0"
+	"crossDeltaDist"		"3.0"
+	"accuracyDivisor"		"200"
+	"accuracyMovementPenalty"	"1"
+	"accuracyMultiplier"		"1"
+	"rangeModifier"			"2.375"
+	"penetrationPower"		"1.0"
+	"bulletStrength"		""
+	"multiplierShots"		"1.0"
+	"multiplierStrength"		"1.0"
+	"multiplierInaccuracy"		"1.0"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"11"
+	"weight"		"30"
+}
+
+entityDef projectile_scout
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_scout_dmg"
+}
+
+entityDef fireInfo_scout
+{
+	"def_onFire"	"projectile_scout"
+	"ammoType"		"ammo_762nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		"0.3"
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

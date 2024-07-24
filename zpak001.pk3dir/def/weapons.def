@@ -1,0 +1,76 @@
+#include "weapons/ak47.def"
+#include "weapons/aug.def"
+#include "weapons/awp.def"
+#include "weapons/c4.def"
+#include "weapons/deagle.def"
+#include "weapons/elites.def"
+#include "weapons/famas.def"
+#include "weapons/fiveseven.def"
+#include "weapons/flashbang.def"
+#include "weapons/g3sg1.def"
+#include "weapons/galil.def"
+#include "weapons/glock18.def"
+#include "weapons/hegrenade.def"
+#include "weapons/knife.def"
+#include "weapons/m249.def"
+#include "weapons/m3.def"
+#include "weapons/m4a1.def"
+#include "weapons/mac10.def"
+#include "weapons/mp5navy.def"
+#include "weapons/p228.def"
+#include "weapons/p90.def"
+#include "weapons/scout.def"
+#include "weapons/sg550.def"
+#include "weapons/sg552.def"
+#include "weapons/smokegrenade.def"
+#include "weapons/tmp.def"
+#include "weapons/ump45.def"
+#include "weapons/usp.def"
+#include "weapons/xm1014.def"
+
+entityDef CSBaseMelee
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+}
+
+entityDef CSBasePistol
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"semiAuto"			"1"
+	"snd_acquire"		"Player.PickupWeapon"
+	"snd_empty"			"Default.ClipEmpty_Pistol"
+}
+
+entityDef CSBaseRifle
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+	"snd_empty"			"Default.ClipEmpty_Rifle"
+}
+
+entityDef CSBaseShotgun
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+}

@@ -115,6 +115,9 @@ ClientGame_Init(float apilevel, string enginename, float engineversion)
 bool
 ClientGame_IsUsingVGUI(void)
 {
+#if defined(CZERO) || defined(CSSOURCE)
+	return true;
+#else
 	/* FTE has a bug with _ infokeys, so we'll accept both formats in case
 	   that gets fixed in the future :/ */
 	if (getplayerkeyfloat(player_localnum, "vgui_menus") == 1)
@@ -123,6 +126,7 @@ ClientGame_IsUsingVGUI(void)
 		return true;
 
 	return false;
+#endif
 }
 
 void VGUI_ShowMOTD(void);
