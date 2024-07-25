@@ -16,6 +16,10 @@
 
 void VGUI_ChooseTeam(void);
 void VGUI_BuyMenu(void);
+void HUD_DrawWeaponSelect_Back(void);
+void HUD_DrawWeaponSelect_Forward(void);
+void HUD_DrawWeaponSelect_Last(void);
+void HUD_SlotSelect(int);
 
 void
 CMD_ChooseTeam(void)
@@ -51,6 +55,45 @@ int
 ClientGame_ConsoleCommand(void)
 {
 	switch(argv(0)) {
+	case "invnext":
+		HUD_DrawWeaponSelect_Back();
+		break;
+	case "invprev":
+		HUD_DrawWeaponSelect_Forward();
+		break;
+	case "lastinv":
+		HUD_DrawWeaponSelect_Last();
+		break;
+	case "slot1":
+		HUD_SlotSelect(0);
+		break;
+	case "slot2":
+		HUD_SlotSelect(1);
+		break;
+	case "slot3":
+		HUD_SlotSelect(2);
+		break;
+	case "slot4":
+		HUD_SlotSelect(3);
+		break;
+	case "slot5":
+		HUD_SlotSelect(4);
+		break;
+	case "slot6":
+		HUD_SlotSelect(5);
+		break;
+	case "slot7":
+		HUD_SlotSelect(6);
+		break;
+	case "slot8":
+		HUD_SlotSelect(7);
+		break;
+	case "slot9":
+		HUD_SlotSelect(8);
+		break;
+	case "slot10":
+		HUD_SlotSelect(9);
+		break;
 	case "chooseteam":
 		CMD_ChooseTeam();
 		break;

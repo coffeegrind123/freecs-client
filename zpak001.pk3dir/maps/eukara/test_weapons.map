@@ -79,6 +79,12 @@
 "angles" "0 0 0"
 "origin" "-192 0 37"
 }
+// entity 1
+{
+"classname" "info_player_deathmatch"
+"angles" "0 0 0"
+"origin" "-192 0 37"
+}
 // entity 2
 {
 "classname" "light"
