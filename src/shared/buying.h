@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Marco Cawthorne <marco@icculus.org>
+ * Copyright (c) 2016-2020 Marco Cawthorne <marco@icculus.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,14 +14,45 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-void
-Player_Precache(void)
+/* Weapon Indices for the weapon table */
+typedef enum
 {
-	searchhandle pm;
-	pm = search_begin("models/player/*/*.mdl", TRUE, TRUE);
-	for (int i = 0; i < search_getsize(pm); i++) {
-		precache_model(search_getfilename(pm, i));
-	}
-	search_end(pm);
-}
+	BUY_NONE,
+	BUY_M3,
+	BUY_XM1014,
+	BUY_MP5,
+	BUY_P90,
+	BUY_UMP45,
+	BUY_MAC10,
+	BUY_TMP,
+#if defined(CZERO) || defined(CSSOURCE)
+	BUY_FAMAS,
+	BUY_GALIL,
+#endif
+	BUY_AK47,
+	BUY_SG552,
+	BUY_M4A1,
+	BUY_AUG,
+	BUY_SCOUT,
+	BUY_AWP,
+	BUY_G3SG1,
+	BUY_SG550,
+	BUY_PARA,
+	BUY_USP45,
+	BUY_GLOCK18,
+	BUY_DEAGLE,
+	BUY_P228,
+	BUY_ELITES,
+	BUY_FIVESEVEN,
+	BUY_KNIFE,
+	BUY_HEGRENADE,
+	BUY_FLASHBANG,
+	BUY_SMOKEGRENADE,
+	BUY_C4BOMB,
+	BUY_PRIMARYAMMO,
+	BUY_SECONDARYAMMO,
+	BUY_VEST,
+	BUY_VESTHELMET,
+	BUY_DEFUSALKIT,
+	BUY_NIGHTVISION
+} cs_buyindex;

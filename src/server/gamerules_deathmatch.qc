@@ -228,14 +228,16 @@ CSDeathmatchRules::PlayerSpawn(NSClientPlayer pp)
 	LevelNewParms();
 	LevelDecodeParms(pl);
 
-	pl.g_items = ITEM_KNIFE | ITEM_SUIT;
-	pl.activeweapon = WEAPON_KNIFE;
+	pl.GiveItem("item_suit");
+	pl.GiveItem("weapon_knife");
 
+#if 0
 	int randomGun = (int)rint(random(WEAPON_USP45, WEAPON_FIVESEVEN));
 	//Weapons_AddItem(pl, randomGun, -1);
 	randomGun = (int)rint(random(WEAPON_M3, WEAPON_PARA));
 	//Weapons_AddItem(pl, randomGun, -1);
 	pl.activeweapon = randomGun;
+#endif
 
 	Ammo_BuyPrimary(pl, TRUE);
 	Ammo_BuySecondary(pl, TRUE);

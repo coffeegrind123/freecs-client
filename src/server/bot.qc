@@ -243,9 +243,9 @@ csbot::CreateObjective(void)
 					/* We carry the bomb */
 					if (m_gflagsBackup & GF_BOMBZONE) {
 						/* We are at a bombsite and ready to plant the bomb */
-						if (activeweapon != WEAPON_C4BOMB) {
+						if (GetCurrentWeapon() != "weapon_c4") {
 						/* TODO: REPLACE THIS WITH NSNAVAI METHOD */
-							activeweapon = WEAPON_C4BOMB;
+							SwitchToWeapon("weapon_c4");
 							//Weapons_Draw((CSPlayer)self);
 						}
 
@@ -351,7 +351,7 @@ csbot::PostFrame(void)
 void
 csbot::WeaponThink(void)
 {
-	if (activeweapon == WEAPON_KNIFE)
+	if (GetCurrentWeapon() == "weapon_knife")
 		return;
 
 #if FIXME
@@ -473,21 +473,21 @@ CSBot_BuyStart_Shop(void)
 		int r = floor(random(1,17));
 
 		if (pl.team == TEAM_T) {
-			if (r == WEAPON_M4A1) { continue; }
-			if (r == WEAPON_AUG) { continue; }
-			if (r == WEAPON_SG550) { continue; }
-			if (r == WEAPON_FIVESEVEN) { continue; }
-			if (r == WEAPON_TMP) { continue; }
+			if (r == BUY_M4A1) { continue; }
+			if (r == BUY_AUG) { continue; }
+			if (r == BUY_SG550) { continue; }
+			if (r == BUY_FIVESEVEN) { continue; }
+			if (r == BUY_TMP) { continue; }
 		} else if (pl.team == TEAM_CT) {
-			if (r == WEAPON_AK47) { continue; }
-			if (r == WEAPON_SG552) { continue; }
-			if (r == WEAPON_G3SG1) { continue; }
-			if (r == WEAPON_ELITES) { continue; }
-			if (r == WEAPON_MAC10) { continue; }
+			if (r == BUY_AK47) { continue; }
+			if (r == BUY_SG552) { continue; }
+			if (r == BUY_G3SG1) { continue; }
+			if (r == BUY_ELITES) { continue; }
+			if (r == BUY_MAC10) { continue; }
 		}
 
-		if (g_cstrikeWeaponPrice[r] <= pl.money) {
-			CSEv_BuyWeapon_f((float)r);
+		if (cs_buyprices[r] <= pl.money) {
+			CSEv_CSBuy_f((float)r);
 			done = 1;
 		}
 		count++;
@@ -499,21 +499,21 @@ CSBot_BuyStart_Shop(void)
 
 	/* CT: Random buy bomb defuse kit when enough money left */
 	if (pl.team == TEAM_CT && g_cs_bombzones > 0 &&
-		g_cstrikeUtilPrice[(float)5] <= pl.money &&
+		cs_buyprices[BUY_DEFUSALKIT] <= pl.money &&
 		random() < 0.5)
 	{
-		CSEv_BuyEquipment_f((float)5);  // ITEM_DEFUSAL
+		CSEv_CSBuy_f(BUY_DEFUSALKIT);  // ITEM_DEFUSAL
 	}
 
 	/* need armor */
 	if (pl.armor < 100) {
-		if (pl.money >= g_cstrikeUtilPrice[1]) /* kevlar and helmet */
-			CSEv_BuyEquipment_f(1);
-		else if (pl.money >= g_cstrikeUtilPrice[0]) /* just kevlar */
-			CSEv_BuyEquipment_f(0);
+		if (pl.money >= cs_buyprices[1]) /* kevlar and helmet */
+			CSEv_CSBuy_f(BUY_VESTHELMET);
+		else if (pl.money >= cs_buyprices[0]) /* just kevlar */
+			CSEv_CSBuy_f(BUY_VEST);
 	} else if (!(pl.g_items & ITEM_HELMET)) { /* we need helmet */
 		if (pl.money >= 350) /* kevlar and helmet */
-			CSEv_BuyEquipment_f(1);
+			CSEv_CSBuy_f(BUY_VESTHELMET);
 	}
 
 #if FIXME
@@ -527,8 +527,8 @@ CSBot_BuyStart_Shop(void)
 #endif
 
 	/* force buy right now */
-	CSEv_AmmoBuyPrimary();
-	CSEv_AmmoBuySecondary();
+	CSEv_CSBuy_f(BUY_PRIMARYAMMO);
+	CSEv_CSBuy_f(BUY_SECONDARYAMMO);
 }
 
 void

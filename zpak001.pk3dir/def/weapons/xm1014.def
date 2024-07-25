@@ -42,7 +42,7 @@ entityDef weapon_xm1014
 
 entityDef projectile_xm1014
 {
-	"inherit"	"projectile_bullet_base"
+	"inherit"	"projectile_bullet_shotgun"
 	"damage"	"skill:plr_xm1014_dmg"
 }
 

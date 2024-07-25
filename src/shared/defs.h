@@ -16,10 +16,11 @@
 
 #include "animations.h"
 #include "radio.h"
-#include "weapons.h"
+#include "buying.h"
 #include "items.h"
 #include "entities.h"
 #include "events.h"
+#include "CSProjectile.h"
 
 #define TEAM_SPECTATOR	0
 #define TEAM_T		1

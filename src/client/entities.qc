@@ -24,6 +24,9 @@ ClientGame_EntityUpdate(float id, float new)
 	case ENT_PLAYER:
 		NSENTITY_READENTITY(CSPlayer, new)
 		break;
+	case ENT_ENTITYPROJECTILE:
+		NSENTITY_READENTITY(CSProjectile, new)
+		break;
 	case ENT_WEAPON:
 		NSENTITY_READENTITY(CSWeapon, new)
 		break;

@@ -1,0 +1,235 @@
+// entity 0
+{
+"classname" "worldspawn"
+"defaultteam" "0"
+"newunit" "0"
+"gametitle" "0"
+"startdark" "0"
+"MaxRange" "4096"
+"sounds" "1"
+"mapversion" "220"
+"wad" "/Internal/WAD3/decals.wad;/Internal/WAD3/halflife.wad;/Internal/WAD3/liquids.wad;/Internal/WAD3/xeno.wad;/Internal/WAD3/cstrike.wad;/Internal/WAD3/cs_office.wad"
+// brush 0
+{
+( 288 256 160 ) ( 288 256 0 ) ( 288 -256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 160 ) ( 256 -256 0 ) ( 256 256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 288 -256 160 ) ( 288 -256 0 ) ( 256 -256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( 256 256 0 ) ( 288 256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 288 -256 160 ) ( 256 -256 160 ) ( 288 256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 256 256 0 ) ( 256 -256 0 ) ( 288 256 0 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 1
+{
+( -256 256 160 ) ( -256 256 0 ) ( -256 -256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -288 -256 160 ) ( -288 -256 0 ) ( -288 256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -256 -256 0 ) ( -288 -256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -288 256 160 ) ( -288 256 0 ) ( -256 256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -288 -256 160 ) ( -256 256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -288 256 0 ) ( -288 -256 0 ) ( -256 256 0 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 2
+{
+( 256 288 160 ) ( 256 288 0 ) ( 256 256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 160 ) ( -256 256 0 ) ( -256 288 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( 256 256 0 ) ( -256 256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 288 160 ) ( -256 288 0 ) ( 256 288 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 256 160 ) ( -256 256 160 ) ( 256 288 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 288 0 ) ( -256 256 0 ) ( 256 288 0 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 3
+{
+( 256 -256 160 ) ( 256 -256 0 ) ( 256 -288 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -288 160 ) ( -256 -288 0 ) ( -256 -256 160 ) Core_Urban_028 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -288 160 ) ( 256 -288 0 ) ( -256 -288 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 160 ) ( -256 -256 0 ) ( 256 -256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -288 160 ) ( -256 -288 160 ) ( 256 -256 160 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 -256 0 ) ( -256 -288 0 ) ( 256 -256 0 ) Core_Urban_028 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 4
+{
+( 256 256 192 ) ( 256 256 160 ) ( 256 -256 192 ) CSTRIKE_CH3TILE [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 192 ) ( -256 -256 160 ) ( -256 256 192 ) CSTRIKE_CH3TILE [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 192 ) ( 256 -256 160 ) ( -256 -256 192 ) CSTRIKE_CH3TILE [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 192 ) ( -256 256 160 ) ( 256 256 192 ) CSTRIKE_CH3TILE [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 192 ) ( -256 -256 192 ) ( 256 256 192 ) CSTRIKE_CH3TILE [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 256 160 ) ( -256 -256 160 ) ( 256 256 160 ) CSTRIKE_CH3TILE [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 5
+{
+( 256 256 0 ) ( 256 256 -32 ) ( 256 -256 0 ) Core_Urban_066 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 -256 0 ) ( -256 -256 -32 ) ( -256 256 0 ) Core_Urban_066 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 0 ) ( 256 -256 -32 ) ( -256 -256 0 ) Core_Urban_066 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -256 256 0 ) ( -256 256 -32 ) ( 256 256 0 ) Core_Urban_066 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 256 -256 0 ) ( -256 -256 0 ) ( 256 256 0 ) Core_Urban_066 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -256 256 -32 ) ( -256 -256 -32 ) ( 256 256 -32 ) Core_Urban_066 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+}
+// brush 6
+{
+( 32 16 160 ) ( 32 -16 160 ) ( -32 16 160 ) -0CSTRIKE_WE4AL [ 0 1 0 0 ] [ 1 0 0 0 ] -0 1 1
+( 32 16 160 ) ( -32 16 160 ) ( 32 16 128 ) -0CSTRIKE_WE4AL [ -1 -0 -0 0 ] [ 0 0 -1 0 ] -0 1 1
+( 32 16 160 ) ( 32 16 128 ) ( 32 -16 160 ) -0CSTRIKE_WE4AL [ 0 1 0 0 ] [ 0 0 -1 0 ] -0 1 1
+( -32 -16 154 ) ( 32 -16 154 ) ( -32 16 154 ) +0CSTRIKE_IE1LT [ 0 1 0 -32 ] [ -1 0 0 0 ] -0 1 1
+( -32 -16 128 ) ( -32 -16 160 ) ( 32 -16 128 ) -0CSTRIKE_WE4AL [ 1 0 0 0 ] [ 0 0 -1 0 ] -0 1 1
+( -32 -16 128 ) ( -32 16 128 ) ( -32 -16 160 ) -0CSTRIKE_WE4AL [ 0 -1 0 0 ] [ 0 0 -1 0 ] -0 1 1
+}
+}
+// entity 1
+{
+"classname" "info_player_start"
+"angles" "0 0 0"
+"origin" "-192 0 37"
+}
+// entity 2
+{
+"classname" "light"
+"_falloff" "0"
+"_fade" "1.0"
+"style" "0"
+"_light" "255 255 128 200"
+"origin" "0 0 128"
+}
+// entity 3
+{
+"classname" "weapon_ak47"
+"origin" "128 192 16"
+}
+// entity 4
+{
+"classname" "weapon_aug"
+"origin" "128 128 16"
+}
+// entity 5
+{
+"classname" "weapon_awp"
+"origin" "128 64 16"
+}
+// entity 6
+{
+"classname" "weapon_c4bomb"
+"origin" "128 0 16"
+}
+// entity 7
+{
+"classname" "weapon_deagle"
+"origin" "128 -64 16"
+}
+// entity 8
+{
+"classname" "weapon_elites"
+"origin" "128 -128 16"
+}
+// entity 9
+{
+"classname" "weapon_famas"
+"origin" "128 -192 16"
+}
+// entity 10
+{
+"classname" "weapon_fiveseven"
+"origin" "0 192 16"
+}
+// entity 11
+{
+"classname" "weapon_flashbang"
+"origin" "0 128 16"
+}
+// entity 12
+{
+"classname" "weapon_g3sg1"
+"origin" "0 64 16"
+}
+// entity 13
+{
+"classname" "weapon_galil"
+"origin" "0 0 16"
+}
+// entity 14
+{
+"classname" "weapon_glock18"
+"origin" "0 -64 16"
+}
+// entity 15
+{
+"classname" "weapon_hegrenade"
+"origin" "0 -128 16"
+}
+// entity 16
+{
+"classname" "weapon_knife"
+"origin" "0 -192 16"
+}
+// entity 17
+{
+"classname" "weapon_m249"
+"origin" "-64 192 16"
+}
+// entity 18
+{
+"classname" "weapon_m3"
+"origin" "-64 128 16"
+}
+// entity 19
+{
+"classname" "weapon_m4a1"
+"origin" "-64 64 16"
+}
+// entity 20
+{
+"classname" "weapon_mac10"
+"origin" "-64 0 16"
+}
+// entity 21
+{
+"classname" "weapon_mp5navy"
+"origin" "-64 -64 16"
+}
+// entity 22
+{
+"classname" "weapon_p228"
+"origin" "-64 -128 16"
+}
+// entity 23
+{
+"classname" "weapon_p90"
+"origin" "-64 -192 16"
+}
+// entity 24
+{
+"classname" "weapon_scout"
+"origin" "64 192 16"
+}
+// entity 25
+{
+"classname" "weapon_sg550"
+"origin" "64 128 16"
+}
+// entity 26
+{
+"classname" "weapon_sg552"
+"origin" "64 64 16"
+}
+// entity 27
+{
+"classname" "weapon_smokegrenade"
+"origin" "64 0 16"
+}
+// entity 28
+{
+"classname" "weapon_tmp"
+"origin" "64 -64 16"
+}
+// entity 29
+{
+"classname" "weapon_ump45"
+"origin" "64 -128 16"
+}
+// entity 30
+{
+"classname" "weapon_usp"
+"origin" "64 -192 16"
+}
+// entity 31
+{
+"classname" "weapon_xm1014"
+"origin" "-128 0 16"
+}

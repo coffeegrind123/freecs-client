@@ -1,0 +1,27 @@
+entityDef weapon_galil
+{
+	"inherit"			"CSBaseRifle"
+	"editor_usage"		"galil"
+
+	"model"				"models/w_galil.mdl"
+	"model_view"		"models/v_galil.mdl"
+
+	"def_onFire"	"projectile_csbullet"
+	"inv_name"			"galil"
+	"clipSize"			"50"
+	"clipSizeDefault"	"25"
+	"ammoType"			"ammo_762nato"
+
+	"actFire"		"5,6,7"
+	"actAltFire"	"2"
+	"actHolster"	"4"
+	"actReload"		"3"
+	"actDraw"		"4"
+	"actIdle"		"0,1"
+
+	"snd_fire"		"Weapon_Galil.Single"
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"7"
+	"weight"		"25"
+}

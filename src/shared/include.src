@@ -12,6 +12,7 @@ fx_flashbang.qc
 fx_smokenade.qc
 item_c4bomb.qc
 weapons_cstrike.qc
+CSProjectile.qc
 CSWeapon.qc
 pmove.qc
 #endlist

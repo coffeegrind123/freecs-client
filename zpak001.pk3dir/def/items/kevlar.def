@@ -1,0 +1,11 @@
+// actually armor
+entityDef item_kevlar
+{
+	"spawnclass"	"NSItem"
+	"model"			"models/w_kevlar.mdl"
+	"mins"			"-16 -16 0"
+	"maxs"			"16 16 16"
+	"snd_acquire"	"buy.kevlar"
+	"snd_respawn"	"item.respawn"
+	"inv_armor"		"100"
+}

@@ -1,0 +1,6 @@
+#include "items/c4.def"
+#include "items/suit.def"
+#include "items/kevlar_helmet.def"
+#include "items/nightvision.def"
+#include "items/defuse.def"
+#include "items/kevlar.def"

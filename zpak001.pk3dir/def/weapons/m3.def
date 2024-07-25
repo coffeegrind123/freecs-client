@@ -40,13 +40,13 @@ entityDef weapon_m3
 
 entityDef projectile_m3
 {
-	"inherit"	"projectile_bullet_base"
+	"inherit"	"projectile_bullet_shotgun"
 	"damage"	"skill:plr_m3_dmg"
 }
 
 entityDef fireInfo_m3
 {
-	"def_onFire"	"projectile_m3"
+	"def_onFire"		"projectile_m3"
 	"ammoType"			"ammo_buckshot"
 	"ammoRequired" 		"1"
 	"ammoPerShot" 		"1"

@@ -15,7 +15,7 @@
  */
 
 void
-CSEv_BuyWeapon_f(float fWeapon)
+CSEv_CSBuy_f(float fWeapon)
 {
 #if 0
 	CSGameRules rules = (CSGameRules)g_grMode;

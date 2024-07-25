@@ -15,7 +15,7 @@
  */
 
 /* values courtesy of https://wiki.alliedmods.net/Cs_weapons_information */
-int g_cstrikeWeaponPrice[] =
+int cs_buyprices[] =
 {
 	0,	/* WEAPON_NONE */
 	1700,	/* WEAPON_M3 */
@@ -40,25 +40,17 @@ int g_cstrikeWeaponPrice[] =
 	600,	/* WEAPON_P228 */
 	800,	/* WEAPON_ELITES */
 	750,	/* WEAPON_FIVESEVEN */
-	0,	/* WEAPON_KNIFE */
+	0,		/* WEAPON_KNIFE */
 	300,	/* WEAPON_HEGRENADE */
 	200,	/* WEAPON_FLASHBANG */
 	300,	/* WEAPON_SMOKEGRENADE */
-	0	/* WEAPON_C4BOMB */
-};
-
-int g_cstrikeUtilPrice[] =
-{
+	0,		/* WEAPON_C4BOMB */
+	0,		/* padding */
+	0,		/* padding */
 	650,	/* Kevlar Vest */
 	1000,	/* Kevlar Vest & Helmet */
-	200,	/* Flashbang */
-	300,	/* HE Grenade */
-	300,	/* Smoke Grenade */
 	200,	/* Defuse Kit */
 	1250	/* NightVision Goggles */
 };
 
-void CSEv_BuyWeapon_f(float fWeapon);
-void CSEv_BuyEquipment_f(float fWeapon);
-void CSEv_AmmoBuyPrimary(void);
-void CSEv_AmmoBuySecondary(void);
+void CSEv_CSBuy_f(float itemID);

@@ -1,0 +1,10 @@
+entityDef item_nightvision
+{
+	"spawnclass"	"NSItem"
+	"model"			"models/w_backpack.mdl"
+	"mins"			"-16 -16 0"
+	"maxs"			"16 16 16"
+	"snd_acquire"	"buy.weapon"
+	"snd_respawn"	"item.respawn"
+	"inv_carry"		"1"
+}

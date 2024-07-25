@@ -1,0 +1,56 @@
+entityDef weapon_famas
+{
+	"inherit"	"CSBaseRifle"
+	"editor_usage"	"FAMAS Weapon - Uses ammo_762nato"
+
+	"model"		"models/w_famas.mdl"
+	"model_view"	"models/v_famas.mdl"
+
+	"inv_name"	"FAMAS Weapon"
+	"def_fireInfo"	"fireInfo_famas"
+	"clipSize"	""
+
+	"actFire"	""
+	"actAltFire"	""
+	"actHolster"	""
+	"actReload"	""
+	"actDraw"	""
+	"actIdle"	""
+
+
+	"snd_fire"	"Weapon_FAMAS.Single"
+
+	"speed_mod"			""
+	"price"				""
+	"crossMinDist"			""
+	"crossDeltaDist"		""
+	"accuracyDivisor"		""
+	"accuracyMovementPenalty"	""
+	"accuracyMultiplier"		""
+	"rangeModifier"			""
+	"penetrationPower"		""
+	"bulletStrength"		""
+	"multiplierShots"		""
+	"multiplierStrength"		""
+	"multiplierInaccuracy"		""
+
+	"hudSlot"		"0"
+	"hudSlotPos"	"7"
+	"weight"		"25"
+}
+
+entityDef projectile_famas
+{
+	"inherit"	"projectile_bullet_base"
+	"damage"	"skill:plr_famas_dmg"
+}
+
+entityDef fireInfo_famas
+{
+	"def_onFire"	"projectile_famas"
+	"ammoType"		"ammo_762nato"
+	"ammoRequired" 		"1"
+	"ammoPerShot" 		"1"
+	"fireRate"		""
+	"model_flash"		"sprites/muzzleflash2.spr"
+}

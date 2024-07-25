@@ -38,6 +38,7 @@ typedef struct
 	int price;
 } ammoinfo_t;
 
+#if 0
 ammoinfo_t cs_ammoinfo[11] = {
 	/* CALIBER_NONE */
 	{
@@ -106,6 +107,7 @@ ammoinfo_t cs_ammoinfo[11] = {
 		.price = 50
 	}
 };
+#endif
 
 int
 Ammo_BuyCaliber(CSPlayer pl, int cal, int free)
@@ -324,7 +326,7 @@ CSEv_AmmoBuyPrimary(void)
 		return;
 	}
 
-	Ammo_BuyPrimary(pl, FALSE);
+	//Ammo_BuyPrimary(pl, FALSE);
 }
 
 void
@@ -336,8 +338,8 @@ Ammo_AutoFill(NSClientPlayer pp)
 		return;
 	}
 
-	Ammo_BuyPrimary(pl, true);
-	Ammo_BuySecondary(pl, true);
+	//Ammo_BuyPrimary(pl, true);
+	//Ammo_BuySecondary(pl, true);
 }
 
 void

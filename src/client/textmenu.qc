@@ -106,11 +106,11 @@ BUY(int n)
 		Textmenu_Call(inteam == TEAM_T ? "BUYMACHINEGUN" : "BUYMACHINEGUN");
 		break;
 	case 6:
-		sendevent("AmmoBuyPrimary", "");
+		sendevent("CSBuy", "f", BUY_PRIMARYAMMO);
 		Textmenu_Call("");
 		break;
 	case 7:
-		sendevent("AmmoBuySecondary", "");
+		sendevent("CSBuy", "f", BUY_SECONDARYAMMO);
 		Textmenu_Call("");
 		break;
 	case 8:
@@ -128,22 +128,22 @@ DT_BUYITEM(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyEquipment", "f", 0);
+		sendevent("CSBuy", "f", BUY_VEST);
 		break;
 	case 2:
-		sendevent("BuyEquipment", "f", 1);
+		sendevent("CSBuy", "f", BUY_VESTHELMET);
 		break;
 	case 3:
-		sendevent("BuyEquipment", "f", 2);
+		sendevent("CSBuy", "f", BUY_FLASHBANG);
 		break;
 	case 4:
-		sendevent("BuyEquipment", "f", 3);
+		sendevent("CSBuy", "f", BUY_HEGRENADE);
 		break;
 	case 5:
-		sendevent("BuyEquipment", "f", 4);
+		sendevent("CSBuy", "f", BUY_SMOKEGRENADE);
 		break;
 	case 7:
-		sendevent("BuyEquipment", "f", 6);
+		sendevent("CSBuy", "f", BUY_NIGHTVISION);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -159,25 +159,25 @@ DCT_BUYITEM(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyEquipment", "f", 0);
+		sendevent("CSBuy", "f", BUY_VEST);
 		break;
 	case 2:
-		sendevent("BuyEquipment", "f", 1);
+		sendevent("CSBuy", "f", BUY_VESTHELMET);
 		break;
 	case 3:
-		sendevent("BuyEquipment", "f", 2);
+		sendevent("CSBuy", "f", BUY_FLASHBANG);
 		break;
 	case 4:
-		sendevent("BuyEquipment", "f", 3);
+		sendevent("CSBuy", "f", BUY_HEGRENADE);
 		break;
 	case 5:
-		sendevent("BuyEquipment", "f", 4);
+		sendevent("CSBuy", "f", BUY_SMOKEGRENADE);
 		break;
 	case 6:
-		sendevent("BuyEquipment", "f", 5);
+		sendevent("CSBuy", "f", BUY_DEFUSALKIT);
 		break;
 	case 7:
-		sendevent("BuyEquipment", "f", 6);
+		sendevent("CSBuy", "f", BUY_NIGHTVISION);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -195,19 +195,19 @@ T_BUYPISTOL(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_USP45);
+		sendevent("CSBuy", "f", BUY_USP45);
 		break;
 	case 2:
-		sendevent("BuyWeapon", "f", WEAPON_GLOCK18);
+		sendevent("CSBuy", "f", BUY_GLOCK18);
 		break;
 	case 3:
-		sendevent("BuyWeapon", "f", WEAPON_DEAGLE);
+		sendevent("CSBuy", "f", BUY_DEAGLE);
 		break;
 	case 4:
-		sendevent("BuyWeapon", "f", WEAPON_P228);
+		sendevent("CSBuy", "f", BUY_P228);
 		break;
 	case 5:
-		sendevent("BuyWeapon", "f", WEAPON_ELITES);
+		sendevent("CSBuy", "f", BUY_ELITES);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -223,19 +223,19 @@ CT_BUYPISTOL(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_USP45);
+		sendevent("CSBuy", "f", BUY_USP45);
 		break;
 	case 2:
-		sendevent("BuyWeapon", "f", WEAPON_GLOCK18);
+		sendevent("CSBuy", "f", BUY_GLOCK18);
 		break;
 	case 3:
-		sendevent("BuyWeapon", "f", WEAPON_DEAGLE);
+		sendevent("CSBuy", "f", BUY_DEAGLE);
 		break;
 	case 4:
-		sendevent("BuyWeapon", "f", WEAPON_P228);
+		sendevent("CSBuy", "f", BUY_P228);
 		break;
 	case 6:
-		sendevent("BuyWeapon", "f", WEAPON_FIVESEVEN);
+		sendevent("CSBuy", "f", BUY_FIVESEVEN);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -253,10 +253,10 @@ BUYSHOTGUN(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_M3);
+		sendevent("CSBuy", "f", BUY_M3);
 		break;
 	case 2:
-		sendevent("BuyWeapon", "f", WEAPON_XM1014);
+		sendevent("CSBuy", "f", BUY_XM1014);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -274,19 +274,19 @@ T_BUYRIFLE(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_AK47);
+		sendevent("CSBuy", "f", BUY_AK47);
 		break;
 	case 2:
-		sendevent("BuyWeapon", "f", WEAPON_SG552);
+		sendevent("CSBuy", "f", BUY_SG552);
 		break;
 	case 5:
-		sendevent("BuyWeapon", "f", WEAPON_SCOUT);
+		sendevent("CSBuy", "f", BUY_SCOUT);
 		break;
 	case 6:
-		sendevent("BuyWeapon", "f", WEAPON_AWP);
+		sendevent("CSBuy", "f", BUY_AWP);
 		break;
 	case 7:
-		sendevent("BuyWeapon", "f", WEAPON_G3SG1);
+		sendevent("CSBuy", "f", BUY_G3SG1);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -302,22 +302,22 @@ CT_BUYRIFLE(int n)
 {
 	switch (n) {
 	case 3:
-		sendevent("BuyWeapon", "f", WEAPON_M4A1);
+		sendevent("CSBuy", "f", BUY_M4A1);
 		break;
 	case 4:
-		sendevent("BuyWeapon", "f", WEAPON_AUG);
+		sendevent("CSBuy", "f", BUY_AUG);
 		break;
 	case 5:
-		sendevent("BuyWeapon", "f", WEAPON_SCOUT);
+		sendevent("CSBuy", "f", BUY_SCOUT);
 		break;
 	case 6:
-		sendevent("BuyWeapon", "f", WEAPON_AWP);
+		sendevent("CSBuy", "f", BUY_AWP);
 		break;
 	case 7:
-		sendevent("BuyWeapon", "f", WEAPON_G3SG1);
+		sendevent("CSBuy", "f", BUY_G3SG1);
 		break;
 	case 8:
-		sendevent("BuyWeapon", "f", WEAPON_SG550);
+		sendevent("CSBuy", "f", BUY_SG550);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -335,16 +335,16 @@ T_BUYSUBMACHINEGUN(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_MP5);
+		sendevent("CSBuy", "f", BUY_MP5);
 		break;
 	case 3:
-		sendevent("BuyWeapon", "f", WEAPON_P90);
+		sendevent("CSBuy", "f", BUY_P90);
 		break;
 	case 4:
-		sendevent("BuyWeapon", "f", WEAPON_MAC10);
+		sendevent("CSBuy", "f", BUY_MAC10);
 		break;
 	case 5:
-		sendevent("BuyWeapon", "f", WEAPON_UMP45);
+		sendevent("CSBuy", "f", BUY_UMP45);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -360,16 +360,16 @@ CT_BUYSUBMACHINEGUN(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_MP5);
+		sendevent("CSBuy", "f", BUY_MP5);
 		break;
 	case 2:
-		sendevent("BuyWeapon", "f", WEAPON_TMP);
+		sendevent("CSBuy", "f", BUY_TMP);
 		break;
 	case 3:
-		sendevent("BuyWeapon", "f", WEAPON_P90);
+		sendevent("CSBuy", "f", BUY_P90);
 		break;
 	case 5:
-		sendevent("BuyWeapon", "f", WEAPON_UMP45);
+		sendevent("CSBuy", "f", BUY_UMP45);
 		break;
 	case 10:
 		Textmenu_Call("");
@@ -387,7 +387,7 @@ BUYMACHINEGUN(int n)
 {
 	switch (n) {
 	case 1:
-		sendevent("BuyWeapon", "f", WEAPON_PARA);
+		sendevent("CSBuy", "f", BUY_PARA);
 		break;
 	case 10:
 		Textmenu_Call("");
