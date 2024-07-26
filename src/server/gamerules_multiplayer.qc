@@ -312,7 +312,7 @@ CSMultiplayerRules::InitPostEnts(void)
 	EntityDef_Precache("weapon_awp");
 	EntityDef_Precache("weapon_c4");
 	EntityDef_Precache("weapon_deagle");
-	EntityDef_Precache("weapon_elites");
+	EntityDef_Precache("weapon_elite");
 	EntityDef_Precache("weapon_famas");
 	EntityDef_Precache("weapon_fiveseven");
 	EntityDef_Precache("weapon_flashbang");

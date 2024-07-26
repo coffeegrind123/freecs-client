@@ -121,7 +121,7 @@
 }
 // entity 8
 {
-"classname" "weapon_elites"
+"classname" "weapon_elite"
 "origin" "128 -128 16"
 }
 // entity 9

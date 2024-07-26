@@ -3,7 +3,7 @@
 #include "weapons/awp.def"
 #include "weapons/c4.def"
 #include "weapons/deagle.def"
-#include "weapons/elites.def"
+#include "weapons/elite.def"
 #include "weapons/fiveseven.def"
 #include "weapons/flashbang.def"
 #include "weapons/g3sg1.def"

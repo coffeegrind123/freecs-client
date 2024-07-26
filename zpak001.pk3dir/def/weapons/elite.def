@@ -1,4 +1,4 @@
-entityDef weapon_elites
+entityDef weapon_elite
 {
 	"inherit"			"CSBasePistol"
 	"editor_usage"		"Dual Beretta 96G (Elites) Weapon - Uses ammo_9mm"
@@ -7,8 +7,8 @@ entityDef weapon_elites
 	"model_view"		"models/v_elite.mdl"
 
 	"inv_name"			"Dual Beretta 96G (Elites) Weapon"
-	"def_fireInfo"	"fireInfo_elites"
-	"def_altFireInfo"	"fireInfo_elites_alt"
+	"def_fireInfo"		"fireInfo_elite"
+	"def_altFireInfo"	"fireInfo_elite_alt"
 	"clipSize"			"30"
 
 	"actFire"			"2,3,4,5,6"
@@ -41,15 +41,15 @@ entityDef weapon_elites
 	"weight"		"5"
 }
 
-entityDef projectile_elites
+entityDef projectile_elite
 {
 	"inherit"	"projectile_bullet_base"
-	"damage"	"skill:plr_elites_dmg"
+	"damage"	"skill:plr_elite_dmg"
 }
 
-entityDef fireInfo_elites
+entityDef fireInfo_elite
 {
-	"def_onFire"	"projectile_elites"
+	"def_onFire"	"projectile_elite"
 	"ammoType"			"ammo_9mm"
 	"ammoRequired" 		"1"
 	"ammoPerShot" 		"1"
@@ -58,9 +58,9 @@ entityDef fireInfo_elites
 	"model_flash"		"sprites/muzzleflash2.spr"
 }
 
-entityDef fireInfo_elites_alt
+entityDef fireInfo_elite_alt
 {
-	"inherit"		"fireInfo_elites"
+	"inherit"		"fireInfo_elite"
 	"actFire"		"8,9,10,11,12"
 	"actFireLast"	"13"
 }
