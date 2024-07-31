@@ -38,7 +38,7 @@ CSWeapon:NSWeapon
 	virtual void PrimaryAttack(void);
 	virtual void SecondaryAttack(void);
 	virtual void Release(void);
-	virtual void FiredWeapon(string);
+	virtual void FiredWeaponAttack(string);
 	virtual void SwitchedToWeapon(void);
 };
 
@@ -102,7 +102,7 @@ CSWeapon::SecondaryAttack(void)
 }
 
 void
-CSWeapon::FiredWeapon(string defName)
+CSWeapon::FiredWeaponAttack(string defName)
 {
 	CSPlayer ourOwner = (CSPlayer)owner;
 	int numProjectiles = GetSubDefInt(defName, "numProjectiles");
