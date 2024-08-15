@@ -13,12 +13,12 @@ entityDef weapon_glock18
 	"ammoRequired"		"1"
 	"model_flash"		"sprites/muzzleflash2.spr"
 
-	"actFire"	"5"
-	"actFireLast"	"6"
-	"actHolster"	"9"
-	"actReload"	"7,12"
-	"actDraw"	"9,11"
-	"actIdle"	"0,1,2"
+	"actFire"			"5"
+	"actFireLast"		"6"
+	"actHolster"		"9"
+	"actReload"			"7,12"
+	"actDraw"			"9,11"
+	"actIdle"			"0,1,2"
 
 	"snd_fire"		"Weapon_Glock.Single"
 
@@ -35,6 +35,10 @@ entityDef weapon_glock18
 	"multiplierShots"			"2.0"
 	"multiplierStrength"		"0.7"
 	"multiplierInaccuracy"		"1.0"
+	"weight"					"5"
+	"altMode"					"1"
+	"actModeOn"					"3"
+	"actModeOff"				"3"
 }
 
 entityDef projectile_glock
@@ -45,7 +49,7 @@ entityDef projectile_glock
 
 entityDef fireInfo_glock18
 {
-	"def_onFire"	"projectile_glock"
+	"def_onFire"		"projectile_glock"
 	"ammoType"			"ammo_9mm"
 	"ammoPerShot" 		"1"
 	"fireRate"			"0.13"
@@ -54,12 +58,12 @@ entityDef fireInfo_glock18
 
 entityDef fireInfo_altglock18
 {
-	"def_onFire"	"projectile_glock"
+	"def_onFire"		"projectile_glock"
 	"ammoType"			"ammo_9mm"
 	"ammoPerShot"		"3"
 	"numProjectiles"	"3"
 	"fireRate"			"0.5"
 	"accuracyDivisor"	"75"
-	"actFire"	"3,4"
-	"snd_fire"	"Weapon_Glock.Burst"
+	"actFire"			"3,4"
+	"snd_fire"			"Weapon_Glock.Burst"
 }

@@ -19,27 +19,31 @@ void Cstrike_DrawCrosshair(CSPlayer);
 #endif
 
 class
-CSWeapon:NSWeapon
+CSWeapon:HLWeapon
 {
+public:
 	void CSWeapon(void);
 
 #ifdef CLIENT
+	virtual void AddedToInventory(void);
+	virtual void UpdateGUI(void);
+#endif
+
+	virtual void Draw(void);
+	virtual void SecondaryAttack(void);
+	virtual void Release(void);
+	virtual void FiredWeaponAttack(string);
+	virtual void SwitchedToWeapon(void);
+
+#ifdef CLIENT
+private:
 	int m_iHudSlot;
 	int m_iHudSlotPos;
 
 	string m_ammoIcon;
 	string m_crossHair;
 	NSWeapon m_nextWeapon;
-	virtual void AddedToInventory(void);
-	virtual void UpdateGUI(void);
 #endif
-
-	virtual void Draw(void);
-	virtual void PrimaryAttack(void);
-	virtual void SecondaryAttack(void);
-	virtual void Release(void);
-	virtual void FiredWeaponAttack(string);
-	virtual void SwitchedToWeapon(void);
 };
 
 void
@@ -51,26 +55,7 @@ CSWeapon::CSWeapon(void)
 void
 CSWeapon::SwitchedToWeapon(void)
 {
-	w_cstrke_switched((CSPlayer)owner);
-}
-
-void
-CSWeapon::PrimaryAttack(void)
-{
-	if (GetDefBool("altAlternates") == true) {
-		if (CanFire() == false) {
-			return;
-		}
-
-		m_iMode = 1 - m_iMode;
-	}
-
-	if (m_iMode) {
-		super::SecondaryAttack();
-		return;
-	}
-
-	super::PrimaryAttack();
+	Cstrike_ShotReset((CSPlayer)owner);
 }
 
 void
@@ -139,7 +124,7 @@ CSWeapon::FiredWeaponAttack(string defName)
 	}
 
 	for (int i = 0i; i < numProjectiles; i++) {
-		CSProjectile_SpawnDef(traceInfo, owner, flRangeModifier, flPenetrationPower, bulletSpread);
+		CSProjectile_SpawnDef(traceInfo, ourOwner, flRangeModifier, flPenetrationPower, bulletSpread);
 	}
 #endif
 
@@ -162,7 +147,6 @@ CSWeapon::Draw(void)
 	CSPlayer ourOwner = (CSPlayer)owner;
 	ourOwner.cs_cross_mindist = GetDefInt("crossMinDist");
 	ourOwner.cs_cross_deltadist = GetDefInt("crossDeltaDist");
-
 	CStrikeView_UpdateGeomset(ourOwner);
 #endif
 }
@@ -171,7 +155,7 @@ void
 CSWeapon::Release(void)
 {
 	owner.v_angle = input_angles;
-	w_cstrike_weaponrelease((CSPlayer)owner);
+	Cstrike_ShotMultiplierUpdate((CSPlayer)owner);
 	input_angles = owner.v_angle;
 	super::Release();
 }

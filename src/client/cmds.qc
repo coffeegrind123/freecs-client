@@ -56,10 +56,10 @@ ClientGame_ConsoleCommand(void)
 {
 	switch(argv(0)) {
 	case "invnext":
-		HUD_DrawWeaponSelect_Back();
+		pSeatLocal->weaponSelectionHUD.SelectNext(false);
 		break;
 	case "invprev":
-		HUD_DrawWeaponSelect_Forward();
+		pSeatLocal->weaponSelectionHUD.SelectPrevious(false);
 		break;
 	case "lastinv":
 		HUD_DrawWeaponSelect_Last();

@@ -37,6 +37,7 @@ hud_ammonotify.qc
 vgui_spectator.qc
 hud.qc
 ../../../valve/src/client/hud_sprite.qc
+../../../valve/src/client/HLWeaponSelect.qc
 ../../../valve/src/client/hud_weaponselect.qc
 ../../../valve/src/client/scoreboard.qc
 radio.qc

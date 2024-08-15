@@ -16,16 +16,10 @@
 
 class CSBombEntity:NSRenderableEntity
 {
-#ifdef SERVER
-	entity m_eUser;
-	float m_flBeepTime;
-	float m_flExplodeTime;
-	float m_flDefusalState;
-#endif
-
-#ifdef SERVER
+public:
 	void CSBombEntity(void);
 
+#ifdef SERVER
 	virtual void Spawned(void);
 	virtual float SendEntity(entity, float);
 	virtual void ClearProgress(void);
@@ -35,9 +29,16 @@ class CSBombEntity:NSRenderableEntity
 #endif
 
 #ifdef CLIENT
-	void CSBombEntity(void);
 	virtual void DrawLED(void);
 	virtual float predraw(void);
+#endif
+
+#ifdef SERVER
+private:
+	entity m_eUser;
+	float m_flBeepTime;
+	float m_flExplodeTime;
+	float m_flDefusalState;
 #endif
 };
 

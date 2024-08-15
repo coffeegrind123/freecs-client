@@ -33,18 +33,6 @@ var bool autocvar_fcs_guns_random_recoil_direction = TRUE;
 var float autocvar_fcs_guns_movement_inaccuracy = 1.0f;
 var float autocvar_fcs_guns_firing_inaccuracy = 1.0f;
 
-weapontype_t
-csweapon_ranged_type(CSPlayer pl)
-{
-	return WPNTYPE_RANGED;
-}
-
-weapontype_t
-csweapon_melee_type(CSPlayer pl)
-{
-	return WPNTYPE_CLOSE;
-}
-
 float
 Cstrike_CalculateMovementInaccuracy(CSPlayer pl) {
 	float m = 1.0f;
@@ -150,8 +138,6 @@ Cstrike_ShotMultiplierAdd(CSPlayer pl, float shots, float strength, float inaccu
 	}*/
 }
 
-
-
 /* generate an accuracy value that we'll pass onto TraceAttack */
 float
 Cstrike_CalculateAccuracy(CSPlayer pl, float divisor, float movement_penalty=1)
@@ -207,19 +193,6 @@ Cstrike_ShotReset(CSPlayer pl)
 {
 	pl.cs_shottime = 0.0f;
 	pl.cs_shotmultiplier = 0;
-}
-
-void
-w_cstrike_weaponrelease(CSPlayer pl)
-{
-	//pl.punchangle[1] *= 0.95;
-	Cstrike_ShotMultiplierUpdate(pl);
-}
-
-void
-w_cstrke_switched(CSPlayer pl)
-{
-	Cstrike_ShotReset(pl);
 }
 
 #ifdef CLIENT

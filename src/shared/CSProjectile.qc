@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Vera Visions LLC.
+ * Copyright (c) 2024 Marco Cawthorne <marco@icculus.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,7 +12,7 @@
  * WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
  * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+ */
 
 void
 CSProjectile::CSProjectile(void)
@@ -20,6 +20,7 @@ CSProjectile::CSProjectile(void)
 
 }
 
+#ifdef SERVER
 void
 CSProjectile::SetRangeModifier(float rangeModifier)
 {
@@ -38,7 +39,6 @@ CSProjectile::SetPenetrationPower(int powerLevel)
 	m_iTotalPenetrations = powerLevel;
 }
 
-#ifdef SERVER
 void
 CSProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultiplier)
 {

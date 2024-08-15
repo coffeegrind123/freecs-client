@@ -725,10 +725,11 @@ HUD_Draw(void)
 	g_hud_color = autocvar_con_color * (1 / 255);
 
 	/* little point in not drawing these, even if you don't have a suit */
-	if (pl.m_activeWeapon)
+	if (pl.m_activeWeapon) {
 		pl.m_activeWeapon.UpdateGUI();
+	}
 
-	HUD_DrawWeaponSelect();
+	pSeatLocal->weaponSelectionHUD.Draw();
 	Obituary_Draw();
 
 	Textmenu_Draw();
@@ -756,6 +757,10 @@ HUD_Draw(void)
 void
 HUD_DrawSpectator(void)
 {
+	if (VGUI_Active() == true) {
+		return;
+	}
+
 	Textmenu_Draw();
 	Obituary_Draw();
 

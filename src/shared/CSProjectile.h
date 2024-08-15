@@ -17,10 +17,7 @@
 class
 CSProjectile:NSProjectile
 {
-	float m_flRangeModifier;
-	int m_iTotalPenetrations;
-	float m_flMaxThickness;
-
+public:
 	void CSProjectile(void);
 
 #ifdef SERVER
@@ -30,5 +27,10 @@ CSProjectile:NSProjectile
 
 	virtual void _FireSingle(vector,vector,float,float);
 	virtual void _LaunchHitscan(vector, vector, float);
+
+private:
+	float m_flRangeModifier;
+	int m_iTotalPenetrations;
+	float m_flMaxThickness;
 #endif
 };

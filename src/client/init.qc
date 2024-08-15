@@ -106,10 +106,17 @@ ClientGame_Init(float apilevel, string enginename, float engineversion)
 	registercommand("negative");
 	registercommand("enemydown");
 
+	/* hud */
+	registercommand("lastinv");
+	registercommand("invnext");
+	registercommand("invprev");
+
 	Obituary_Init();
 
 	Sound_Precache("nvg.on");
 	Sound_Precache("nvg.off");
+
+	pSeatLocal->weaponSelectionHUD = spawn(HLWeaponSelect);
 }
 
 bool

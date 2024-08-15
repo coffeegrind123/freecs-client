@@ -13,6 +13,7 @@ fx_smokenade.qc
 item_c4bomb.qc
 weapons_cstrike.qc
 CSProjectile.qc
+../../../valve/src/shared/HLWeapon.qc
 CSWeapon.qc
 pmove.qc
 #endlist

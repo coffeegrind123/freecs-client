@@ -51,7 +51,7 @@ func_hostage_rescue::Respawn(void)
 void
 func_hostage_rescue::Touch(entity eToucher)
 {
-	if (eToucher.flags & FL_CLIENT) {
+	if (isPlayer(eToucher)) {
 		CSPlayer pl = (CSPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;

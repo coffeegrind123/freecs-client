@@ -32,7 +32,6 @@ func_bomb_target:NSBrushTrigger
 {
 	void(void) func_bomb_target;
 
-	virtual void(void) Respawn;
 	virtual void(entity) Touch;
 };
 
@@ -43,17 +42,11 @@ func_bomb_target::func_bomb_target(void)
 }
 
 void
-func_bomb_target::Respawn(void)
-{
-	InitBrushTrigger();
-}
-
-void
 func_bomb_target::Touch(entity eToucher)
 {
 	CSPlayer pl = (CSPlayer)eToucher;
 
-	if (!(eToucher.flags & FL_CLIENT)) {
+	if (isPlayer(pl) == false) {
 		return;
 	}
 
@@ -65,5 +58,6 @@ func_bomb_target::Touch(entity eToucher)
 		env_message_single(pl, "Hint_you_are_in_targetzone");
 		pl.m_seenBombSite = true;
 	}
+
 	pl.gflags |= GF_BOMBZONE;
 }

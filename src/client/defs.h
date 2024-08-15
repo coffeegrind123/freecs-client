@@ -18,12 +18,14 @@
 #include "radio.h"
 #include "../../../valve/src/client/obituary.h"
 #include "../../../valve/src/client/hud_sprite.h"
+#include "../../../valve/src/client/HLWeaponSelect.h"
 
 var int autocvar_cl_autoweaponswitch = TRUE;
 
 vector g_hud_color;
 vector g_hudmins;
 vector g_hudres;
+var string g_laser_spr;
 
 var string g_hud1_spr;
 var string g_hud2_spr;
@@ -80,6 +82,7 @@ struct
 	float m_flTimeAlpha;
 	vector m_vecMoneyColor;
 	int m_iNightvision;
+	HLWeaponSelect weaponSelectionHUD;
 } g_seatslocal[4], *pSeatLocal;
 
 void HUD_DrawAmmo1(void);

@@ -105,8 +105,9 @@ CSHostage::OnPlayerUse(void)
 		return;
 	}
 
-	if (m_eFollowing == world)
+	if (m_eFollowing == world) {
 		Sound_Speak(this, "hostage_entity.follow");
+	}
 
 	/* CT reward, first time only */
 	if (m_iUsedOnce == FALSE) {
@@ -118,12 +119,13 @@ CSHostage::OnPlayerUse(void)
 }
 
 void
-CSHostage::Pain(entity inflictor, entity attacker, int damage, vector dir, int location)
+CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, int location)
 {
-	super::Pain(inflictor, attacker, damage, dir, location);
+	super::Pain(inflictor, attacker, damageDealt, dir, location);
 
-	if (IsAlive() == false)
+	if (IsAlive() == false) {
 		return;
+	}
 
 	switch (location) {
 	case BODY_HEAD:
@@ -147,14 +149,15 @@ CSHostage::Pain(entity inflictor, entity attacker, int damage, vector dir, int l
 	}
 
 	/* penalties */
-	if (attacker.classname != "player")
+	if (isPlayer(attacker) == false) {
 		return;
+	}
 
-	Money_AddMoney((NSClientPlayer)attacker, -(damage * 25i));
+	Money_AddMoney((NSClientPlayer)attacker, -(damageDealt * 25i));
 }
 
 void
-CSHostage::Death(entity inflictor, entity attacker, int damage, vector dir, int location)
+CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir, int location)
 {
 	WarnAllies();
 
@@ -171,11 +174,12 @@ CSHostage::Death(entity inflictor, entity attacker, int damage, vector dir, int 
 			break;
 		}
 
-		if (attacker.classname == "player") {
-			if (damage >= 100)
+		if (isPlayer(attacker) == true) {
+			if (damageDealt >= 100) {
 				Money_AddMoney((NSClientPlayer)attacker, -2500);
-			else
+			} else {
 				Money_AddMoney((NSClientPlayer)attacker, -500);
+			}
 
 			Radio_BroadcastMessage(RADIO_HOSDOWN);
 		}
@@ -185,7 +189,7 @@ CSHostage::Death(entity inflictor, entity attacker, int damage, vector dir, int 
 	SetHealth(0);
 
 	/* now mark our state as 'dead' */
-	super::Death(inflictor, attacker, damage, dir, location);
+	super::Death(inflictor, attacker, damageDealt, dir, location);
 	SetSolid(SOLID_NOT);
 }
 

@@ -57,9 +57,9 @@ CSSingleplayerRules::PlayerSpawn(NSClientPlayer pl)
 	pl.frame = 1;
 	pl.SendFlags = UPDATE_ALL;
 	pl.customphysics = Empty;
-	pl.iBleeds = TRUE;
-	forceinfokey(pl, "*spec", "0");
-	forceinfokey(pl, "*deaths", ftos(pl.deaths));
+	pl.EnableBleeding();
+	pl.SetInfoKey("*spec", "0");
+	pl.SetInfoKey("*deaths", ftos(pl.deaths));
 
 	entity spot;
 

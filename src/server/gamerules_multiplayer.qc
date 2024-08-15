@@ -113,8 +113,8 @@ CSMultiplayerRules::PlayerDeath(NSClientPlayer pl)
 	forceinfokey(targ, "*deaths", ftos(targ.deaths));
 
 	/* update score-counter */
-	if (g_dmg_eTarget.flags & FL_CLIENT || g_dmg_eTarget.flags & FL_MONSTER)
-	if (g_dmg_eAttacker.flags & FL_CLIENT) {
+	if (isClient(g_dmg_eTarget) || isAI(g_dmg_eTarget))
+	if (isClient(g_dmg_eAttacker)) {
 		float vip = (g_dmg_eTarget.team == TEAM_VIP && g_dmg_eAttacker.team == TEAM_CT);
 
 		if (g_dmg_eTarget == g_dmg_eAttacker) {
@@ -129,7 +129,7 @@ CSMultiplayerRules::PlayerDeath(NSClientPlayer pl)
 	}
 
 	/* scoreboard death icon */
-	if (g_dmg_eTarget.flags & FL_CLIENT) {
+	if (isClient(g_dmg_eTarget)) {
 		targ.SetInfoKey("*icon1", "d_skull");
 		targ.SetInfoKey("*icon1_r", "1");
 		targ.SetInfoKey("*icon1_g", "0");
@@ -408,7 +408,7 @@ CSMultiplayerRules::TimerUpdate(void)
 		}
 	}
 
-	// This map has been played enough we think
+	/* This map has been played enough we think */
 	if (g_cs_gamestate != GAME_OVER) {
 		if (cvar("mp_timelimit") > 0) {
 			if (time >= (cvar("mp_timelimit") * 60)) {
@@ -418,9 +418,9 @@ CSMultiplayerRules::TimerUpdate(void)
 		}
 	}
 
-	// Okay, this means that timelimit is not the only deciding factor
+	/* Okay, this means that timelimit is not the only deciding factor */
 	if (autocvar_mp_winlimit > 0 && g_cs_gamestate != GAME_OVER) {
-		// It really doesn't matter who won. Do some logging perhaps?
+		/* It really doesn't matter who won. Do some logging perhaps? */
 		if (g_cs_roundswon_ct == autocvar_mp_winlimit ||
 			g_cs_roundswon_t == autocvar_mp_winlimit) {
 			IntermissionStart();
@@ -465,7 +465,7 @@ CSMultiplayerRules::TimerUpdate(void)
 					}
 				}
 				TimeOut();
-				TimerBegin(5, GAME_END); // Round is over, 5 seconds til a new round starts
+				TimerBegin(5, GAME_END); /* Round is over, 5 seconds til a new round starts */
 			} else {
 				TimerBegin(autocvar_mp_roundtime * 60, GAME_ACTIVE); // Unfreeze
 				Radio_StartMessage();
@@ -485,7 +485,7 @@ Checks if it is possible for players to buy anything
 bool
 CSMultiplayerRules::BuyingPossible(NSClientPlayer pl)
 {
-	if (pl.health <= 0) {
+	if (pl.IsDead()) {
 		return (false);
 	}
 
@@ -537,7 +537,7 @@ CSMultiplayerRules::MakeVIP(NSClientPlayer pl)
 	pl.team = TEAM_VIP;
 	PlayerRespawn(pl, pl.team);
 	env_message_single(pl, "Hint_you_are_the_vip");
-	forceinfokey(pl, "*dead", "2");
+	pl.SetInfoKey("*dead", "2");
 	pl.SetModel("models/player/vip/vip.mdl");
 }
 
@@ -574,8 +574,9 @@ CSMultiplayerRules::RestartRound(int iWipe)
 	CSBot_RestartRound();
 
 	for (entity eFind = world; (eFind = findfloat(eFind, ::team, TEAM_T));) {
-		if (!(eFind.flags & FL_CLIENT))
+		if (isClient(eFind) == false) {
 			continue;
+		}
 
 		CSPlayer pl = (CSPlayer)eFind;
 
@@ -593,8 +594,9 @@ CSMultiplayerRules::RestartRound(int iWipe)
 		}
 	}
 	for (entity eFind = world; (eFind = findfloat(eFind, ::team, TEAM_CT));) {
-		if (!(eFind.flags & FL_CLIENT))
+		if (isClient(eFind) == false) {
 			continue;
+		}
 
 		CSPlayer pl = (CSPlayer)eFind;
 
@@ -614,8 +616,9 @@ CSMultiplayerRules::RestartRound(int iWipe)
 
 	/* respawn the VIP as well, but turn them back into a CT. */
 	for (entity eFind = world; (eFind = findfloat(eFind, ::team, TEAM_VIP));) {
-		if (!(eFind.flags & FL_CLIENT))
+		if (isClient(eFind) == false) {
 			continue;
+		}
 
 		CSPlayer pl = (CSPlayer)eFind;
 		pl.team = TEAM_CT;
@@ -801,7 +804,7 @@ CSMultiplayerRules::SwitchTeams(void)
 			pl.team = TEAM_CT;
 			pl.charmodel += 4;
 		}
-		forceinfokey(pl, "*team", ftos(pl.team));
+		pl.SetInfoKey("*team", ftos(pl.team));
 	}
 
 	iCTW = g_cs_roundswon_ct;
@@ -1032,8 +1035,7 @@ CSMultiplayerRules::PlayerRespawn(NSClientPlayer pp, int fTeam)
 
 	pl.ClearVelocity();
 	pl.progress = 0.0f;
-	/* TODO: Implement this in NSNavAI*/
-	//Weapons_SwitchBest(pl);
+	pl.SwitchToBestWeapon(false);
 	Ammo_AutoFill(pl);
 }
 
@@ -1052,29 +1054,32 @@ void
 CSMultiplayerRules::PlayerMakePlayable(NSClientPlayer pp, int chara)
 {
 	CSPlayer pl = (CSPlayer)pp;
+
 	/* spectator */
 	if (chara == 0) {
 		PlayerSpawn(pl);
 		return;
 	}
 
+	pl.RemoveAllItems(false);
 	pl.ingame = TRUE;
-	forceinfokey(pl, "*team", ftos(pl.team)); 
+	pl.SetInfoKey("*team", ftos(pl.team)); 
 	PlayerRespawn(pl, pl.team);
 
 	/* terrorists */
 	if (chara < 5) {
 		pl.team = TEAM_T;
+
 		if (autocvar_fcs_knifeonly == FALSE) {
 			pl.GiveItem("weapon_glock18");
-			//pl.ammo_9mm = 40;
+			pl.GiveAmmo(ammoNumForName("ammo_9mm"), 40);
 		}
 	} else {
 		pl.team = TEAM_CT;
 
 		if (autocvar_fcs_knifeonly == FALSE) {
 			pl.GiveItem("weapon_usp");
-			//pl.ammo_45acp = 24;
+			pl.GiveAmmo(ammoNumForName("ammo_45acp"), 24);
 		}
 	}
 
@@ -1139,7 +1144,7 @@ CSMultiplayerRules::PlayerSpawn(NSClientPlayer pl)
 
 	/* we don't belong to any team */
 	pl.team = TEAM_SPECTATOR;
-	forceinfokey(pl, "*team", "0"); 
+	pl.SetInfoKey("*team", "0"); 
 }
 
 bool
@@ -1195,15 +1200,27 @@ CSEv_JoinTeam_f(float flChar)
 	rules = (CSMultiplayerRules)g_grMode;
 	pl = (CSPlayer)self;
 
+	/* VIPs cannot change teams... ? */
 	if (pl.team == TEAM_VIP) {
 		centerprint(pl, "You are the VIP!\nYou cannot switch roles now.\n");
 		return;
 	}
 
-	// alive and are trying to switch teams, so subtract us from the Alive_Team counter.
-	if (pl.health > 0) {
+	if (pl.IsAlive()) {
 		rules.PlayerKill(pl);
 	}
+
+	/* team switching, var reset */
+	if (flChar < 5) {
+		pl.team = TEAM_T;
+	} else {
+		pl.team = TEAM_CT;
+	}
+
+	pl.frags = 0;
+	pl.deaths = 0;
+	pl.SetInfoKey("*deaths", ftos(pl.deaths));
+	pl.SetInfoKey("*team", ftos(pl.team)); 
 
 	switch (g_cs_gamestate) {
 	/* spawn the players immediately when its in the freeze state */
@@ -1229,22 +1246,11 @@ CSEv_JoinTeam_f(float flChar)
 			return;
 		}
 
-		//PlayerMakeSpectator(pl);
+		rules.PlayerMakeSpectator(pl);
 		pl.charmodel = (int)flChar;
-		forceinfokey(pl, "*dead", "1");
+		pl.SetInfoKey("*dead", "1");
 		break;
 	}
-
-	if (flChar < 5)
-		pl.team = TEAM_T;
-	else
-		pl.team = TEAM_CT;
-
-	forceinfokey(pl, "*team", ftos(pl.team)); 
-
-	pl.frags = 0;
-	pl.deaths = 0;
-	forceinfokey(pl, "*deaths", ftos(pl.deaths));
 
 	rules.CountPlayers();
 
