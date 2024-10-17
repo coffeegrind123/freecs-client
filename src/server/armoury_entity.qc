@@ -183,8 +183,8 @@ armoury_entity::Touch(entity eToucher)
 		}
 
 		/* we may need a helmet though */
-		if (!(pl.g_items & ITEM_HELMET) && m_iID == 17) {
-			pl.g_items |= ITEM_HELMET;
+		if (pl.HasItem("item_kevlar_helmet") == false && m_iID == 17) {
+			pl.GiveItem("item_kevlar_helmet");
 			picked_up = true;
 		}
 

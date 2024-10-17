@@ -99,7 +99,7 @@ HUD_AmmoNotify_Insert(int type, int count)
 
 /* called whenever we should check for pickup updates */
 void
-HUD_AmmoNotify_Check(CSPlayer pl)
+HUD_AmmoNotify_Check(NSClientPlayer pl)
 {
 #if 0
 	HUD_AmmoNotify_Insert(0, pl.ammo_50ae - pl.ammo_50ae_net);
@@ -116,4 +116,9 @@ HUD_AmmoNotify_Check(CSPlayer pl)
 	HUD_AmmoNotify_Insert(11, pl.ammo_fbgrenade - pl.ammo_fbgrenade_net);
 	HUD_AmmoNotify_Insert(12, pl.ammo_smokegrenade - pl.ammo_smokegrenade_net);
 #endif
+}
+
+void
+HUD_ItemNotify_Check(NSClientPlayer pl)
+{
 }

@@ -1,0 +1,7 @@
+entityDef ammo_50ae
+{
+	"editor_usage"		"Ammo used by weapon_deagle"
+	"inherit"			"ammo_base"
+	"inv_ammo_50ae"		"7"
+	"price"				"40"
+}

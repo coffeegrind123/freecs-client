@@ -1,0 +1,7 @@
+entityDef ammo_762nato
+{
+	"editor_usage"		"Ammo used by weapon_aug, weapon_famas, weapon_g3sg1, weapon_galil, weapon_ak47, weapon_scout"
+	"inherit"			"ammo_base"
+	"inv_ammo_762nato"	"30"
+	"price"				"80"
+}

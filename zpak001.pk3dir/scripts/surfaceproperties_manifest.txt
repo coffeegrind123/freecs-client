@@ -1,0 +1,5 @@
+surfaceproperties_manifest
+{
+	file "scripts/surfaceproperties_cstrike.txt"
+	file "scripts/surfaceproperties_valve.txt"
+}

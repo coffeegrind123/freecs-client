@@ -1,0 +1,7 @@
+entityDef ammo_556natobox
+{
+	"editor_usage"			"Ammo used by weapon_m249"
+	"inherit"				"ammo_base"
+	"inv_ammo_556natobox"	"30"
+	"price"					"60"
+}

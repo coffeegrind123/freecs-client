@@ -15,6 +15,15 @@ player.hitarmor
 	sample player/bhit_kevlar-1.wav
 }
 
+Player.Pain
+{
+	sample player/pl_pain2.wav
+	sample player/pl_pain4.wav
+	sample player/pl_pain5.wav
+	sample player/pl_pain6.wav
+	sample player/pl_pain7.wav
+}
+
 Player.FallDamage
 {
 	sample player/pl_pain2.wav

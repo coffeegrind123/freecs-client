@@ -10,11 +10,11 @@ entityDef weapon_fiveseven
 	"def_fireInfo"	"fireInfo_fiveseven"
 	"clipSize"			"20"
 
-	"actFire"		"1,2"
-	"actFireLast"		"3"
-	"actReload"		"4"
-	"actDraw"		"5"
-	"actIdle"		"0"
+	"act_fire"		"1,2"
+	"act_fireLast"		"3"
+	"act_reload"		"4"
+	"act_draw"		"5"
+	"act_idle"		"0"
 
 
 	"snd_fire"		"Weapon_FiveSeven.Single"

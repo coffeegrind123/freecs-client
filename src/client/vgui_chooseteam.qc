@@ -73,24 +73,23 @@ VGUI_ChooseTeam(void)
 	static VGUILabel lblMapInfo;
 
 	static void VGUI_ChooseTeam_CT(void) {
+		localcmd("cmd joinTeam 2\n");
 		VGUI_ChooseClassCT();
 		winChooseTeam.Hide();
 	}
 
 	static void VGUI_ChooseTeam_T(void) {
+		localcmd("cmd joinTeam 1\n");
 		VGUI_ChooseClassT();
 		winChooseTeam.Hide();
 	}
 
 	static void VGUI_ChooseTeam_Auto(void) {
-		if (VGUI_ChooseTeam_AutoQuery())
-			VGUI_ChooseTeam_CT();
-		else
-			VGUI_ChooseTeam_T();
+		localcmd("cmd joinTeam 9\n");
 	}
 
 	static void VGUI_ChooseTeam_Spec(void) {
-		sendevent("JoinSpectator", "");
+		localcmd("cmd joinTeam 1002\n");
 		winChooseTeam.Hide();
 	}
 

@@ -10,12 +10,12 @@ entityDef weapon_awp
 	"def_fireInfo"	"fireInfo_awp"
 	"clipSize"			"5"
 
-	"actFire"		"1,2,3"
+	"act_fire"		"1,2,3"
 	"actAltFire"	""
-	"actHolster"	""
-	"actReload"		"4"
-	"actDraw"		"5"
-	"actIdle"		"0"
+	"act_holster"	""
+	"act_reload"		"4"
+	"act_draw"		"5"
+	"act_idle"		"0"
 
 	"snd_fire"		"Weapon_AWP.Single"
 

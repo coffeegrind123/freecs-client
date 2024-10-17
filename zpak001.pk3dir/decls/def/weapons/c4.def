@@ -17,9 +17,9 @@ entityDef weapon_c4
 	"clipSize"			"1"
 	"trigger_delay"		"3"	// takes three seconds to charge
 
-	"actFire"			"2"
-	"actDraw"			"1"
-	"actIdle"			"0"
+	"act_fire"			"2"
+	"act_draw"			"1"
+	"act_idle"			"0"
 	"actDelay"			"3"
 
 	"snd_fire"			"C4.PlantSound"

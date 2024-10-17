@@ -17,16 +17,13 @@
 #include "animations.h"
 #include "radio.h"
 #include "buying.h"
-#include "items.h"
 #include "entities.h"
 #include "events.h"
 #include "CSProjectile.h"
 #include "../../../valve/src/shared/HLWeapon.h"
 
-#define TEAM_SPECTATOR	0
 #define TEAM_T		1
 #define TEAM_CT		2
-#define TEAM_VIP	3
 
 enum
 {

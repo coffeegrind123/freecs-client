@@ -38,7 +38,6 @@ class func_vip_safetyzone:NSBrushTrigger
 void
 func_vip_safetyzone::func_vip_safetyzone(void)
 {
-	g_cs_vipzones++;
 }
 
 void
@@ -50,12 +49,11 @@ func_vip_safetyzone::Respawn(void)
 void
 func_vip_safetyzone::Touch(entity eToucher)
 {
-	CSMultiplayerRules rule = (CSMultiplayerRules)g_grMode;
-
 	CSPlayer pl = (CSPlayer)eToucher;
 
 	if (pl.classname != "player")
 		return;
+#if 0
 	if (pl.team != TEAM_VIP)
 		return;
 
@@ -67,4 +65,5 @@ func_vip_safetyzone::Touch(entity eToucher)
 	/* mark player as spectator for the end of this 'round' */
 	pl.MakeTempSpectator();
 	pl.gflags &= ~GF_FLASHLIGHT;
+#endif
 }

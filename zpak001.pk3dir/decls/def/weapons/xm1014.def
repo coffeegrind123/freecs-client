@@ -12,12 +12,12 @@ entityDef weapon_xm1014
 
 	"ammoType"			"ammo_buckshot"
 
-	"actFire"		"1,2"
-	"actReloadStart"	"5"
-	"actReload"		"3"
-	"actReloadEnd"		"4"
-	"actDraw"		"6"
-	"actIdle"		"0"
+	"act_fire"		"1,2"
+	"act_reloadStart"	"5"
+	"act_reload"		"3"
+	"act_reloadEnd"		"4"
+	"act_draw"		"6"
+	"act_idle"		"0"
 
 	"snd_fire"		"Weapon_XM1014.Single"
 

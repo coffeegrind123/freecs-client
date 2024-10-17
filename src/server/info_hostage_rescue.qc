@@ -72,14 +72,6 @@ info_hostage_rescue::Touch(entity eToucher)
 	if (!((CSPlayer)hosty.m_eFollowing))
 		return;
 
-	Radio_BroadcastMessage(RADIO_RESCUED);
-	CSBot_HostageRescueNotify();
-	g_cs_hostagesrescued++;
-
-	Money_AddMoney((CSPlayer)hosty.m_eFollowing, 1000);
-
-	/* In Hostage Rescue, all Counter-Terrorists receive an $850
-	 * bonus for every hostage they rescue, even if they lose the round. */
-	Money_QueTeamReward(TEAM_CT, 850);
+	g_grMode.Input(hosty.m_eFollowing, "HostageRescued", "");
 	hosty.Disappear();
 }

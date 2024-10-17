@@ -15,15 +15,15 @@ entityDef weapon_m4a1
 	"ammoPerShot" 		"1"
 	"fireRate"			"0.0875"
 
-	"altSilences"		"1"
-	"actAddSil"			"6"
-	"actDetachSil"		"13"
+	"altMode"			"1"
+	"act_modeOn"		"6"
+	"act_modeOff"		"13"
 
 	// Unsilenced
-	"actFire"	"8,9,10"
-	"actReload"	"11"
-	"actDraw"	"12"
-	"actIdle"	"7"
+	"act_fire"	"8,9,10"
+	"act_reload"	"11"
+	"act_draw"	"12"
+	"act_idle"	"7"
 	"snd_fire"	"Weapon_M4A1.Single"
 
 
@@ -62,9 +62,9 @@ entityDef fireInfo_m4a1
 entityDef fireInfo_m4a1_silenced
 {
 	"inherit"	"fireInfo_m4a1"
-	"actFire"	"1,2,3"
-	"actReload"	"4"
-	"actDraw"	"5"
-	"actIdle"	"0"
+	"act_fire"	"1,2,3"
+	"act_reload"	"4"
+	"act_draw"	"5"
+	"act_idle"	"0"
 	"snd_fire"	"Weapon_M4A1.Silenced"
 }

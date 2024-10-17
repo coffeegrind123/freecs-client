@@ -10,10 +10,10 @@ entityDef weapon_mac10
 	"def_fireInfo"	"fireInfo_mac10"
 	"clipSize"	"30"
 
-	"actFire"	"3,4,5"
-	"actReload"	"1"
-	"actDraw"	"2"
-	"actIdle"	"0"
+	"act_fire"	"3,4,5"
+	"act_reload"	"1"
+	"act_draw"	"2"
+	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_MAC10.Single"
 

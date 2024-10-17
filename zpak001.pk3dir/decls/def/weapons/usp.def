@@ -32,9 +32,9 @@ entityDef weapon_usp
 	"semiAuto"			"1"
 	"ammoRequired" 		"1"
 
-	"altSilences"		"1"
-	"actAddSil"			"7"
-	"actDetachSil"		"15"
+	"altMode"		"1"
+	"act_modeOn"		"7"
+	"act_modeOff"		"15"
 
 	"crossMinDist"				"4"
 	"crossDeltaDist"			"4"
@@ -49,11 +49,11 @@ entityDef weapon_usp
 	"multiplierInaccuracy"		"0.5"
 
 	// Unsilenced
-	"actDraw"			"14"
-	"actIdle"			"8"
-	"actFire"			"9,10,11"
-	"actFireLast"		"12"
-	"actReload"			"13"
+	"act_draw"			"14"
+	"act_idle"			"8"
+	"act_fire"			"9,10,11"
+	"act_fireLast"		"12"
+	"act_reload"			"13"
 	"snd_fire"			"Weapon_USP.Single"
 
 	"hudSlot"		"1"
@@ -77,10 +77,10 @@ entityDef fireInfo_usp45_sil
 {
 	"def_onFire"	"projectile_usp45"
 	"model_flash"	"sprites/muzzleflash2.spr"
-	"actDraw"		"6"
-	"actIdle"		"0"
-	"actReload"		"5"
-	"actFire"		"1,2,3"
-	"actFireLast"	"4"
+	"act_draw"		"6"
+	"act_idle"		"0"
+	"act_reload"	"5"
+	"act_fire"		"1,2,3"
+	"act_fireLast"	"4"
 	"snd_fire"		"Weapon_USP.SilencedShot"
 }

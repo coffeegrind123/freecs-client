@@ -10,12 +10,12 @@ entityDef weapon_famas
 	"def_fireInfo"	"fireInfo_famas"
 	"clipSize"	""
 
-	"actFire"	""
+	"act_fire"	""
 	"actAltFire"	""
-	"actHolster"	""
-	"actReload"	""
-	"actDraw"	""
-	"actIdle"	""
+	"act_holster"	""
+	"act_reload"	""
+	"act_draw"	""
+	"act_idle"	""
 
 
 	"snd_fire"	"Weapon_FAMAS.Single"

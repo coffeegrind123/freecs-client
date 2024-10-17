@@ -98,8 +98,6 @@ CSBombEntity::OnPlayerUse(void)
 void
 CSBombEntity::Logic(void)
 {
-	CSMultiplayerRules rules = (CSMultiplayerRules)g_grMode;
-
 	/* check if we're being used */
 	if (m_eUser != world) {
 		CSPlayer pl = (CSPlayer)m_eUser;
@@ -111,11 +109,11 @@ CSBombEntity::Logic(void)
 			/* clear user */
 			m_eUser = world;
 			m_flDefusalState = 0.0f;
-			g_cs_bombbeingdefused = FALSE;
+			serverinfo.SetBool("cs_bombbeingdefused", false);
 		} else {
 
 			/* defusal kit always cuts the time in half */
-			if (pl.g_items & ITEM_DEFUSAL)
+			if (pl.HasItem("item_defuse"))
 				m_flDefusalState += (frametime * 2);
 			else
 				m_flDefusalState += frametime;
@@ -123,15 +121,13 @@ CSBombEntity::Logic(void)
 			/* tracked stat */
 			pl.progress = m_flDefusalState;
 			pl.AddVFlags(VFL_FROZEN);
-
-			g_cs_bombbeingdefused = TRUE;
+			serverinfo.SetBool("cs_bombbeingdefused", true);
 		}
 	}
 
 	if (m_flDefusalState > 10.0f) {
 		StartSoundDef("weapon_c4bomb.disarmed", CHAN_VOICE, true);
-		rules.RoundOver(TEAM_CT, 3600, TRUE);
-		Radio_BroadcastMessage(RADIO_BOMBDEF);
+		g_grMode.Input(m_eUser, "BombDisarmed", "");
 		Destroy();
 		return;
 	}
@@ -140,12 +136,9 @@ CSBombEntity::Logic(void)
 	if (m_flExplodeTime < time) {
 		float bestDist = 9999.0f;
 		NSEntity bestTarget = __NULL__;
+		g_grMode.Input(m_eUser, "BombExploded", "");
 
-		/* In Bomb Defusal, all Terrorists receive $3500
-		 * if they won by detonating the bomb. */
-		rules.RoundOver(TEAM_T, 3500, FALSE);
-
-		radiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner);
+		combat.RadiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner, "");
 		//Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
 
 
@@ -193,8 +186,8 @@ CSBombEntity::OnRemoveEntity(void)
 	ClearProgress();
 	m_flBeepTime = 0.0f;
 	m_flDefusalState = 0;
-	g_cs_bombbeingdefused = FALSE;
-	g_cs_bombplanted = false;
+	serverinfo.SetBool("cs_bombbeingdefused", false);
+	serverinfo.SetBool("cs_bombplanted", false);
 }
 
 void
@@ -214,6 +207,7 @@ CSBombEntity::Spawned(void)
 	PlayerUse = OnPlayerUse;
 	m_flExplodeTime = time + 45.0f;
 	StartSoundDef("c4.plant", CHAN_WEAPON, true);
+	serverinfo.SetBool("cs_bombplanted", true);
 }
 #endif
 

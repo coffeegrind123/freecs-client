@@ -14,88 +14,47 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifdef CLIENT
-/* Here's a list of bone names that we are aware of on HL player models.
-   Usually we'd use skeletalobjects to share the same skeleton/anim with
-   another model - but because FTEQW does not support that for HLMDL we
-   are forced to manually position the bones of our attachnment
-   by iterating over them and manually setting their position in 3D-space.
-*/
-string g_pbones[] =
+/** @brief Get entity by class name and index **/
+NSEntity
+GetEntityByNameAndIndex(string name, int index)
 {
- "Bip01",
- "Bip01 Footsteps",
- "Bip01 Pelvis",
- "Bip01 L Leg",
- "Bip01 L Leg1",
- "Bip01 L Foot",
- "Bip01 L Toe0",
- "Bip01 L Toe01",
- "Bip01 L Toe02",
- "Dummy16",
- "Bip01 R Leg",
- "Bip01 R Leg1",
- "Bip01 R Foot",
- "Bip01 R Toe0",
- "Bip01 R Toe01",
- "Bip01 R Toe02",
- "Dummy11",
- "Bip01 Spine",
- "Bip01 Spine1",
- "Bip01 Spine2",
- "Bip01 Spine3",
- "Bip01 Neck",
- "Bip01 Head",
- "Dummy21",
- "Dummy08",
- "Bone02",
- "Bone03",
- "Bone04",
- "Dummy05",
- "Bone09",
- "Bone10",
- "Dummy04",
- "Bone05",
- "Bone06",
- "Dummy03",
- "Bone07",
- "Bone08",
- "Dummy09",
- "Bone11",
- "Bone12",
-"Dummy10",
- "Bone13",
- "Bone14",
- "Bone15",
- "Bip01 L Arm",
- "Bip01 L Arm1",
- "Bip01 L Arm2",
- "Bip01 L Hand",
- "Bip01 L Finger0",
- "Bip01 L Finger01",
- "Bip01 L Finger02",
- "Dummy06",
- "Bip01 L Finger1",
- "Bip01 L Finger11",
- "Bip01 L Finger12",
- "Dummy07",
- "Bip01 R Arm",
- "Bip01 R Arm1",
- "Bip01 R Arm2",
- "Bip01 R Hand",
- "Bip01 R Finger0",
- "Bip01 R Finger01",
- "Bip01 R Finger02",
- "Dummy01",
- "Bip01 R Finger1",
- "Bip01 R Finger11",
- "Bip01 R Finger12",
- "Dummy02",
- "Box02",
- "Bone08",
- "Bone15"
-};
-#endif
+	int curIndex = 0;
+	for (entity a = world; (a = find(a, ::classname, name));) {
+		if (curIndex == index) {
+			return (NSEntity)a;
+		}
+		++curIndex;
+	}
+	print("WARNING: cstrike/server/bot.qc GetEntityByNameAndIndex: no entity '",
+		  name, "' with index ", itos(index), "!\n");
+	return __NULL__;
+}
+
+/** @brief Get bombsite entity by bombsite index
+ *
+ *  @note
+ *  When there are for example 2 bombsites (g_cs_bombzones == 2) then valid
+ *  indexes would be 0 and 1.
+ * */
+NSEntity
+GetBombsiteByIndex(int index)
+{
+	return GetEntityByNameAndIndex("func_bomb_target", index);
+}
+
+/** @brief Get Escape Zone entity by index **/
+NSEntity
+GetEscapeZoneByIndex(int index)
+{
+	return GetEntityByNameAndIndex("func_escapezone", index);
+}
+
+/** @brief Get VIP Safety Zone entity by index **/
+NSEntity
+GetVIPSafetyZoneByIndex(int index)
+{
+	return GetEntityByNameAndIndex("func_vip_safetyzone", index);
+}
 
 /* all potential SendFlags bits we can possibly send */
 enumflags
@@ -105,9 +64,12 @@ enumflags
 	PLAYER_CSTIMERS = PLAYER_CUSTOMFIELDSTART
 };
 
-class CSPlayer:NSClientPlayer
+class
+CSPlayer:HLPlayer
 {
 	int ingame;
+
+	void CSPlayer(void);
 
 	PREDICTED_FLOAT(cs_shotmultiplier)
 	PREDICTED_FLOAT(cs_shottime)
@@ -115,17 +77,10 @@ class CSPlayer:NSClientPlayer
 	PREDICTED_INT(cs_hor_rec_sign)
 	PREDICTED_FLOAT(cs_rec_reverse_chance)
 
-	PREDICTED_FLOAT(anim_top)
-	PREDICTED_FLOAT(anim_top_time)
-	PREDICTED_FLOAT(anim_top_delay)
-	PREDICTED_FLOAT(anim_bottom)
-	PREDICTED_FLOAT(anim_bottom_time)
-
 	virtual void(float) Physics_Fall;
 	virtual void(void) Physics_Jump;
 
 	virtual void(void) Physics_InputPostMove;
-	virtual void UpdatePlayerAnimation(float);
 
 #ifdef CLIENT
 	int playertype;
@@ -134,16 +89,28 @@ class CSPlayer:NSClientPlayer
 	int cs_cross_deltadist;
 	float cs_crosshairdistance;
 
-	virtual void UpdatePlayerAttachments(bool);
 	virtual void ReceiveEntity(float, float);
 	virtual void PredictPreFrame(void);
 	virtual void PredictPostFrame(void);
-	virtual void UpdateAliveCam(void);
-	virtual void ClientInputFrame(void);
 #else
+	virtual void Input(entity, string, string);
 	virtual void ServerInputFrame(void);
 	virtual void EvaluateEntity(void);
 	virtual float SendEntity(entity, float);
+
+	nonvirtual void Bot_RunToConfront(void);
+	nonvirtual void Bot_RunToBomb(void);
+	nonvirtual void Bot_RunToBombsite(int);
+	nonvirtual void Bot_RunToRandomBombsite(void);
+	nonvirtual void Bot_RunToEscapeZone(int);
+	nonvirtual void Bot_RunToRandomEscapeZone(void);
+	nonvirtual void Bot_RunToVIPSafetyZone(int);
+	nonvirtual void Bot_RunToRandomVIPSafetyZone(void);
+	nonvirtual void Bot_RunToHostages(void);
+	nonvirtual void Bot_Roam(vector, int);
+	nonvirtual void Bot_CreateObjective(void);
+	nonvirtual void Bot_Buy(void);
+	nonvirtual void Bot_AimLerp(vector, float);
 
 	int charmodel;
 	int money;
@@ -156,8 +123,53 @@ class CSPlayer:NSClientPlayer
 	bool m_seenHostage;
 	bool m_seenBombSite;
 	bool m_bHasNightvision;
+
+	/* bot related vars */
+	int m_actionIsPlanting;
+	int m_actionIsDefusing;
+
+	/* Workaround:
+	* gflags is not yet set when CSBot_BuyStart_Shop() or Bot_CreateObjective()
+	* are called, so we back it up on PostFrame() and use that instead.
+	* Known issues it solves:
+	* - Check if the bot is in a Bomb Zone (gflags & GF_BOMBZONE)
+	* - Check if the bot is in a Buy Zone (gflags & GF_BUYZONE) */
+	int m_gflagsBackup;
 #endif
 };
+
+void
+CSPlayer::CSPlayer(void)
+{
+	ingame = false;
+	cs_shotmultiplier = 0;
+	cs_shottime = 0;
+	cs_prev_hor_rec = 0;
+	cs_hor_rec_sign = 0;
+	cs_rec_reverse_chance = 0;
+
+#ifdef CLIENT
+	 playertype = 0;
+	 cs_cross_mindist = 0;
+	 cs_cross_deltadist = 0;
+	 cs_crosshairdistance = 0;
+#else
+	 charmodel = 0;
+	 money = 0;
+	 progress = 0;
+	 m_buyMessage = 0;
+	 m_hostMessageT = 0;
+	 m_seenFriend = 0;
+	 m_seenEnemy = 0;
+	 m_seenHostage = 0;
+	 m_seenBombSite = 0;
+	 m_bHasNightvision = 0;
+	/* bot related maps */
+	m_actionIsPlanting = FALSE;
+	m_actionIsDefusing = FALSE;
+	m_gflagsBackup = 0;
+#endif
+}
 
 float punchangle_recovery(float punchangle) {
 	return 0.05 * (-0.2 * pow(1.2, fabs(punchangle)) + 4);
@@ -183,166 +195,20 @@ CSPlayer::Physics_InputPostMove(void)
 	RemoveVFlags(VFL_FROZEN);
 	RemoveVFlags(VFL_NOATTACK);
 
-#ifdef SERVER
-	if (g_cs_gamestate == GAME_FREEZE) {
-#else
-	if (getstati(STAT_GAMESTATE) == GAME_FREEZE) {
-#endif
+	if (serverkeyfloat("cs_gamestate") == GAME_FREEZE) {
 		AddVFlags(VFL_FROZEN);
 		AddVFlags(VFL_NOATTACK);
 
 		if (input_buttons & INPUT_BUTTON0) {
 			w_attack_next = (w_attack_next > 0.1) ? w_attack_next : 0.1f;
 		}
-
 	}
+
 	ProcessInput();
 }
-
-void Animation_PlayerUpdate(CSPlayer); 
-void Animation_TimerUpdate(CSPlayer, float); 
-
-void
-CSPlayer::UpdatePlayerAnimation(float timelength)
-{
-	/* calculate our skeletal progression */
-	Animation_PlayerUpdate(this);
-	/* advance animation timers */
-	Animation_TimerUpdate(this, timelength);
-}
-
 #ifdef CLIENT
-void
-CSPlayer::ClientInputFrame(void)
-{
-	if (pSeatLocal->weaponSelectionHUD.Active()) {
-		if (input_buttons & INPUT_PRIMARY) {
-			pSeatLocal->weaponSelectionHUD.Trigger();
-		} else if (input_buttons & INPUT_SECONDARY) {
-			pSeatLocal->weaponSelectionHUD.Deactivate();
-		}
 
-		pSeat->m_flInputBlockTime = time + 0.2;
-	}
 
-	super::ClientInputFrame();
-}
-
-void Camera_RunPosBob(vector angles, __inout vector camera_pos);
-void Camera_StrafeRoll(__inout vector camera_angle);
-void Shake_Update(NSClientPlayer);
-
-void
-CSPlayer::UpdateAliveCam(void)
-{
-	vector cam_pos = GetEyePos();
-	Camera_RunPosBob(view_angles, cam_pos);
-
-	g_view.SetCameraOrigin(cam_pos);
-	Camera_StrafeRoll(view_angles);
-	g_view.SetCameraAngle(view_angles);
-
-	if (vehicle) {
-		NSVehicle veh = (NSVehicle)vehicle;
-
-		if (veh.UpdateView)
-			veh.UpdateView();
-	} else if (health) {
-		if (autocvar_pm_thirdPerson == TRUE) {
-			makevectors(view_angles);
-			vector vStart = [pSeat->m_vecPredictedOrigin[0], pSeat->m_vecPredictedOrigin[1], pSeat->m_vecPredictedOrigin[2] + 16] + (v_right * 4);
-			vector vEnd = vStart + (v_forward * -48) + [0,0,16] + (v_right * 4);
-			traceline(vStart, vEnd, FALSE, this);
-			g_view.SetCameraOrigin(trace_endpos + (v_forward * 5));
-		}
-	}
-
-	Shake_Update(this);
-	g_view.AddPunchAngle(punchangle);
-}
-
-.string oldmodel;
-///string Weapons_GetPlayermodel(NSClientPlayer, int);
-
-void
-CSPlayer::UpdatePlayerAttachments(bool visible)
-{
-	/* draw the flashlight */
-	if (gflags & GF_FLASHLIGHT) {
-		vector src;
-		vector ang;
-		
-		if (entnum != player_localentnum) {
-			src = origin + view_ofs;
-			ang = v_angle;
-		} else {
-			src = pSeat->m_vecPredictedOrigin + [0,0,-8];
-			ang = view_angles;
-		}
-
-		makevectors(ang);
-		traceline(src, src + (v_forward * 8096), MOVE_NORMAL, this);
-
-		if (serverkeyfloat("*bspversion") == BSPVER_HL) {
-			dynamiclight_add(trace_endpos + (v_forward * -2), 128, [1,1,1]);
-		} else {
-			float p = dynamiclight_add(src, 512, [1,1,1], 0, "textures/flashlight");
-			dynamiclight_set(p, LFIELD_ANGLES, ang);
-			dynamiclight_set(p, LFIELD_FLAGS, 3);
-		}
-	}
-
-	/* FIXME: this needs to be incorporated and simplified, now that we can handle it all in-class */
-	if (!visible)
-		return;
-
-	/* what's the current weapon model supposed to be anyway? */
-	p_model.oldmodel = 0;//Weapons_GetPlayermodel(this, activeweapon);
-
-	/* we changed weapons, update skeletonindex */
-	if (p_model.model != p_model.oldmodel) {
-		/* free memory */
-		if (p_model.skeletonindex)
-			skel_delete(p_model.skeletonindex);
-
-		/* set the new model and mark us updated */
-		setmodel(p_model, p_model.oldmodel);
-		p_model.model = p_model.oldmodel;
-		
-		/* set the new skeletonindex */
-		p_model.skeletonindex = skel_create(p_model.modelindex);
-
-		/* hack this thing in here FIXME: this should be done when popping in/out of a pvs */
-		if (autocvar(cl_himodels, 1, "Use high-quality thisayer models over lower-definition ones"))
-			setcustomskin(this, "", "geomset 0 2\n");
-		else
-			setcustomskin(this, "", "geomset 0 1\n");
-	}
-
-	/* follow thisayer at all times */
-	setorigin(p_model, origin);
-	p_model.angles = angles;
-	skel_build(p_model.skeletonindex, p_model, p_model.modelindex,0, 0, -1);
-
-	/* we have to loop through all valid bones of the weapon model and match them
-	 * to the thisayer one */
-	for (float i = 0; i < g_pbones.length; i++) {
-		vector bpos;
-		float pbone = gettagindex(this, g_pbones[i]);
-		float wbone = gettagindex(p_model, g_pbones[i]);
-
-		/* if the bone doesn't ignore in either skeletal mesh, ignore */
-		if (wbone <= 0 || pbone <= 0)
-			continue;
-
-		bpos = gettaginfo(this, pbone);
-		
-		/* the most expensive bit */
-		skel_set_bone_world(p_model, wbone, bpos, v_forward, v_right, v_up);
-	}
-}
-
-void HUD_AmmoNotify_Check(CSPlayer pl);
 /*
 =================
 CSPlayer::ReceiveEntity
@@ -351,7 +217,7 @@ CSPlayer::ReceiveEntity
 void
 CSPlayer::ReceiveEntity(float flIsNew, float flChanged)
 {
-	super::ReceiveEntity(flIsNew, flChanged);
+	NSClientPlayer::ReceiveEntity(flIsNew, flChanged);
 
 	/* animation */
 	READENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
@@ -393,11 +259,6 @@ CSPlayer::PredictPreFrame(void)
 	SAVE_STATE(cs_prev_hor_rec)
 	SAVE_STATE(cs_hor_rec_sign)
 	SAVE_STATE(cs_rec_reverse_chance)
-	SAVE_STATE(anim_top)
-	SAVE_STATE(anim_top_time)
-	SAVE_STATE(anim_top_delay)
-	SAVE_STATE(anim_bottom)
-	SAVE_STATE(anim_bottom_time)
 }
 
 /*
@@ -417,14 +278,429 @@ CSPlayer::PredictPostFrame(void)
 	ROLL_BACK(cs_prev_hor_rec)
 	ROLL_BACK(cs_hor_rec_sign)
 	ROLL_BACK(cs_rec_reverse_chance)
-	ROLL_BACK(anim_top)
-	ROLL_BACK(anim_top_time)
-	ROLL_BACK(anim_top_delay)
-	ROLL_BACK(anim_bottom)
-	ROLL_BACK(anim_bottom_time)
 }
 
 #else
+/** @brief Aim towards a given (vector)aimpos with a given (float)lerp speed.
+ *
+ * @note
+ * Copied code from nuclide botlib (inside bot::RunAI), maybe make this a
+ * method there, could be usefull for other stuff?
+ **/
+void CSPlayer::Bot_AimLerp(vector aimpos, float flLerp) {
+	vector aimdir, vecNewAngles;
+
+	vector oldAngle = v_angle;
+
+	/* that's the old angle */
+	vecNewAngles = anglesToForward(v_angle);
+
+	/* aimdir = new final angle */
+	aimdir = vectorToAngles(aimpos - origin);
+
+	/* slowly lerp towards the final angle */
+	vecNewAngles = vectorLerp(vecNewAngles, anglesToForward(aimdir), flLerp);
+
+	/* make sure we're aiming tight */
+	v_angle = vectorToAngles(vecNewAngles);
+	input_angles = angles = v_angle = fixAngle(v_angle);
+}
+
+void
+CSPlayer::Bot_RunToConfront(void)
+{
+	entity t;
+
+	if (team == TEAM_T) {
+		t = Route_SelectRandom(teams.SpawnPoint(TEAM_CT));
+	} else {
+		t = Route_SelectRandom(teams.SpawnPoint(TEAM_T));
+	}
+
+	ChatSayTeam("Going to run to the Enemy Spawn!");
+
+	if (t)
+		RouteToPosition(t.origin);
+}
+/* go to the planted bomb */
+void
+CSPlayer::Bot_RunToBomb(void)
+{
+	NSEntity e = __NULL__;
+	e = (NSEntity)find(e, ::model, "models/w_c4.mdl");
+
+	if (e) {
+		RouteToPosition(e.WorldSpaceCenter());
+		ChatSayTeam("Going to run to the Bomb!");
+	}
+}
+
+/* go to given bombsite */
+void
+CSPlayer::Bot_RunToBombsite(int bombsiteIndex)
+{
+	NSEntity e = GetBombsiteByIndex(bombsiteIndex);
+	RouteToPosition(e.WorldSpaceCenter());
+	ChatSayTeam(strcat("Going to run to Bomb Site ", itos(bombsiteIndex), "!"));
+}
+
+/* go to random bombsite */
+void
+CSPlayer::Bot_RunToRandomBombsite(void)
+{
+	Bot_RunToBombsite(random(0, serverinfo.GetInteger("cs_bombzones")));
+}
+
+/* go to given escape zone */
+void
+CSPlayer::Bot_RunToEscapeZone(int index)
+{
+	NSEntity e = GetEscapeZoneByIndex(index);
+	RouteToPosition(e.WorldSpaceCenter());
+	ChatSayTeam(strcat("Going to run to Escape Zone ", itos(index), "!"));
+}
+
+/* go to a random escape zone */
+void
+CSPlayer::Bot_RunToRandomEscapeZone(void)
+{
+	Bot_RunToEscapeZone(random(0, serverinfo.GetInteger("cs_escapezones")));
+}
+
+/* go to given VIP Safety Zone */
+void
+CSPlayer::Bot_RunToVIPSafetyZone(int index)
+{
+	NSEntity e = GetVIPSafetyZoneByIndex(index);
+	RouteToPosition(e.WorldSpaceCenter());
+	ChatSayTeam(strcat("Going to run to VIP Safety Zone ", itos(index), "!"));
+}
+
+/* go to a random VIP Safety Zone */
+void
+CSPlayer::Bot_RunToRandomVIPSafetyZone(void)
+{
+	Bot_RunToVIPSafetyZone(random(0, serverinfo.GetInteger("cs_vipzones")));
+}
+
+void
+CSPlayer::Bot_RunToHostages(void)
+{
+	NSEntity e = __NULL__;
+
+	e = (NSEntity)find(e, ::classname, "hostage_entity");
+
+	RouteToPosition(e.origin);
+	ChatSayTeam("Going to run to the hostages!");
+}
+
+/** @brief Let the bot roam within a maximum distance from a given origin. */
+void CSPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
+	/* Get random point whitin a radius from the given origin */
+	int angle = random(0, 360); /* random angle. */
+	int distance = random(0, maxDistance); /* random distance */
+	float radian = angle * 3.145238095238 / 180;
+	vector randLoc = roamOrigin;
+	randLoc.x += sin(radian) * distance;
+	randLoc.y += cos(radian) * distance;
+
+	/* Go to the random waypoint. */
+	RouteToPosition(Nodes_PositionOfClosestNode(randLoc));
+}
+
+void
+CSPlayer::Bot_CreateObjective(void)
+{
+	/* Bomb defuse map */
+	if (serverinfo.GetInteger("cs_bombzones") > 0) {
+		/* Bomb is planted */
+		if (serverinfo.GetBool("cs_bombplanted")) {
+			entity eBomb = find(world, ::model, "models/w_c4.mdl");
+			if (eBomb == world) {
+				/* No bomb model found, but it is/was planted */
+
+				/* RoundOver: Bomb is defused */
+				if (serverkeyfloat("cs_gamestate") == GAME_END) {
+					Bot_RunToRandomBombsite();
+					return;
+				}
+
+				/* Error */
+				print("WARNING! g_cs_bombplanted == TRUE, but bomb model "
+					  "cannot be found in the world.\n");
+				return;
+			}
+
+			if (team == TEAM_CT) {
+				if (serverinfo.GetBool("cs_bombbeingdefused") && m_actionIsDefusing == FALSE) {
+					/* Bomb is being defused but not by this bot */
+					/* Go and roam the defuser */
+					Bot_Roam(eBomb.origin, 300);
+					return;
+				}
+
+				if (m_actionIsDefusing) {
+					if (serverinfo.GetBool("cs_bombbeingdefused") == false) {
+						/* Defusing complete or somehow failed. */
+						m_actionIsDefusing = FALSE;
+					} else {
+						/* Continue defusing. */
+						input_buttons |= (INPUT_BUTTON5 | INPUT_BUTTON8);
+						input_movevalues = [0,0,0];
+						button5 = input_buttons & INPUT_BUTTON5; // don't release button5
+					}
+				}
+				else {
+					int distToBomb = floor(vlen(eBomb.origin - origin));
+					if (distToBomb > 60) {
+						/* To far away from the bomb to defuse it, run to it! */
+						Bot_RunToBomb();
+					} else {
+						/* Aim at the bomb. */
+						input_buttons |= INPUT_BUTTON8; // duck
+						if ((HasVFlags(VFL_ONUSABLE))) {
+							// Aimed at the bomb, ready to defuse!
+							ChatSayTeam("Defusing!");
+							input_buttons |= INPUT_BUTTON5;
+							input_movevalues = [0,0,0];
+							button5 = input_buttons & INPUT_BUTTON5; // don't release button5
+							m_actionIsDefusing = TRUE;
+						} else {
+							// Do the real aiming
+							float flLerp = bound(0.0f, frametime * 45, 1.0f);  // aim speed
+							Bot_AimLerp(eBomb.origin + [0, 0, -6], flLerp);
+						}
+					}
+				}
+			}
+			/* team == TEAM_T */
+			else {
+				/* Let T bots roam around the planted bomb */
+				Bot_Roam(eBomb.origin, 500);
+			}
+			return;
+		}
+		/* Bomb is NOT planted */
+		else {
+			if (team == TEAM_T) {
+				/* T-bot: plant bomb */
+				if (HasItem("weapon_c4")) {
+					/* We carry the bomb */
+					if (m_gflagsBackup & GF_BOMBZONE) {
+						/* We are at a bombsite and ready to plant the bomb */
+						if (GetCurrentWeapon() != "weapon_c4") {
+						/* TODO: REPLACE THIS WITH NSNAVAI METHOD */
+							SwitchToWeapon("weapon_c4");
+							//Weapons_Draw((CSPlayer)self);
+						}
+
+						if (!m_actionIsPlanting) {
+							ChatSayTeam("Going to plant the bomb!");
+							m_actionIsPlanting = TRUE;
+						}
+
+						/* Workaround */
+						gflags = m_gflagsBackup;
+
+						/* Duck and plant bomb. */
+						input_buttons = (INPUT_BUTTON0 | INPUT_BUTTON8);
+						input_movevalues = [0,0,0];
+					}
+					else {
+						/* Go to a bombsite first */
+						Bot_RunToRandomBombsite();
+					}
+					return;
+				}
+				else {
+					/* T-bot: check if the bomb has been dropped */
+					NSEntity e = (NSEntity)find(world, ::model, "models/w_backpack.mdl");
+
+					if (e != __NULL__) {
+						/* The bomb backpack has been dropped */
+						/* Go fetch dropped bomb! */
+						ChatSayTeam("Arrr! Bomb on the ground, going to fetch it!");
+						RouteToPosition(e.WorldSpaceCenter());
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	if (serverinfo.GetInteger("cs_escapezones") > 0i && team == TEAM_T) {
+		Bot_RunToRandomEscapeZone();
+		return;
+	}
+
+	if (random() < 0.5 && serverinfo.GetInteger("cs_escapezones") > 0i && team == TEAM_CT) {
+		Bot_RunToRandomEscapeZone();
+		return;
+	}
+
+	if (serverinfo.GetInteger("cs_vipzones") > 0i && team == TEAM_CT) {
+		Bot_RunToRandomVIPSafetyZone();
+		return;
+	}
+
+	if (random() < 0.5 && serverinfo.GetInteger("cs_vipzones") > 0i && team == TEAM_T) {
+		Bot_RunToRandomVIPSafetyZone();
+		return;
+	}
+
+	if (random() < 0.5) {
+		if (serverinfo.GetInteger("cs_hostages") > 0) {
+			Bot_RunToHostages();
+		}
+		if (serverinfo.GetInteger("cs_bombzones") > 0) {
+			Bot_RunToRandomBombsite();
+		}
+	} else {
+		Bot_RunToConfront();
+	}
+}
+
+float ConsoleCmd(string cmd);
+
+void
+CSPlayer::Bot_Buy(void)
+{
+	int done = 0;
+	int count = 0;
+	CSPlayer pl = (CSPlayer)self;
+	int playerMoney = userinfo.GetInteger(pl, "*money");
+	string weaponToBuy = "";
+	int weaponPrice = 0i;
+
+	if (pl.team == TEAM_T) {
+		weaponToBuy = userinfo.GetString(pl, "fav_primary_ct");
+	} else if (pl.team == TEAM_CT) {
+		weaponToBuy = userinfo.GetString(pl, "fav_primary_t");
+	}
+
+	/* Workaround */
+	pl.gflags = m_gflagsBackup;
+
+	if (STRING_SET(weaponToBuy)) {
+		weaponPrice = entityDef.GetInteger(weaponToBuy, "price");
+
+		if (weaponPrice <= userinfo.GetInteger(pl, "*money")) {
+			ConsoleCmd(strcat("buy ", weaponToBuy));
+			playerMoney = userinfo.GetInteger(pl, "*money");
+		} else {
+			weaponToBuy = "";
+		}
+	}
+	
+
+	/* CT: Random buy bomb defuse kit when enough money left */
+	if (pl.team == TEAM_CT && serverinfo.GetInteger("cs_bombzones") > 0 &&
+		entityDef.GetInteger("item_defuse", "price") <= playerMoney &&
+		random() < 0.5)
+	{
+		ConsoleCmd("item_defuse");
+		playerMoney = userinfo.GetInteger(pl, "*money");
+	}
+
+	/* need armor */
+	if (pl.armor < 100) {
+		if (playerMoney >= entityDef.GetInteger("item_kevlar_helmet", "price")) {
+			ConsoleCmd("buy item_kevlar_helmet");
+		} else if (playerMoney >= entityDef.GetInteger("item_kevlar", "price")) {
+			ConsoleCmd("buy item_kevlar");
+		}
+	} else if (pl.HasItem("item_kevlar_helmet") == false) {
+		if (playerMoney >= 350) {
+			ConsoleCmd("buy item_kevlar_helmet");
+		}
+	}
+
+	if (STRING_SET(weaponToBuy)) {
+		SwitchToWeapon(weaponToBuy);
+	}
+
+	/* force buy right now */
+	ConsoleCmd("buyammo 0");
+	ConsoleCmd("buyammo 1");
+}
+
+
+void
+CSPlayer::Input(entity eAct, string strInput, string strData)
+{
+	switch (strInput) {
+	case "RadioMessage":
+		WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+		WriteByte(MSG_MULTICAST, EV_RADIOMSG);
+		WriteByte(MSG_MULTICAST, stof(strData));
+		msg_entity = this;
+		multicast([0,0,0], MULTICAST_ONE);
+		break;
+	case "RadioTeamMessage":
+		tokenize(strData);
+		WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+		WriteByte(MSG_MULTICAST, EV_RADIOMSG2);
+		WriteByte(MSG_MULTICAST, stof(argv(0)));
+		WriteByte(MSG_MULTICAST, stof(argv(1)));
+		msg_entity = this;
+		multicast([0,0,0], MULTICAST_ONE);
+		break;
+	case "NotifyBuyStart":
+		if (IsAlive() == false) {
+			return;
+		}
+
+		ScheduleThink(Bot_Buy, random(0, cvars.GetFloat("mp_freezetime")));
+		break;
+	case "NotifyRoundStarted":
+		if (clienttype(this) != CLIENTTYPE_REAL) {
+			if (IsAlive() == false) {
+				return;
+			}
+
+			if (GetTeam() == TEAM_T) {
+				return;
+			}
+
+			Bot_RunToRandomBombsite();
+		}
+		break;
+	case "NotifyRoundRestarted":
+		/* bot stuff */
+		m_actionIsPlanting = FALSE;
+		m_actionIsDefusing = FALSE;
+		break;
+	case "NotifyBombPlanted":
+		if (clienttype(this) != CLIENTTYPE_REAL) {
+			if (IsAlive() == false) {
+				return;
+			}
+
+			if (GetTeam() == TEAM_T) {
+				return;
+			}
+
+			Bot_RunToRandomBombsite();
+		}
+		break;
+	case "NotifyHostageRescued":
+		if (clienttype(this) != CLIENTTYPE_REAL) {
+			if (IsAlive() == false) {
+				return;
+			}
+
+			if (GetTeam() == TEAM_T) {
+				return;
+			}
+
+			Bot_RunToHostages();
+		}
+		break;
+	default:
+		super::Input(eAct, strInput, strData);
+	}
+}
+
 void
 CSPlayer::ServerInputFrame(void)
 {
@@ -465,7 +741,7 @@ CSPlayer::SendEntity(entity ePEnt, float flChanged)
 
 	flChanged = OptimiseChangedFlags(ePEnt, flChanged);
 
-	super::SendEntity(ePEnt, flChanged);
+	NSClientPlayer::SendEntity(ePEnt, flChanged);
 
 	SENDENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
 	SENDENTITY_FLOAT(anim_top_time, PLAYER_TOPFRAME)
@@ -481,3 +757,50 @@ CSPlayer::SendEntity(entity ePEnt, float flChanged)
 	return (1);
 }
 #endif
+
+void
+CSPlayer::Physics_Fall(float impactspeed)
+{
+	/* apply some predicted punch to the player */
+	if (impactspeed >= 580)
+		punchangle += [15,0,(input_sequence & 1) ? 15 : -15];
+	else if (impactspeed >= 400)
+		punchangle += [15,0,0];
+
+	impactspeed *= 1.25f;
+
+	/* basic server-side falldamage */
+#ifdef SERVER
+	/* if we've reached a fallheight of PHY_FALLDMG_DISTANCE qu, start applying damage */
+	if (impactspeed >= 580) {
+		float impactDamage = (impactspeed - 580) * (100 / (1024 - 580)) * 0.75f;
+
+		/* this is kinda ugly, but worth the price */
+		NSDict damageDecl = spawn(NSDict);
+		damageDecl.AddKey("damage", ftos((int)impactDamage));
+		Damage(this, this, damageDecl, 1.0, g_vec_null, origin);
+		remove(damageDecl);
+		StartSoundDef("Player.FallDamage", CHAN_VOICE, true);
+	} else if (impactspeed >= 400) {
+		StartSoundDef("Player.LightFall", CHAN_VOICE, true);
+	}
+#endif
+}
+
+void
+CSPlayer::Physics_Jump(void)
+{
+	if (waterlevel >= 2) {
+		if (watertype == CONTENT_WATER) {
+			velocity[2] = 100;
+		} else if (watertype == CONTENT_SLIME) {
+			velocity[2] = 80;
+		} else {
+			velocity[2] = 50;
+		}
+	} else {
+		/* slow the player down a bit to prevent bhopping like crazy */
+		velocity *= 0.80f;
+		velocity[2] += 260;
+	}
+}

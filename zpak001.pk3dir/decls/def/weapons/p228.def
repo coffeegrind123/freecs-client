@@ -11,11 +11,11 @@ entityDef weapon_p228
 	"clipSize"	"13"
 
 
-	"actFire"	"1,2,3"
-	"actFireLast"	"4"
-	"actReload"	"5"
-	"actDraw"	"6"
-	"actIdle"	"0"
+	"act_fire"	"1,2,3"
+	"act_fireLast"	"4"
+	"act_reload"	"5"
+	"act_draw"	"6"
+	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_P228.Single"
 

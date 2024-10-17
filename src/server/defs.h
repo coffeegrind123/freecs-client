@@ -14,46 +14,8 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "ammo.h"
-#include "bot.h"
-#include "buy.h"
-#include "gamerules.h"
-#include "money.h"
-#include "radio.h"
-#include "../../../valve/src/server/items.h"
-#include "../../../valve/src/server/flashlight.h"
-
 var int g_cstrike_buying = 0;
 var float g_cstrike_bombradius = 500;
-
-var int g_cs_vipzones;
-var int g_cs_escapezones;
-var int g_cs_bombzones;
-
-var int g_cs_bombbeingdefused;
-var int g_cs_bombplanted;
-var int g_cs_roundswon_ct;
-var int g_cs_roundswon_t;
-var int g_cs_roundsplayed;
-
-var int g_cs_alive_t;
-var int g_cs_alive_ct;
-
-var int g_cs_total_t;
-var int g_cs_total_ct;
-
-var int g_total_players;
-
-var int g_cs_hostagesrescued;
-var int g_cs_hostagestotal;
-var int g_cs_roundslost_ct;
-var int g_cs_roundslost_t;
-var int g_cs_winstreak_ct;
-var int g_cs_winstreak_t;
-var int g_cs_bonus_ct;
-var int g_cs_bonus_t;
-var int g_cs_gamestate;
-var float g_cs_gametime;
 
 /* Counter-Strike's own cvars */
 var int autocvar_mp_winlimit = 0;

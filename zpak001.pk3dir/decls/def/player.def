@@ -2,3 +2,80 @@ entityDef player
 {
 	"spawnclass" "CSPlayer"
 }
+
+entityDef player_mp
+{
+	"inherit"		"player"
+	"def_precache"	"weapon_ak47"
+	"def_precache"	"weapon_aug"
+	"def_precache"	"weapon_awp"
+	"def_precache"	"weapon_c4"
+	"def_precache"	"weapon_deagle"
+	"def_precache"	"weapon_elite"
+	"def_precache"	"weapon_famas"
+	"def_precache"	"weapon_fiveseven"
+	"def_precache"	"weapon_flashbang"
+	"def_precache"	"weapon_g3sg1"
+	"def_precache"	"weapon_galil"
+	"def_precache"	"weapon_glock18"
+	"def_precache"	"weapon_hegrenade"
+	"def_precache"	"weapon_knife"
+	"def_precache"	"weapon_m249"
+	"def_precache"	"weapon_m3"
+	"def_precache"	"weapon_m4a1"
+	"def_precache"	"weapon_mac10"
+	"def_precache"	"weapon_mp5navy"
+	"def_precache"	"weapon_p228"
+	"def_precache"	"weapon_p90"
+	"def_precache"	"weapon_scout"
+	"def_precache"	"weapon_sg550"
+	"def_precache"	"weapon_sg552"
+	"def_precache"	"weapon_smokegrenade"
+	"def_precache"	"weapon_tmp"
+	"def_precache"	"weapon_ump45"
+	"def_precache"	"weapon_usp"
+	"def_precache"	"weapon_xm1014"
+}
+
+entityDef player_terrorist
+{
+	"inherit" 			"player_mp"
+	"ammo_9mm"			"40"
+	"current_weapon"	"1"
+	"item"				"item_suit"
+	"spawnpoint"		"info_player_deathmatch"
+	"team"				"1"
+	"weapon"			"weapon_knife,weapon_glock18"
+
+	"model_class1"		"models/player/terror/terror.mdl"
+	"model_class2"		"models/player/leet/leet.mdl"
+	"model_class3"		"models/player/arctic/arctic.mdl"
+	"model_class4"		"models/player/guerilla/guerilla.mdl"
+}
+
+entityDef player_counterterrorist
+{
+	"inherit" 			"player_mp"
+	"ammo_45acp"		"24"
+	"current_weapon"	"1"
+	"item"				"item_suit"
+	"spawnpoint"		"info_player_start"
+	"team"				"2"
+	"weapon"			"weapon_knife,weapon_usp"
+
+	"model_class1"		"models/player/urban/urban.mdl"
+	"model_class2"		"models/player/gsg9/gsg9.mdl"
+	"model_class3"		"models/player/sas/sas.mdl"
+	"model_class4"		"models/player/gign/gign.mdl"
+}
+
+entityDef player_vip
+{
+	"inherit" 			"player_mp"
+	"ammo_45acp"		"24"
+	"current_weapon"	"1"
+	"item"				"item_suit"
+	"model"				"models/player/vip/vip.mdl"
+	"team"				"2"
+	"weapon"			"weapon_knife,weapon_usp"
+}

@@ -17,8 +17,8 @@ entityDef weapon_hegrenade
 	"silent_fire"			"1"
 	"primed_fuse"			"4"
 
-	"actIdle"		"0"
-	"actDraw"		"3"
+	"act_idle"		"0"
+	"act_draw"		"3"
 	"actPull"		"1"
 	"actThrow"		"2"
 

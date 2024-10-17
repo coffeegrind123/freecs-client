@@ -94,3 +94,9 @@ void HUD_DrawAmmoBar(vector pos, float val, float max, float a);
 void Cstrike_DrawSimpleCrosshair(void);
 void Cstrike_DrawScope(void);
 void Textmenu_Call(string);
+
+float
+GetGameTime(void)
+{
+	return max(0.0f, serverkeyfloat("cs_gametime") - time);
+}

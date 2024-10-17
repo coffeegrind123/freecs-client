@@ -11,11 +11,11 @@ entityDef weapon_elite
 	"def_altFireInfo"	"fireInfo_elite_alt"
 	"clipSize"			"30"
 
-	"actFire"			"2,3,4,5,6"
-	"actFireLast"		"7"
-	"actReload"			"14"
-	"actDraw"			"15"
-	"actIdle"			"0"
+	"act_fire"			"2,3,4,5,6"
+	"act_fireLast"		"7"
+	"act_reload"			"14"
+	"act_draw"			"15"
+	"act_idle"			"0"
 
 	"snd_fire"		"Weapon_ELITE.Single"
 	"snd_altfire"		"Weapon_ELITE.Single"
@@ -61,6 +61,6 @@ entityDef fireInfo_elite
 entityDef fireInfo_elite_alt
 {
 	"inherit"		"fireInfo_elite"
-	"actFire"		"8,9,10,11,12"
-	"actFireLast"	"13"
+	"act_fire"		"8,9,10,11,12"
+	"act_fireLast"	"13"
 }

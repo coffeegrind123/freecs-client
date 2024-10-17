@@ -52,8 +52,6 @@ Radio_TeamMessage(float fMessage, float fTeam)
 	for (entity eFind = world; (eFind = find(eFind, classname, "player"));) {
 		if (eFind.team == fTeam) {
 			Radio_TeamMessage_Send(fMessage, eFind);
-		} else if (eFind.team == TEAM_VIP && fTeam == TEAM_CT) {
-			Radio_TeamMessage_Send(fMessage, eFind);
 		}
 	}
 }
@@ -131,14 +129,10 @@ CSEv_Radio_f(float fMessage)
 	
 	// Make sure that VIPs and CTs get eachother
 	float fTargetTeam = self.team;
-	if (fTargetTeam == TEAM_VIP) {
-		fTargetTeam = TEAM_CT;
-	}
+
 	
 	for (entity eFind = world; (eFind = find(eFind, classname, "player"));) {
 		if (eFind.team == fTargetTeam) {
-			CSEv_Radio_Send(fMessage, self, eFind);
-		} else if (eFind.team == TEAM_VIP && fTargetTeam == TEAM_CT) {
 			CSEv_Radio_Send(fMessage, self, eFind);
 		}
 	}

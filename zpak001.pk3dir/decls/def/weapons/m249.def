@@ -10,10 +10,10 @@ entityDef weapon_m249
 	"def_fireInfo"	"fireInfo_m249"
 	"clipSize"	"100"
 
-	"actFire"	"1,2"
-	"actReload"	"3"
-	"actDraw"	"4"
-	"actIdle"	"0"
+	"act_fire"	"1,2"
+	"act_reload"	"3"
+	"act_draw"	"4"
+	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_M249.Single"
 

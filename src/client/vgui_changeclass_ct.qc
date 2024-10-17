@@ -59,7 +59,21 @@ CSClassButtonCT::OnMouseUp(void)
 	if (classSelection == 5)
 		classSelection = floor(random(1, 5));
 
-	sendevent("JoinTeam", "f", (float)classSelection + 4);
+	switch (classSelection) {
+	case 1:
+		localcmd("cmd urban\n");
+		break;
+	case 2:
+		localcmd("cmd gsg9\n");
+		break;
+	case 3:
+		localcmd("cmd sas\n");
+		break;
+	case 4:
+		localcmd("cmd gign\n");
+		break;
+	}
+
 	winClassSelectionCT.Hide();
 }
 

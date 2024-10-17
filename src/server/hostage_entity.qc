@@ -81,7 +81,7 @@ enum
 
 class CSHostage:NSTalkMonster
 {
-	int m_iUsedOnce;
+	bool m_bUsedOnce;
 
 	void CSHostage(void);
 
@@ -92,12 +92,20 @@ class CSHostage:NSTalkMonster
 };
 
 void
+CSHostage::CSHostage(void)
+{
+	Sound_Precache("hostage_entity.follow");
+	m_bUsedOnce = false;
+}
+
+
+void
 CSHostage::OnPlayerUse(void)
 {
 	if (eActivator.team == TEAM_T) {
 		CSPlayer pl = (CSPlayer)eActivator;
 
-		if (g_csMode.ShowHints() == true)
+		if (serverinfo.GetBool("cs_hints") == true)
 		if (pl.m_hostMessageT == false) {
 			env_message_single(pl, "Only_CT_Can_Move_Hostages");
 			pl.m_hostMessageT = true;
@@ -110,9 +118,9 @@ CSHostage::OnPlayerUse(void)
 	}
 
 	/* CT reward, first time only */
-	if (m_iUsedOnce == FALSE) {
-		Money_AddMoney((CSPlayer)eActivator, 150);
-		m_iUsedOnce = TRUE;
+	if (m_bUsedOnce == false) {
+		g_grMode.Input(eActivator, "HostageContacted", "");
+		m_bUsedOnce = true;
 	}
 
 	NSTalkMonster::OnPlayerUse();
@@ -153,7 +161,7 @@ CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, 
 		return;
 	}
 
-	Money_AddMoney((NSClientPlayer)attacker, -(damageDealt * 25i));
+	g_grMode.Input(attacker, "HostageInjured",  itos(damageDealt));
 }
 
 void
@@ -175,13 +183,7 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 		}
 
 		if (isPlayer(attacker) == true) {
-			if (damageDealt >= 100) {
-				Money_AddMoney((NSClientPlayer)attacker, -2500);
-			} else {
-				Money_AddMoney((NSClientPlayer)attacker, -500);
-			}
-
-			Radio_BroadcastMessage(RADIO_HOSDOWN);
+			g_grMode.Input(attacker, "HostageKilled", itos(damageDealt));
 		}
 	}
 
@@ -191,11 +193,4 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 	/* now mark our state as 'dead' */
 	super::Death(inflictor, attacker, damageDealt, dir, location);
 	SetSolid(SOLID_NOT);
-}
-
-void
-CSHostage::CSHostage(void)
-{
-	Sound_Precache("hostage_entity.follow");
-	g_cs_hostagestotal++;
 }

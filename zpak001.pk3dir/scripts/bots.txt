@@ -9,6 +9,10 @@
 {
 	name marco
 	funname "]I[ M4RC0 ]I["
+	fav_primary_ct weapon_mp5
+	fav_primary_t weapon_mac10
+	fav_secondary_ct weapon_deagle
+	fav_secondary_t weapon_elite
 }
 {
 	name rich

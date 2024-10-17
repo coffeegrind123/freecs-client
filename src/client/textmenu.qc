@@ -20,12 +20,14 @@ TEAM_SELECT(int n)
 	switch (n) {
 	case 1:
 		Textmenu_Call("TERRORIST_SELECT");
+		localcmd("cmd joinTeam 1\n");
 		break;
 	case 2:
 		Textmenu_Call("CT_SELECT");
+		localcmd("cmd joinTeam 2\n");
 		break;
 	case 5:
-		sendevent("JoinAuto", "");
+		localcmd("cmd joinTeam 9\n");
 		Textmenu_Call("");
 		break;
 	}
@@ -33,55 +35,54 @@ TEAM_SELECT(int n)
 void
 TERRORIST_SELECT(int n)
 {
+	if (n == 5)
+		n = floor(random(1, 5));
+
 	switch (n) {
 	case 1:
-		sendevent("JoinTeam", "f", 1);
+		localcmd("cmd terror\n");
 		Textmenu_Call("");
 		break;
 	case 2:
-		sendevent("JoinTeam", "f", 2);
+		localcmd("cmd leet\n");
 		Textmenu_Call("");
 		break;
 	case 3:
-		sendevent("JoinTeam", "f", 3);
+		localcmd("cmd arctic\n");
 		Textmenu_Call("");
 		break;
 	case 4:
-		sendevent("JoinTeam", "f", 4);
-		Textmenu_Call("");
-		break;
-	case 5:
-		sendevent("JoinTeam", "f", floor(random(1,5)));
+		localcmd("cmd guerilla\n");
 		Textmenu_Call("");
 		break;
 	}
 }
 void
-CT_SELECT(int n)
+CT_SELECT(int classSelection)
 {
-	switch (n) {
+	if (classSelection == 5)
+		classSelection = floor(random(1, 5));
+
+	switch (classSelection) {
 	case 1:
-		sendevent("JoinTeam", "f", 5);
+		localcmd("cmd urban\n");
 		Textmenu_Call("");
 		break;
 	case 2:
-		sendevent("JoinTeam", "f", 6);
+		localcmd("cmd gsg9\n");
 		Textmenu_Call("");
 		break;
 	case 3:
-		sendevent("JoinTeam", "f", 7);
+		localcmd("cmd sas\n");
 		Textmenu_Call("");
 		break;
 	case 4:
-		sendevent("JoinTeam", "f", 8);
-		Textmenu_Call("");
-		break;
-	case 5:
-		sendevent("JoinTeam", "f", floor(random(1,5)));
+		localcmd("cmd gign\n");
 		Textmenu_Call("");
 		break;
 	}
 }
+
 void
 BUY(int n)
 {

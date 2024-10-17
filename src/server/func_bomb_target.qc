@@ -38,7 +38,6 @@ func_bomb_target:NSBrushTrigger
 void
 func_bomb_target::func_bomb_target(void)
 {
-	g_cs_bombzones++;
 }
 
 void
@@ -54,7 +53,7 @@ func_bomb_target::Touch(entity eToucher)
 		return;
 	}
 
-	if (g_csMode.ShowHints() && pl.m_seenBombSite == false) {
+	if (serverinfo.GetBool("cs_hints") && pl.m_seenBombSite == false) {
 		env_message_single(pl, "Hint_you_are_in_targetzone");
 		pl.m_seenBombSite = true;
 	}

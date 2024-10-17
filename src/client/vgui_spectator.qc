@@ -40,6 +40,7 @@ CSSpectateHUD::Draw(void)
 	string strText;
 	int iMinutes, iSeconds;
 	NSClientSpectator spec = (NSClientSpectator)pSeat->m_ePlayer;
+	float moneyValue = getplayerkeyfloat(player_localnum, "*money");
 
 	/* parts on top and bottom */
 	drawfill(m_vecOrigin, [m_vecSize[0], 32], [0,0,0], 0.75f, DRAWFLAG_NORMAL);
@@ -70,7 +71,7 @@ CSSpectateHUD::Draw(void)
 #endif
 
 	/* money */
-	strText = sprintf("$ %i", getstati(STAT_MONEY));
+	strText = sprintf("$ %d", moneyValue);
 	flSep = stringwidth(strText, TRUE, [12,12]);
 
 	if (flSep < 42)
@@ -99,8 +100,8 @@ CSSpectateHUD::Draw(void)
 
 	/* time display */
 	drawpic([flSep + 8, 15], "gfx/vgui/640_timer", [14, 14], [1,1,1], 1.0f, DRAWFLAG_NORMAL);
-	iMinutes = getstatf(STAT_GAMETIME) / 60;
-	iSeconds = getstatf(STAT_GAMETIME) - 60 * iMinutes;
+	iMinutes = GetGameTime() / 60;
+	iSeconds = GetGameTime() - 60 * iMinutes;
 	strText = sprintf("%i:%02i", iMinutes, iSeconds);
 	vecPos[0] = flSep + 8 + 17;
 	vecPos[1] = g_hudmins[1] + 17;

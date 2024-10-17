@@ -127,12 +127,12 @@ HUD_DrawTimer(int NSClientSpectator)
 		time_pos = g_hudmins + [(g_hudres[0] / 2) - 62, g_hudres[1] - 42];
 	}
 
-	if (getstatf(STAT_GAMETIME) == -1) {
+	if (GetGameTime() < -1) {
 		return;
 	}
 
-	iMinutes = getstatf(STAT_GAMETIME) / 60;
-	iSeconds = getstatf(STAT_GAMETIME) - 60 * iMinutes;
+	iMinutes = GetGameTime() / 60;
+	iSeconds = GetGameTime() - 60 * iMinutes;
 	iTens = iSeconds / 10;
 	iUnits = iSeconds - 10 * iTens;
 
@@ -190,31 +190,32 @@ HUD_DrawMoney(void)
 {
 	vector money_pos;
 	float endalpha;
+	float moneyValue = getplayerkeyfloat(player_localnum, "*money");
 
 	money_pos = g_hudmins + [g_hudres[0] - 160, g_hudres[1] - 72];
 
 	/* if the money differs from last frame, paint it appropriately */
-	if (getstati(STAT_MONEY) > pSeatLocal->m_iMoneyOld) {
+	if (moneyValue > pSeatLocal->m_iMoneyOld) {
 		/* effect already in progress from something else, go add on top of it! */
 		if (pSeatLocal->m_flMoneyAlpha > 0) {
-			pSeatLocal->m_iMoneyDelta += (pSeatLocal->m_iMoneyOld - getstati(STAT_MONEY));
+			pSeatLocal->m_iMoneyDelta += (pSeatLocal->m_iMoneyOld - moneyValue);
 		} else {
-			pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - getstati(STAT_MONEY);
+			pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - moneyValue;
 		}
 		/* make it green for a short time */
 		pSeatLocal->m_vecMoneyColor = [0,1,0];
 		pSeatLocal->m_flMoneyAlpha = 1.0;
-	} else if (getstati(STAT_MONEY) < pSeatLocal->m_iMoneyOld) {
+	} else if (moneyValue < pSeatLocal->m_iMoneyOld) {
 		/* same one as above */
 		if (pSeatLocal->m_flMoneyAlpha > 0) {
-			pSeatLocal->m_iMoneyDelta += (pSeatLocal->m_iMoneyOld - getstati(STAT_MONEY));
+			pSeatLocal->m_iMoneyDelta += (pSeatLocal->m_iMoneyOld - moneyValue);
 		} else {
-			pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - getstati(STAT_MONEY);
+			pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - moneyValue;
 		}
 		/* make it red */
 		pSeatLocal->m_vecMoneyColor = [1,0,0];
 		pSeatLocal->m_flMoneyAlpha = 1.0;
-		pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - getstati(STAT_MONEY);
+		pSeatLocal->m_iMoneyDelta = pSeatLocal->m_iMoneyOld - moneyValue;
 	}
 
 	/* maximum alpha is variable. */
@@ -259,7 +260,7 @@ HUD_DrawMoney(void)
 		money_pos[0] += (24 * 5);
 
 		/* draw the red/green overlay numbers on top of ours */
-		HUD_DrawNums(getstati(STAT_MONEY), money_pos, endalpha, pSeatLocal->m_vecMoneyColor);
+		HUD_DrawNums(moneyValue, money_pos, endalpha, pSeatLocal->m_vecMoneyColor);
 
 		/* draw above how much money we've lost/gotten from all this */
 		HUD_DrawNums(fabs(pSeatLocal->m_iMoneyDelta), money_pos + [0,-32], endalpha, pSeatLocal->m_vecMoneyColor);
@@ -269,13 +270,13 @@ HUD_DrawMoney(void)
 
 	/* regular number */
 	HUD_DrawNums(
-		getstati(STAT_MONEY),
+		moneyValue,
 		money_pos,
 		HUD_ALPHA - endalpha,
 		g_hud_color
 	);
 
-	pSeatLocal->m_iMoneyOld = getstati(STAT_MONEY);
+	pSeatLocal->m_iMoneyOld = moneyValue;
 	pSeatLocal->m_flMoneyAlpha = max(0, pSeatLocal->m_flMoneyAlpha - (clframetime * 0.5));
 }
 
@@ -345,7 +346,7 @@ HUD_DrawArmor(void)
 		pSeatLocal->m_flArmorAlpha = HUD_ALPHA;
 	}
 
-	if (pl.g_items & ITEM_HELMET) {
+	if (pl.HasItem("item_kevlar_helmet")) {
 		drawsubpic(
 			pos + [-80,1],
 			[24,24],
@@ -370,7 +371,7 @@ HUD_DrawArmor(void)
 	}
 
 	if (pl.armor > 0) {
-		if (pl.g_items & ITEM_HELMET) {
+		if (pl.HasItem("item_kevlar_helmet")) {
 			drawsubpic(
 				pos + [-80,1],
 				[24, 24 * (pl.armor / 100)],
@@ -536,13 +537,13 @@ HUD_DrawZones(void)
 	if (pl.gflags & GF_BUYZONE) {
 		zc++;
 	}
-	if (pl.g_items & ITEM_C4BOMB) {
+	if (pl.HasItem("weapon_c4")) {
 		zc++;
 	}
 	if (pl.gflags & GF_RESCUEZONE) {
 		zc++;
 	}
-	if (pl.g_items & ITEM_DEFUSAL) {
+	if (pl.HasItem("item_defuse")) {
 		zc++;
 	}
 
@@ -561,7 +562,7 @@ HUD_DrawZones(void)
 		);
 		pos[1] += 32;
 	}
-	if (pl.g_items & ITEM_C4BOMB) {
+	if (pl.HasItem("item_defuse")) {
 		bool isRed = false;
 
 		if (pl.gflags & GF_BOMBZONE) {
@@ -607,7 +608,7 @@ HUD_DrawZones(void)
 		);
 		pos[1] += 32;
 	}
-	if (pl.g_items & ITEM_DEFUSAL) {
+	if (pl.HasItem("item_defuse")) {
 		drawsubpic(
 			pos,
 			[32,32],
@@ -695,16 +696,12 @@ HUD_PlayerNames(void)
 		float own_team = getplayerkeyfloat(player_localnum, "*team");
 		string strAlliance;
 
-		if ((own_team == TEAM_CT || own_team == TEAM_VIP) && 
-			(player_team == TEAM_VIP || player_team == TEAM_CT)) {
-			strAlliance = "Friend";
+		if (own_team != player_team) {
+			strAlliance = "Enemy";
 		} else {
-			if (own_team != player_team) {
-				strAlliance = "Enemy";
-			} else {
-				strAlliance = "Friend";
-			}
+			strAlliance = "Friend";
 		}
+
 
 		if (player_team == TEAM_T) {
 			Font_DrawText(vecTextPos, sprintf("%s%s: %s", \

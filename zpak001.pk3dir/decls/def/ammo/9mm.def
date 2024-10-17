@@ -1,0 +1,7 @@
+entityDef ammo_9mm
+{
+	"editor_usage"		"Ammo used by weapon_elites, weapon_glock18, weapon_mp5navy, weapon_tmp"
+	"inherit"			"ammo_base"
+	"inv_ammo_9mm"		"30"
+	"price"				"20"
+}

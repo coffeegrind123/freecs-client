@@ -40,7 +40,7 @@ void Animation_Print(string sWow) {
 }
 
 void
-Animation_TimerUpdate(CSPlayer pl, float ftime)
+Animation_TimerUpdate(HLPlayer pl, float ftime)
 {
 	makevectors([0, pl.v_angle[1], 0]);
 
@@ -65,7 +65,7 @@ depending on what the player is doing
 =================
 */
 void
-Animation_PlayerUpdate(CSPlayer pl)
+Animation_PlayerUpdate(HLPlayer pl)
 {
 	pl.basebone = gettagindex(pl, "-- R shoulder outside");
 
@@ -128,7 +128,7 @@ Animation_PlayerUpdate(CSPlayer pl)
 }
 
 void
-Animation_PlayerTop(CSPlayer pl, float topanim, float timer)
+Animation_PlayerTop(HLPlayer pl, float topanim, float timer)
 {
 #if 0
 	pl.anim_top = topanim;
@@ -138,7 +138,7 @@ Animation_PlayerTop(CSPlayer pl, float topanim, float timer)
 }
 
 void
-Animation_PlayerBottom(CSPlayer pl, float botanim, float timer)
+Animation_PlayerBottom(HLPlayer pl, float botanim, float timer)
 {
 	pl.anim_bottom = botanim;
 }

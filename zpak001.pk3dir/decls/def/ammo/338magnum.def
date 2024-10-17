@@ -1,0 +1,7 @@
+entityDef ammo_338magnum
+{
+	"editor_usage"			"Ammo used by weapon_awp"
+	"inherit"				"ammo_base"
+	"inv_ammo_338magnum"	"10"
+	"price"					"125"
+}

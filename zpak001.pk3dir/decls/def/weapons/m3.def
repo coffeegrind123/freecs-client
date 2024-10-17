@@ -10,12 +10,12 @@ entityDef weapon_m3
 	"def_fireInfo"	"fireInfo_m3"
 	"clipSize"			"8"
 
-	"actFire"		"1,2"
-	"actReloadStart"	"5"
-	"actReload"		"3"
-	"actReloadEnd"		"4"
-	"actDraw"		"6"
-	"actIdle"		"0"
+	"act_fire"		"1,2"
+	"act_reloadStart"	"5"
+	"act_reload"		"3"
+	"act_reloadEnd"		"4"
+	"act_draw"		"6"
+	"act_idle"		"0"
 
 	"snd_fire"		"Weapon_M3.Single"
 

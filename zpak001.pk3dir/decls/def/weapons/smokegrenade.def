@@ -17,12 +17,12 @@ entityDef weapon_smokegrenade
 	"clipSize"			"50"
 	"clipSizeDefault"	"25"
 
-	"actFire"		"5,6,7"
+	"act_fire"		"5,6,7"
 	"actAltFire"	"2"
-	"actHolster"	"4"
-	"actReload"		"3"
-	"actDraw"		"4"
-	"actIdle"		"0,1"
+	"act_holster"	"4"
+	"act_reload"		"3"
+	"act_draw"		"4"
+	"act_idle"		"0,1"
 
 	"snd_fire"		"weapon_smokegrenade.shoot"
 	"snd_altfire"	"weapon_smokegrenade.gl"
