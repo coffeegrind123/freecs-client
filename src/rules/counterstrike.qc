@@ -32,6 +32,16 @@ typedef enum
 	STATE_OVER = 5i
 } csGameState_t;
 
+string g_csGameStateName[] =
+{
+	"STATE_INACTIVE",
+	"STATE_COMMENCING",
+	"STATE_FREEZE",
+	"STATE_ACTIVE",
+	"STATE_END",
+	"STATE_OVER"
+};
+
 var csGameState_t g_csGameState;
 var float g_cs_gametime;
 var int g_csSwapTeamRoundCounter;
@@ -115,6 +125,12 @@ csGameState_t
 GameState(void)
 {
 	return (g_csGameState);
+}
+
+string
+GameStateName(void)
+{
+	return (g_csGameStateName[g_csGameState]);
 }
 
 float
@@ -461,7 +477,7 @@ Round_TimerUpdate(void)
 	/* our continously running down timer */
 	g_cs_gametime = bound(0.0f, g_cs_gametime - frametime, g_cs_gametime);
 
-	//printf("%f\n", g_cs_gametime);
+	//printf("%f %S\n", GameTime(), GameStateName());
 
 	/* if the round is over or the game is done with... */
 	if (GameState() == STATE_COMMENCING || GameState() == STATE_END) {
@@ -814,6 +830,7 @@ CodeCallback_FrameStart(void)
 		serverinfo.SetInteger("cs_roundsplayed", 0i);
 		return;
 	}
+	
 
 	/* should only ever run when players are actually present. */
 	Round_TimerUpdate();
@@ -912,17 +929,17 @@ CodeCallback_MaxItemPerSlot(int weaponSlot)
 }
 
 void
-CodeCallback_PlayerSpawn(void)
+CodeCallback_PlayerSpawn(entity playerEntity)
 {
 	/* first course of action is to kick players into spectator cam */
-	CS_GoSpectator(self);
+	CS_GoSpectator(playerEntity);
 }
 
 void
-CodeCallback_PlayerDisconnect(void)
+CodeCallback_PlayerDisconnect(entity playerEntity)
 {
 	/* if they leave, timeout, get kicked (or banned), we gotta know! */
-	CS_PlayerRemovedFromGame(self);
+	CS_PlayerRemovedFromGame(playerEntity);
 }
 
 void
@@ -932,18 +949,18 @@ CodeCallback_PlayerDamage(entity inflictor, entity attacker)
 }
 
 void
-CodeCallback_PlayerKilled(entity inflictor, entity attacker, string weapon)
+CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker, string weapon)
 {
-	combat.Obituary(self.netname, attacker.netname, weapon, "");
+	combat.Obituary(playerEntity.netname, attacker.netname, weapon, "");
 
 	/* death-counter */
-	self.deaths++;
+	playerEntity.deaths++;
 
 	/* update player scores */
 	if (ents.isPlayer(attacker)) {
-		if (self == attacker) {
+		if (playerEntity == attacker) {
 			attacker.frags--;
-		} else if (self.team == attacker.team) {
+		} else if (playerEntity.team == attacker.team) {
 			attacker.frags--;
 			Money_AddMoney(attacker, cvars.GetInteger("fcs_penalty_teamkill"));
 		} else {
@@ -953,29 +970,29 @@ CodeCallback_PlayerKilled(entity inflictor, entity attacker, string weapon)
 	}
 
 	/* scoreboard death icon */
-	if (ents.isPlayer(self)) {
-		userinfo.SetString(self, "*icon1", "d_skull");
-		userinfo.SetString(self, "*icon1_r", "1");
-		userinfo.SetString(self, "*icon1_g", "0");
-		userinfo.SetString(self, "*icon1_b", "0");
+	if (ents.isPlayer(playerEntity)) {
+		userinfo.SetString(playerEntity, "*icon1", "d_skull");
+		userinfo.SetString(playerEntity, "*icon1_r", "1");
+		userinfo.SetString(playerEntity, "*icon1_g", "0");
+		userinfo.SetString(playerEntity, "*icon1_b", "0");
 
 		/* turn into a fake spec */
-		ents.Input(self, "Spectate", "", world);
+		ents.Input(playerEntity, "Spectate", "", world);
 	}
 
-	CS_PlayerRemovedFromGame(self);
+	CS_PlayerRemovedFromGame(playerEntity);
 }
 
 bool
-CodeCallback_CallRequestTeam(int teamNum)
+CodeCallback_CallRequestTeam(entity playerEntity, int teamNum)
 {
 	/* can't switch teams while alive. */
-	if (ents.isAlive(self) == true) {
+	if (ents.isAlive(playerEntity) == true) {
 		return (false);
 	}
 
 	/* can't switch teams while we're a VIP */
-	if (IsVIP(self) == true) {
+	if (IsVIP(playerEntity) == true) {
 		return (false);
 	}
 
@@ -986,13 +1003,13 @@ CodeCallback_CallRequestTeam(int teamNum)
 
 	switch (teamNum) {
 	case TEAM_T:
-		ents.Input(self, "SetTeam", "1", self);
+		ents.Input(playerEntity, "SetTeam", "1", playerEntity);
 		break;
 	case TEAM_CT:
-		ents.Input(self, "SetTeam", "2", self);
+		ents.Input(playerEntity, "SetTeam", "2", playerEntity);
 		break;
 	default:
-		CS_GoSpectator(self);
+		CS_GoSpectator(playerEntity);
 		return (true);
 	}
 
@@ -1000,57 +1017,57 @@ CodeCallback_CallRequestTeam(int teamNum)
 }
 
 bool
-CodeCallback_ClientCommand(string command)
+CodeCallback_ClientCommand(entity playerEntity, string command)
 {
 	float commandArgs = tokenize(command);
 
 	switch (argv(0)) {
 	/* class selection */
 	case "terror":
-		SetTClass(self, 1);
-		CodeCallback_CallRequestTeam(TEAM_T);
-		CS_RequestSpawn(self);
+		SetTClass(playerEntity, 1);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_T);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "leet":
-		SetTClass(self, 2);
-		CodeCallback_CallRequestTeam(TEAM_T);
-		CS_RequestSpawn(self);
+		SetTClass(playerEntity, 2);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_T);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "arctic":
-		SetTClass(self, 3);
-		CodeCallback_CallRequestTeam(TEAM_T);
-		CS_RequestSpawn(self);
+		SetTClass(playerEntity, 3);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_T);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "guerilla":
-		SetTClass(self, 4);
-		CodeCallback_CallRequestTeam(TEAM_T);
-		CS_RequestSpawn(self);
+		SetTClass(playerEntity, 4);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_T);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "urban":
-		SetCTClass(self, 1);
-		CodeCallback_CallRequestTeam(TEAM_CT);
-		CS_RequestSpawn(self);
+		SetCTClass(playerEntity, 1);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_CT);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "gsg9":
-		SetCTClass(self, 2);
-		CodeCallback_CallRequestTeam(TEAM_CT);
-		CS_RequestSpawn(self);
+		SetCTClass(playerEntity, 2);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_CT);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "sas":
-		SetCTClass(self, 3);
-		CodeCallback_CallRequestTeam(TEAM_CT);
-		CS_RequestSpawn(self);
+		SetCTClass(playerEntity, 3);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_CT);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "gign":
-		SetCTClass(self, 4);
-		CodeCallback_CallRequestTeam(TEAM_CT);
-		CS_RequestSpawn(self);
+		SetCTClass(playerEntity, 4);
+		CodeCallback_CallRequestTeam(playerEntity, TEAM_CT);
+		CS_RequestSpawn(playerEntity);
 		break;
 	case "buy":
-		Money_Purchase(self, argv(1));
+		Money_Purchase(playerEntity, argv(1));
 		break;
 	case "buyammo":
-		Money_PurchaseAmmoForSlot(self, stoi(argv(1)));
+		Money_PurchaseAmmoForSlot(playerEntity, stoi(argv(1)));
 		break;
 	default:
 		return (false);
@@ -1060,13 +1077,13 @@ CodeCallback_ClientCommand(string command)
 }
 
 bool
-CodeCallback_ImpulseCommand(float impulseNum)
+CodeCallback_ImpulseCommand(entity playerEntity, float impulseNum)
 {
 	switch (impulseNum) {
 	/* this is how Half-Life triggers the flashlight. `impulse 100`. */
 	case 100:
 		if (AllowFlashlight() == true) {
-			ents.Input(self, "UseItem", "item_suit", self);
+			ents.Input(playerEntity, "UseItem", "item_suit", playerEntity);
 		}
 		break;
 	default:

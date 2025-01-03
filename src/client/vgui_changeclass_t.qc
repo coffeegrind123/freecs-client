@@ -32,13 +32,13 @@ CSClassT_Init(void)
 		g_classDescrAuto = textfile_to_string("classes/autoselect.txt");
 }
 
-static VGUIWindow winClassSelection;
-static VGUIPic imgClassPreview;
-static VGUILabel lblClassTitle;
-static VGUILabel lblClassDescription;
-static VGUILabel lblClassCounter;
+static vguiWindow winClassSelection;
+static vguiPic imgClassPreview;
+static vguiLabel lblClassTitle;
+static vguiLabel lblClassDescription;
+static vguiLabel lblClassCounter;
 
-class CSClassButtonT:VGUIButton
+class CSClassButtonT:vguiButton
 {
 	void CSClassButtonT(void);
 
@@ -116,8 +116,8 @@ void
 VGUI_ChooseClassT(void)
 {
 	static int initialized;
-	static VGUILabel lblSelectClass;
-	static VGUIFrame frmClassInfo;
+	static vguiLabel lblSelectClass;
+	static vguiFrame frmClassInfo;
 	static CSClassButtonT btnPhoenix;
 	static CSClassButtonT btnLeet;
 	static CSClassButtonT btnArctic;
@@ -130,33 +130,33 @@ VGUI_ChooseClassT(void)
 
 		CSClassT_Init();
 
-		winClassSelection = spawn(VGUIWindow);
+		winClassSelection = spawn(vguiWindow);
 		winClassSelection.SetSize([640, 480]);
-		winClassSelection.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
+		winClassSelection.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
-		lblSelectClass = spawn(VGUILabel);
+		lblSelectClass = spawn(vguiLabel);
 		lblSelectClass.SetTitle(Titles_GetTextBody("Title_terrorist_model_selection"));
 		lblSelectClass.SetTextSize(19);
 		lblSelectClass.SetPos([40, 38]);
 		lblSelectClass.SetSize([400, 24]);
 
-		frmClassInfo = spawn(VGUIFrame);
+		frmClassInfo = spawn(vguiFrame);
 		frmClassInfo.SetPos([176, 80]);
 		frmClassInfo.SetSize([424, 312]);
 
-		imgClassPreview = spawn(VGUIPic);
+		imgClassPreview = spawn(vguiPic);
 		imgClassPreview.SetPos([190, 90]);
 
-		lblClassTitle = spawn(VGUILabel);
+		lblClassTitle = spawn(vguiLabel);
 		lblClassTitle.SetPos([338, 90]);
 		lblClassTitle.SetTextSize(19);
 		lblClassTitle.SetSize([320, 24]);
 
-		lblClassCounter = spawn(VGUILabel);
+		lblClassCounter = spawn(vguiLabel);
 		lblClassCounter.SetPos([338, 90 + 32]);
 		lblClassCounter.SetSize([320, 18]);
 
-		lblClassDescription = spawn(VGUILabel);
+		lblClassDescription = spawn(vguiLabel);
 		lblClassDescription.SetPos([338, 90 + 32 + 32]);
 		lblClassDescription.SetSize([250, 240]);
 

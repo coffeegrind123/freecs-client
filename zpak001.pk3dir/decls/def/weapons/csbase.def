@@ -1,0 +1,52 @@
+entityDef CSBaseMelee
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+}
+
+entityDef CSBasePistol
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"semiAuto"			"1"
+	"snd_acquire"		"Player.PickupWeapon"
+	"snd_empty"			"Default.ClipEmpty_Pistol"
+	"csWeaponMode"		"1"
+	"model_flash"		"sprites/muzzleflash1.spr"
+}
+
+entityDef CSBaseRifle
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+	"snd_empty"			"Default.ClipEmpty_Rifle"
+	"csWeaponMode"		"1"
+	"model_flash"		"sprites/muzzleflash3.spr"
+}
+
+entityDef CSBaseShotgun
+{
+	"spawnclass"		"CSWeapon"
+	"editor_color"		".3 .3 1"
+	"editor_mins"		"-16 -16 -16"
+	"editor_maxs"		"16 16 16"
+	"editor_rotatable"	"1"
+
+	"snd_acquire"		"Player.PickupWeapon"
+	"csWeaponMode"		"1"
+	"model_flash"		"sprites/muzzleflash4.spr"
+}

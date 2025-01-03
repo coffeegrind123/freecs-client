@@ -27,7 +27,7 @@ Used in the Escape mode (es_* maps).
 */
 
 class
-func_escapezone:NSBrushTrigger
+func_escapezone:ncBrushTrigger
 {
 	void func_escapezone(void);
 

@@ -116,12 +116,12 @@ HUD_DrawNums(float fNumber, vector vecPos, float fAlpha, vector vColor)
 
 /* timer */
 void
-HUD_DrawTimer(int NSClientSpectator)
+HUD_DrawTimer(int ncSpectator)
 {
 	int iMinutes, iSeconds, iTens, iUnits;
 	vector time_pos;
 	
-	if (NSClientSpectator) {
+	if (ncSpectator) {
 		time_pos = g_hudmins + [(g_hudres[0] / 2) - 62, 16];
 	} else {
 		time_pos = g_hudmins + [(g_hudres[0] / 2) - 62, g_hudres[1] - 42];

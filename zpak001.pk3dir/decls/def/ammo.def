@@ -15,6 +15,7 @@ entityDef ammo_types {
 	"ammo_hegrenade"		"11"
 	"ammo_smokegrenade"		"12"
 	"ammo_flashbang"		"13"
+	"ammo_c4"				"14"
 }
 
 entityDef ammo_names {
@@ -23,15 +24,16 @@ entityDef ammo_names {
 	"ammo_357sig"			".357 SIG"
 	"ammo_45acp"			".45 ACP"
 	"ammo_50ae"				".50 Action Express"
-	"ammo_556nato"			"5.56×45mm NATO"
-	"ammo_556natobox"		"5.56×45mm NATO BOX"
-	"ammo_57mm"				"FN 5.7×28mm"
-	"ammo_762nato"			"7.62×51mm NATO"
-	"ammo_9mm"				"9×19mm Parabellum"
+	"ammo_556nato"			"5.56x45mm NATO"
+	"ammo_556natobox"		"5.56x45mm NATO BOX"
+	"ammo_57mm"				"FN 5.7x28mm"
+	"ammo_762nato"			"7.62x51mm NATO"
+	"ammo_9mm"				"9x19mm Parabellum"
 	"ammo_buckshot"			"Buckshot"
 	"ammo_hegrenade"		"HE Grenade"
 	"ammo_smokegrenade"		"Smoke Grenade"
 	"ammo_flashbang"		"Flashbang"
+	"ammo_c4"				"C4"
 }
 
 entityDef ammo_max {
@@ -49,12 +51,12 @@ entityDef ammo_max {
 	"ammo_hegrenade"		"1"
 	"ammo_smokegrenade"		"1"
 	"ammo_flashbang"		"2"
+	"ammo_c4"		"1"
 }
 
 
 // these don't exist as pickups in the game, but 
 // might be helpful nonetheless for level designers
-
 #include "ammo/base.def"
 #include "ammo/556natobox.def"
 #include "ammo/338magnum.def"

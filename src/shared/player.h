@@ -15,13 +15,13 @@
  */
 
 /** @brief Get entity by class name and index **/
-NSEntity
+ncEntity
 GetEntityByNameAndIndex(string name, int index)
 {
 	int curIndex = 0;
 	for (entity a = world; (a = find(a, ::classname, name));) {
 		if (curIndex == index) {
-			return (NSEntity)a;
+			return (ncEntity)a;
 		}
 		++curIndex;
 	}
@@ -36,21 +36,21 @@ GetEntityByNameAndIndex(string name, int index)
  *  When there are for example 2 bombsites (g_cs_bombzones == 2) then valid
  *  indexes would be 0 and 1.
  * */
-NSEntity
+ncEntity
 GetBombsiteByIndex(int index)
 {
 	return GetEntityByNameAndIndex("func_bomb_target", index);
 }
 
 /** @brief Get Escape Zone entity by index **/
-NSEntity
+ncEntity
 GetEscapeZoneByIndex(int index)
 {
 	return GetEntityByNameAndIndex("func_escapezone", index);
 }
 
 /** @brief Get VIP Safety Zone entity by index **/
-NSEntity
+ncEntity
 GetVIPSafetyZoneByIndex(int index)
 {
 	return GetEntityByNameAndIndex("func_vip_safetyzone", index);
@@ -77,10 +77,11 @@ CSPlayer:HLPlayer
 	PREDICTED_INT(cs_hor_rec_sign)
 	PREDICTED_FLOAT(cs_rec_reverse_chance)
 
-	virtual void(float) Physics_Fall;
-	virtual void(void) Physics_Jump;
+	virtual void Physics_Fall(float);
+	virtual void Physics_Jump(void);
+	virtual void Physics_InputPreMove(void);
 
-	virtual void(void) Physics_InputPostMove;
+	virtual void Physics_InputPostMove(void);
 
 #ifdef CLIENT
 	int playertype;
@@ -171,9 +172,23 @@ CSPlayer::CSPlayer(void)
 #endif
 }
 
-float punchangle_recovery(float punchangle) {
+void
+CSPlayer::Physics_InputPreMove(void)
+{
+	super::Physics_InputPreMove();
+	
+
+	gflags &= ~GF_BUYZONE;
+	gflags &= ~GF_RESCUEZONE;
+	gflags &= ~GF_BOMBZONE;
+}
+
+float
+punchangle_recovery(float punchangle)
+{
 	return 0.05 * (-0.2 * pow(1.2, fabs(punchangle)) + 4);
 }
+
 void
 CSPlayer::Physics_InputPostMove(void)
 {
@@ -181,14 +196,15 @@ CSPlayer::Physics_InputPostMove(void)
 	float punch;
 	/* timers, these are predicted and shared across client and server */
 	w_attack_next = max(0, w_attack_next - input_timelength);
+	w_reload_next = max(0, w_reload_next - input_timelength);
 	w_idle_next = max(0, w_idle_next - input_timelength);
 	weapontime += input_timelength;
 	punch = max(0, 1.0f - (input_timelength * 4));
 	if (punchangle[0] < 0) {
 		punchangle[0] += punchangle_recovery(punchangle[0]);
 	}
-	punchangle[1] *= .98;
-	punchangle[2] *= .99;
+	punchangle[1] *= punch;
+	punchangle[2] *= punch;
 
 	/* player animation code */
 	UpdatePlayerAnimation(input_timelength);
@@ -217,7 +233,7 @@ CSPlayer::ReceiveEntity
 void
 CSPlayer::ReceiveEntity(float flIsNew, float flChanged)
 {
-	NSClientPlayer::ReceiveEntity(flIsNew, flChanged);
+	ncPlayer::ReceiveEntity(flIsNew, flChanged);
 
 	/* animation */
 	READENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
@@ -326,8 +342,8 @@ CSPlayer::Bot_RunToConfront(void)
 void
 CSPlayer::Bot_RunToBomb(void)
 {
-	NSEntity e = __NULL__;
-	e = (NSEntity)find(e, ::model, "models/w_c4.mdl");
+	ncEntity e = __NULL__;
+	e = (ncEntity)find(e, ::model, "models/w_c4.mdl");
 
 	if (e) {
 		RouteToPosition(e.WorldSpaceCenter());
@@ -339,7 +355,7 @@ CSPlayer::Bot_RunToBomb(void)
 void
 CSPlayer::Bot_RunToBombsite(int bombsiteIndex)
 {
-	NSEntity e = GetBombsiteByIndex(bombsiteIndex);
+	ncEntity e = GetBombsiteByIndex(bombsiteIndex);
 	RouteToPosition(e.WorldSpaceCenter());
 	ChatSayTeam(strcat("Going to run to Bomb Site ", itos(bombsiteIndex), "!"));
 }
@@ -355,7 +371,7 @@ CSPlayer::Bot_RunToRandomBombsite(void)
 void
 CSPlayer::Bot_RunToEscapeZone(int index)
 {
-	NSEntity e = GetEscapeZoneByIndex(index);
+	ncEntity e = GetEscapeZoneByIndex(index);
 	RouteToPosition(e.WorldSpaceCenter());
 	ChatSayTeam(strcat("Going to run to Escape Zone ", itos(index), "!"));
 }
@@ -371,7 +387,7 @@ CSPlayer::Bot_RunToRandomEscapeZone(void)
 void
 CSPlayer::Bot_RunToVIPSafetyZone(int index)
 {
-	NSEntity e = GetVIPSafetyZoneByIndex(index);
+	ncEntity e = GetVIPSafetyZoneByIndex(index);
 	RouteToPosition(e.WorldSpaceCenter());
 	ChatSayTeam(strcat("Going to run to VIP Safety Zone ", itos(index), "!"));
 }
@@ -386,9 +402,9 @@ CSPlayer::Bot_RunToRandomVIPSafetyZone(void)
 void
 CSPlayer::Bot_RunToHostages(void)
 {
-	NSEntity e = __NULL__;
+	ncEntity e = __NULL__;
 
-	e = (NSEntity)find(e, ::classname, "hostage_entity");
+	e = (ncEntity)find(e, ::classname, "hostage_entity");
 
 	RouteToPosition(e.origin);
 	ChatSayTeam("Going to run to the hostages!");
@@ -514,7 +530,7 @@ CSPlayer::Bot_CreateObjective(void)
 				}
 				else {
 					/* T-bot: check if the bomb has been dropped */
-					NSEntity e = (NSEntity)find(world, ::model, "models/w_backpack.mdl");
+					ncEntity e = (ncEntity)find(world, ::model, "models/w_backpack.mdl");
 
 					if (e != __NULL__) {
 						/* The bomb backpack has been dropped */
@@ -741,7 +757,7 @@ CSPlayer::SendEntity(entity ePEnt, float flChanged)
 
 	flChanged = OptimiseChangedFlags(ePEnt, flChanged);
 
-	NSClientPlayer::SendEntity(ePEnt, flChanged);
+	ncPlayer::SendEntity(ePEnt, flChanged);
 
 	SENDENTITY_BYTE(anim_top, PLAYER_TOPFRAME)
 	SENDENTITY_FLOAT(anim_top_time, PLAYER_TOPFRAME)
@@ -776,7 +792,7 @@ CSPlayer::Physics_Fall(float impactspeed)
 		float impactDamage = (impactspeed - 580) * (100 / (1024 - 580)) * 0.75f;
 
 		/* this is kinda ugly, but worth the price */
-		NSDict damageDecl = spawn(NSDict);
+		ncDict damageDecl = spawn(ncDict);
 		damageDecl.AddKey("damage", ftos((int)impactDamage));
 		Damage(this, this, damageDecl, 1.0, g_vec_null, origin);
 		remove(damageDecl);

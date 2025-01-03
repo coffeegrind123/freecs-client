@@ -29,27 +29,31 @@ public:
 	virtual void UpdateGUI(void);
 #endif
 
+	virtual bool CanFire(void);
 	virtual void Draw(void);
-	virtual void SecondaryAttack(void);
 	virtual void Release(void);
 	virtual void FiredWeaponAttack(string);
 	virtual void SwitchedToWeapon(void);
-
-#ifdef CLIENT
-private:
-	int m_iHudSlot;
-	int m_iHudSlotPos;
-
-	string m_ammoIcon;
-	string m_crossHair;
-	NSWeapon m_nextWeapon;
-#endif
 };
 
 void
 CSWeapon::CSWeapon(void)
 {
 
+}
+
+bool
+CSWeapon::CanFire(void)
+{
+	bool returnValue = super::CanFire();
+	
+	if (returnValue == true) {
+		if (!owner.gflags & GF_BOMBZONE && GetSpawnBool("onlyInBombZone")) {
+			returnValue = false;
+		}
+	}
+
+	return (returnValue);
 }
 
 void
@@ -59,37 +63,15 @@ CSWeapon::SwitchedToWeapon(void)
 }
 
 void
-CSWeapon::SecondaryAttack(void)
-{
-	if (GetDefBool("altSilences") == true) {
-		if (CanFire() == false) {
-			return;
-		}
-
-		float silAnimation = 0;
-		float silTime;
-
-		m_iMode = 1 - m_iMode;
-
-		if (m_iMode)
-			silAnimation = GetDefAct("actAddSil");
-		else
-			silAnimation = GetDefAct("actDetachSil");
-
-		SetWeaponFrame(silAnimation);
-		silTime = frameduration(m_viewModel, silAnimation);
-		SetAttackNext(silTime);
-		SetIdleNext(silTime + 1.0f);
-		return;
-	}
-
-	super::SecondaryAttack();
-}
-
-void
 CSWeapon::FiredWeaponAttack(string defName)
 {
 	CSPlayer ourOwner = (CSPlayer)owner;
+
+	if (GetSubDefBool(defName, "csWeaponMode") == false) {
+		super::FiredWeaponAttack(defName);
+		return;
+	}
+
 	int numProjectiles = GetSubDefInt(defName, "numProjectiles");
 	string traceInfo = GetSubDefString(defName, "def_onFire");
 	float flAccuracyDivisor = GetSubDefFloat(defName,"accuracyDivisor");

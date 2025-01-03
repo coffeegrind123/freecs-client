@@ -18,11 +18,11 @@ void
 VGUI_ShowMOTD(void)
 {
 	static int initialized;
-	static VGUIButton winMotdClose;
-	static VGUIWindow winMotd;
-	static VGUILabel winMotdHostname;
-	static VGUILabel winMotdBody;
-	static VGUIFrame frmWindow;
+	static vguiButton winMotdClose;
+	static vguiWindow winMotd;
+	static vguiLabel winMotdHostname;
+	static vguiLabel winMotdBody;
+	static vguiFrame frmWindow;
 	
 	static void VGUI_ShowMOTD_Close(void)
 	{
@@ -35,27 +35,27 @@ VGUI_ShowMOTD(void)
 
 	if (!initialized) {
 		initialized = TRUE;
-		winMotd = spawn(VGUIWindow);
+		winMotd = spawn(vguiWindow);
 		winMotd.SetTitle("Message Of The Day");
-		winMotd.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
+		winMotd.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 		winMotd.SetSize('424 312');
 
-		frmWindow = spawn(VGUIFrame);
+		frmWindow = spawn(vguiFrame);
 		frmWindow.SetPos('0 0');
 		frmWindow.SetSize('424 312');
 
-		winMotdClose = spawn(VGUIButton);
+		winMotdClose = spawn(vguiButton);
 		winMotdClose.SetTitle("OK");
 		winMotdClose.SetPos([16, 266]);
 		winMotdClose.SetSize([160, 30]);
 		winMotdClose.SetFunc(VGUI_ShowMOTD_Close);
 
-		winMotdHostname = spawn(VGUILabel);
+		winMotdHostname = spawn(vguiLabel);
 		winMotdHostname.SetTitle(serverkey("hostname"));
 		winMotdHostname.SetTextSize(19);
 		winMotdHostname.SetPos([16, 20]);
 
-		winMotdBody = spawn(VGUILabel);
+		winMotdBody = spawn(vguiLabel);
 		winMotdBody.SetTitle(MOTD_GetTextBody());
 		winMotdBody.SetPos([16, 48]);
 		winMotdBody.SetSize([392, 210]);

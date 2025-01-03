@@ -18,7 +18,7 @@
 #define SPEC_FG_COL [0.561,0.561,0.212]
 
 class
-CSSpectateHUD:VGUIWidget
+CSSpectateHUD:vguiWidget
 {
 	void CSSpectateHUD(void);
 
@@ -39,7 +39,7 @@ CSSpectateHUD::Draw(void)
 	float flSep;
 	string strText;
 	int iMinutes, iSeconds;
-	NSClientSpectator spec = (NSClientSpectator)pSeat->m_ePlayer;
+	ncSpectator spec = (ncSpectator)pSeat->m_ePlayer;
 	float moneyValue = getplayerkeyfloat(player_localnum, "*money");
 
 	/* parts on top and bottom */

@@ -28,7 +28,7 @@ Once the bomb explodes inside this volume, it'll trigger its targets.
 */
 
 class
-func_bomb_target:NSBrushTrigger
+func_bomb_target:ncBrushTrigger
 {
 	void(void) func_bomb_target;
 

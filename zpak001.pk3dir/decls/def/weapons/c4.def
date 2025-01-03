@@ -11,16 +11,19 @@ entityDef weapon_c4
 	"model_view"		"models/v_c4.mdl"
 	"snd_acquire"		"weapon.pickup"
 	"snd_respawn"		"item.respawn"
+	"ammoRequired"		"1"
 
-	"def_plant"			"item_c4"
+	"def_fireInfo"		"fireInfo_c4Plant"
 	"inv_name"			"C4 Bomb Weapon"
-	"clipSize"			"1"
+	"ammoType"			"ammo_c4"
+	"inv_ammo_c4"		"1"
 	"trigger_delay"		"3"	// takes three seconds to charge
 
 	"act_fire"			"2"
+	"act_fireFailed"	"0"
 	"act_draw"			"1"
 	"act_idle"			"0"
-	"actDelay"			"3"
+	"act_delay"			"3"
 
 	"snd_fire"			"C4.PlantSound"
 
@@ -30,4 +33,23 @@ entityDef weapon_c4
 	"hudSlotPos"		"0"
 	"weight"			"0"
 	"team"				"1"	// Terrorists only!
+	"onlyInBombZone"	"1"
+	"removeOnEmpty"		"1"
+}
+
+entityDef fireInfo_c4Plant
+{
+	"def_onFire"		"projectile_c4bomb"
+	"testDistance"		"-64"
+	"chargeTime"		"3"
+}
+
+entityDef projectile_c4bomb
+{
+	"spawnclass"		"ncAttack"
+	"def_plant"			"item_c4"
+	"plant"				"1"
+	"plantOnGround"		"1"
+	"plantDistance"		"64"
+	"plantOffset"		"8"
 }

@@ -17,7 +17,7 @@ entityDef weapon_glock18
 	"act_fireLast"		"6"
 	"act_holster"		"9"
 	"act_reload"			"7,12"
-	"act_draw"			"9,11"
+	"act_draw"			"8,11"
 	"act_idle"			"0,1,2"
 
 	"snd_fire"		"Weapon_Glock.Single"

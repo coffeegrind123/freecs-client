@@ -14,10 +14,10 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-static VGUIWindow winBuyMenu;
-static VGUILabel lblCategoryDescr;
+static vguiWindow winBuyMenu;
+static vguiLabel lblCategoryDescr;
 
-class CSBuyMenuButton:VGUIButton
+class CSBuyMenuButton:vguiButton
 {
 	void CSBuyMenuButton(void);
 
@@ -110,9 +110,9 @@ VGUI_BuyMenu(void)
 	static CSBuyMenuButton btnPrimAmmo;
 	static CSBuyMenuButton btnSecAmmo;
 	static CSBuyMenuButton btnEquipment;
-	static VGUIButton btnCancel;
-	static VGUILabel lblSelectTeam;
-	static VGUIFrame frmBuyInfo;
+	static vguiButton btnCancel;
+	static vguiLabel lblSelectTeam;
+	static vguiFrame frmBuyInfo;
 
 	static void VGUI_BuyMenu_Cancel(void) {
 		winBuyMenu.Hide();
@@ -122,21 +122,21 @@ VGUI_BuyMenu(void)
 		vector btnpos = [40,80];
 
 		initialized = TRUE;
-		winBuyMenu = spawn(VGUIWindow);
+		winBuyMenu = spawn(vguiWindow);
 		winBuyMenu.SetSize('640 480');
-		winBuyMenu.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
+		winBuyMenu.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
-		lblSelectTeam = spawn(VGUILabel);
+		lblSelectTeam = spawn(vguiLabel);
 		lblSelectTeam.SetTitle(Titles_GetTextBody("Title_select_category_of_purchase"));
 		lblSelectTeam.SetTextSize(19);
 		lblSelectTeam.SetPos([40, 38]);
 		lblSelectTeam.SetSize('400 24');
 
-		frmBuyInfo = spawn(VGUIFrame);
+		frmBuyInfo = spawn(vguiFrame);
 		frmBuyInfo.SetPos('176 80');
 		frmBuyInfo.SetSize('200 100');
 
-		lblCategoryDescr = spawn(VGUILabel);
+		lblCategoryDescr = spawn(vguiLabel);
 		lblCategoryDescr.SetTitle("");
 		lblCategoryDescr.SetPos('185 90');
 		lblCategoryDescr.SetSize('375 250');

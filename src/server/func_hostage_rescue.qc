@@ -29,7 +29,7 @@ zones will be placed in Counter-Terrorist player spawn nodes automatically.
 */
 
 class
-func_hostage_rescue:NSBrushTrigger
+func_hostage_rescue:ncBrushTrigger
 {
 	void(void) func_hostage_rescue;
 

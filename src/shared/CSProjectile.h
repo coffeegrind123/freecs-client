@@ -15,12 +15,13 @@
 */
 
 class
-CSProjectile:NSProjectile
+CSProjectile:ncProjectile
 {
 public:
 	void CSProjectile(void);
 
 #ifdef SERVER
+	virtual void HasExploded(void);
 	nonvirtual void SetRangeModifier(float);
 	nonvirtual void SetPenetrationMaxThickness(float);
 	nonvirtual void SetPenetrationPower(int);

@@ -41,7 +41,7 @@ Choices for 'team' include:
 */
 
 class
-func_buyzone:NSBrushTrigger
+func_buyzone:ncBrushTrigger
 {
 	void(void) func_buyzone;
 

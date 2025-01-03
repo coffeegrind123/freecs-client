@@ -29,7 +29,7 @@ If neither a info_hostage_rescue or a func_hostage_rescue is placed,
 zones will be placed in Counter-Terrorist player spawn nodes automatically.
 */
 
-class info_hostage_rescue:NSPointTrigger
+class info_hostage_rescue:ncPointTrigger
 {
 	void(void) info_hostage_rescue;
 
@@ -62,7 +62,7 @@ info_hostage_rescue::Touch(entity eToucher)
 		return;
 	}
 
-	NSTalkMonster hosty = (NSTalkMonster)other;
+	ncTalkMonster hosty = (ncTalkMonster)other;
 
 	if (hosty.GetSolid() == SOLID_NOT) {
 		return;

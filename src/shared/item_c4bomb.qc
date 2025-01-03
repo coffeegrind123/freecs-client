@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class CSBombEntity:NSRenderableEntity
+class CSBombEntity:ncRenderableEntity
 {
 public:
 	void CSBombEntity(void);
@@ -135,7 +135,7 @@ CSBombEntity::Logic(void)
 	/* if our time has passed, explode */
 	if (m_flExplodeTime < time) {
 		float bestDist = 9999.0f;
-		NSEntity bestTarget = __NULL__;
+		ncEntity bestTarget = __NULL__;
 		g_grMode.Input(m_eUser, "BombExploded", "");
 
 		combat.RadiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner, "");
@@ -149,7 +149,7 @@ CSBombEntity::Logic(void)
 
 			if (dist < bestDist) {
 				bestDist = dist;
-				bestTarget = (NSEntity)e;
+				bestTarget = (ncEntity)e;
 			}
 		}
 

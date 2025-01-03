@@ -1,7 +1,7 @@
 // other equipment
 entityDef item_kevlar_helmet
 {
-	"spawnclass"	"NSItem"
+	"spawnclass"	"ncItem"
 	"model"			"models/w_kevlar.mdl"
 	"mins"			"-16 -16 0"
 	"maxs"			"16 16 16"

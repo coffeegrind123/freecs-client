@@ -1,6 +1,7 @@
 #pragma target fte_5768
 //#pragma flag enable assumeint
 #pragma progs_dat  "../../csprogs.dat"
+#pragma forcecrc 54730
 
 #define CSQC
 #define CLIENT

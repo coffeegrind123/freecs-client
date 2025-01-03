@@ -15,20 +15,6 @@
  */
 
 void
-Game_InitRules(void)
-{
-	if (cvar("sv_playerslots") == 1 || cvar("coop") == 1) {
-			g_grMode = NSGameRules::InitFromProgs("progs/singleplayer.dat");
-	} else {
-		if (cvar("fcs_deathmatch") == 1) {
-			g_grMode = NSGameRules::InitFromProgs("progs/deathmatch.dat");
-		} else {
-			g_grMode = NSGameRules::InitFromProgs("progs/counterstrike.dat");
-		}
-	}
-}
-
-void
 Game_Worldspawn(void)
 {
 	precache_sound("weapons/ric_metal-2.wav");
@@ -42,6 +28,4 @@ Game_Worldspawn(void)
 	Sound_Precache("player.headshotarmor");
 	Sound_Precache("Player.FlashLightOff");
 	Sound_Precache("Player.FlashLightOn");
-
-	FX_Corpse_Init();
 }

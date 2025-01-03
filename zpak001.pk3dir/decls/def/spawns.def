@@ -4,7 +4,7 @@ entityDef info_player_start
 	"editor_maxs" "16 16 36"
 	"editor_description" "Singleplayer Spawn Point"
 	"editor_color" "1 0 0"
-	"spawnclass" "NSSpawnPoint"
+	"spawnclass" "ncSpawnPoint"
 }
 
 entityDef info_player_deathmatch
@@ -13,7 +13,7 @@ entityDef info_player_deathmatch
 	"editor_maxs" "16 16 36"
 	"editor_description" "Deathmatch Spawn Point"
 	"editor_color" "1 0 0"
-	"spawnclass" "NSSpawnPoint"
+	"spawnclass" "ncSpawnPoint"
 }
 
 entityDef info_player_coop
@@ -22,5 +22,5 @@ entityDef info_player_coop
 	"editor_maxs" "16 16 36"
 	"editor_description" "Cooperative Spawn Point"
 	"editor_color" "1 0 0"
-	"spawnclass" "NSSpawnPoint"
+	"spawnclass" "ncSpawnPoint"
 }

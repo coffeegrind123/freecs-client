@@ -14,10 +14,10 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-static VGUIWindow winBuyMenuPage;
-static VGUILabel lblBuyItemDescr;
-static VGUILabel lblBuyItemTitle;
-static VGUIPic imgBuyItemPic;
+static vguiWindow winBuyMenuPage;
+static vguiLabel lblBuyItemDescr;
+static vguiLabel lblBuyItemTitle;
+static vguiPic imgBuyItemPic;
 
 /* these id's are for the button tags only */
 typedef enum
@@ -104,7 +104,7 @@ const buyItems_t g_buyItemList [] = {
 
 string g_butItemDescr[29];
 
-class CSBuyItemButton:VGUIButton
+class CSBuyItemButton:vguiButton
 {
 	void CSBuyItemButton(void);
 
@@ -150,9 +150,9 @@ void
 VGUI_BuyMenu_Page(int buyPage)
 {
 	static int initialized;
-	static VGUIButton btnCancel;
-	static VGUIFrame frmBuyInfo;
-	static VGUILabel lblBuyScreenTitle;
+	static vguiButton btnCancel;
+	static vguiFrame frmBuyInfo;
+	static vguiLabel lblBuyScreenTitle;
 
 	static CSBuyItemButton btnBuyItem1;
 	static CSBuyItemButton btnBuyItem2;
@@ -176,29 +176,29 @@ VGUI_BuyMenu_Page(int buyPage)
 		vector btnpos = [40,80];
 
 		initialized = TRUE;
-		winBuyMenuPage = spawn(VGUIWindow);
+		winBuyMenuPage = spawn(vguiWindow);
 		winBuyMenuPage.SetSize([640,480]);
-		winBuyMenuPage.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
+		winBuyMenuPage.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
-		lblBuyScreenTitle = spawn(VGUILabel);
+		lblBuyScreenTitle = spawn(vguiLabel);
 		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_select_category_of_purchase"));
 		lblBuyScreenTitle.SetTextSize(19);
 		lblBuyScreenTitle.SetPos([40, 38]);
 		lblBuyScreenTitle.SetSize('400 24');
 
-		frmBuyInfo = spawn(VGUIFrame);
+		frmBuyInfo = spawn(vguiFrame);
 		frmBuyInfo.SetPos('176 80');
 		frmBuyInfo.SetSize('424 312');
 
-		lblBuyItemDescr = spawn(VGUILabel);
+		lblBuyItemDescr = spawn(vguiLabel);
 		lblBuyItemDescr.SetTitle("");
 		lblBuyItemDescr.SetPos('185 190');
 		lblBuyItemDescr.SetSize('408 250');
 
-		imgBuyItemPic = spawn(VGUIPic);
+		imgBuyItemPic = spawn(vguiPic);
 		imgBuyItemPic.SetPos([260, 130]);
 
-		lblBuyItemTitle = spawn(VGUILabel);
+		lblBuyItemTitle = spawn(vguiLabel);
 		lblBuyItemTitle.SetPos([185, 96]);
 		lblBuyItemTitle.SetTextSize(19);
 		lblBuyItemTitle.SetSize([390, 24]);
@@ -257,7 +257,7 @@ VGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem9.SetKeyEquivalent("9");
 		btnBuyItem9.SetFunc(VGUI_BuyMenu_Pistols_Cancel);
 
-		btnCancel = spawn(VGUIButton);
+		btnCancel = spawn(vguiButton);
 		btnCancel.SetTitle(Titles_GetTextBody("Menu_Cancel"));
 		btnCancel.SetPos('40 368');
 		btnCancel.SetSize('124 24');

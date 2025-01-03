@@ -79,15 +79,15 @@ enum
 	HOSA_DEADTABLE3
 };
 
-class CSHostage:NSTalkMonster
+class CSHostage:ncTalkMonster
 {
 	bool m_bUsedOnce;
 
 	void CSHostage(void);
 
 	virtual void OnPlayerUse(void);
-	virtual void Pain(entity, entity, int, vector, int);
-	virtual void Death(entity, entity, int, vector, int);
+	virtual void Pain(entity, entity, int, vector, vector, int);
+	virtual void Death(entity, entity, int, vector, vector, int);
 
 };
 
@@ -123,19 +123,19 @@ CSHostage::OnPlayerUse(void)
 		m_bUsedOnce = true;
 	}
 
-	NSTalkMonster::OnPlayerUse();
+	ncTalkMonster::OnPlayerUse();
 }
 
 void
-CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, int location)
+CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, vector absImpactPos, int hitBody)
 {
-	super::Pain(inflictor, attacker, damageDealt, dir, location);
+	super::Pain(inflictor, attacker, damageDealt, dir, absImpactPos, hitBody);
 
 	if (IsAlive() == false) {
 		return;
 	}
 
-	switch (location) {
+	switch (hitBody) {
 	case BODY_HEAD:
 	case BODY_DEFAULT:
 	case BODY_CHEST:
@@ -165,12 +165,12 @@ CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, 
 }
 
 void
-CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir, int location)
+CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir, vector absImpactPos, int hitBody)
 {
 	WarnAllies();
 
 	if (IsAlive() == true) {
-		switch (location) {
+		switch (hitBody) {
 		case BODY_HEAD:
 			SetFrame(HOSA_DIE_HEADSHOT);
 			break;
@@ -191,6 +191,6 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 	SetHealth(0);
 
 	/* now mark our state as 'dead' */
-	super::Death(inflictor, attacker, damageDealt, dir, location);
+	super::Death(inflictor, attacker, damageDealt, dir, absImpactPos, hitBody);
 	SetSolid(SOLID_NOT);
 }

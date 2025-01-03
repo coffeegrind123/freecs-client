@@ -7,7 +7,7 @@ entityDef weapon_xm1014
 	"model_view"		"models/v_xm1014.mdl"
 
 	"inv_name"			"Benneli XM1014 Weapon"
-	"def_fireInfo"	"fireInfo_xm1014"
+	"def_fireInfo"		"fireInfo_xm1014"
 	"clipSize"			"7"
 
 	"ammoType"			"ammo_buckshot"

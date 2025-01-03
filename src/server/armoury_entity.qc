@@ -97,7 +97,7 @@ string g_cstrike_armourymodels[19] = {
 	"models/w_smokegrenade.mdl"
 };
 
-class armoury_entity:NSRenderableEntity
+class armoury_entity:ncRenderableEntity
 {
 	int m_iCount;
 	int m_iLeft;

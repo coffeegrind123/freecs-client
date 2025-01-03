@@ -17,14 +17,14 @@
 #define CSRADAR_DISTANCE 1024
 
 var string g_cs_radar;
-var NSRadar g_csRadar;
+var ncRadar g_csRadar;
 
 void
 Radar_Init(void)
 {
 	g_cs_radar = spriteframe("sprites/radar640.spr", 0, 0.0f);
 
-	g_csRadar = NSRadar::InitEmpty();
+	g_csRadar = ncRadar::InitEmpty();
 }
 
 void

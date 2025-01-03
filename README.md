@@ -44,14 +44,19 @@ Here's the quick and dirty instructions for those unfamilar:
 ```
 $ git clone https://code.idtech.space/vera/nuclide Nuclide-SDK
 $ cd Nuclide-SDK
-$ ./build_engine.sh # (only required if you don't have an up-to-date FTEQW & FTEQCC in your PATH)
+
+# (only required if you don't have an up-to-date FTEQW & FTEQCC in your PATH)
+$ make update
+$ make fteqw
+
+# build the menu (from valve/) then our own game-logic:
 $ git clone https://code.idtech.space/fn/valve valve
 $ git clone https://code.idtech.space/fn/cstrike cstrike
-$ SKIP_UPDATE=1 SKIP_RADIANT=1 ./build_game.sh valve
-$ SKIP_UPDATE=1 SKIP_RADIANT=1 ./build_game.sh cstrike
+$ make game GAME=valve
+$ make game GAME=cstrike
 ```
 
-You can also issue `make` inside `valve/src/` and `cstrike/src`, but it won't build an `entities.def` file for use in Radiant (level editor family).
+You can also issue `make` inside `valve/src/` and `cstrike/src`, but it won't generate some additional helper files.
 
 ** !! You need to also provide data-files !! **
 

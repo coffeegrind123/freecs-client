@@ -22,6 +22,21 @@ CSProjectile::CSProjectile(void)
 
 #ifdef SERVER
 void
+CSProjectile::HasExploded(void)
+{
+	float flashTime = GetSpawnFloat("flashTime");
+	float smokeTime = GetSpawnFloat("smokeTime");
+
+	if (flashTime > 0.0f) {
+		FX_Flashbang(GetOrigin());
+	}
+
+	if (smokeTime > 0.0f) {
+		FX_Smokenade(GetOrigin());
+	}
+}
+
+void
 CSProjectile::SetRangeModifier(float rangeModifier)
 {
 	m_flRangeModifier = rangeModifier;
@@ -143,7 +158,7 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 	if (trace_ent.takedamage != DAMAGE_NO && trace_ent.iBleeds) {
 		Sound_Play(trace_ent, CHAN_BODY, "damage_bullet.hit");
 
-		NSClientPlayer pl = (NSClientPlayer)trace_ent;
+		ncPlayer pl = (ncPlayer)trace_ent;
 		/* modify the damage based on the location */
 		switch (trace_surface_id) {
 		case BODY_HEAD:
@@ -183,7 +198,7 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 		if (trace_ent != m_eMultiTarget) {
 			trace_endpos = endPos;
 			_ApplyDamage();
-			m_eMultiTarget = (NSSurfacePropEntity)trace_ent;
+			m_eMultiTarget = (ncSurfacePropEntity)trace_ent;
 			m_iMultiValue = flDamage;
 		} else {
 			m_iMultiValue += flDamage;
@@ -214,7 +229,7 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 }
 
 CSProjectile
-CSProjectile_SpawnDef(string entityDef, NSEntity theOwner, float rangeMod, int power, vector spread)
+CSProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread)
 {
 	entity oldself = self;
 

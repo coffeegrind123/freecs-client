@@ -59,15 +59,6 @@ switch (fHeader) {
 	case EV_VIEWMODEL:
 		View_PlayAnimation(readbyte());
 		break;
-	case EV_WEAPON_PICKUP:
-		int w = readbyte();
-
-		if (autocvar_cl_autoweaponswitch == 1) {
-			sendevent("PlayerSwitchWeapon", "i", w);
-		}
-
-		HUD_WeaponPickupNotify(w);
-		break;
 	case EV_RADIOMSG:
 		Radio_PlayMessage(readbyte());
 		break;

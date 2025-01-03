@@ -26,7 +26,7 @@ See func_buyzone for more information.
 */
 
 class
-info_buyzone:NSPointTrigger
+info_buyzone:ncPointTrigger
 {
 	void info_buyzone(void);
 

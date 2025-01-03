@@ -46,10 +46,10 @@ FX_Flashbang(vector org)
 		/* send the blinding env_fade event */
 		WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
 		WriteByte(MSG_MULTICAST, EV_FADE);
-		WriteFloat(MSG_MULTICAST, 1.0f);
-		WriteFloat(MSG_MULTICAST, 1.0f);
-		WriteFloat(MSG_MULTICAST, 1.0f);
-		WriteFloat(MSG_MULTICAST, 1.0f);
+		WriteByte(MSG_MULTICAST, 255);
+		WriteByte(MSG_MULTICAST, 255);
+		WriteByte(MSG_MULTICAST, 255);
+		WriteByte(MSG_MULTICAST, 255);
 		WriteFloat(MSG_MULTICAST, blindness);
 		WriteFloat(MSG_MULTICAST, fade);
 		WriteByte(MSG_MULTICAST, EVF_FADEDROM);
@@ -57,4 +57,4 @@ FX_Flashbang(vector org)
 		multicast([0,0,0], MULTICAST_ONE_R);
 	}
 }
-#endif 
+#endif
