@@ -6,7 +6,6 @@
 ../../../cstrike/src/shared/animations.h
 ../../../cstrike/src/shared/animations.qc
 ../../../cstrike/src/shared/item_c4bomb.h
-../../../valve/src/shared/fx_blood.qc
 ../../../cstrike/src/shared/fx_flashbang.qc
 ../../../cstrike/src/shared/fx_smokenade.qc
 ../../../cstrike/src/shared/item_c4bomb.qc

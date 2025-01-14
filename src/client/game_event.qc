@@ -21,20 +21,6 @@ switch (fHeader) {
 	case EV_OBITUARY:
 		Obituary_Parse();
 		break;
-	case EV_BLOOD:
-		vector vBloodPos;
-		vector vBloodColor;
-
-		vBloodPos[0] = readcoord();
-		vBloodPos[1] = readcoord();
-		vBloodPos[2] = readcoord();
-
-		vBloodColor[0] = readbyte() / 255;
-		vBloodColor[1] = readbyte() / 255;
-		vBloodColor[2] = readbyte() / 255;
-
-		FX_Blood(vBloodPos, vBloodColor);
-		break;
 	case EV_SMOKE:
 		vector vSmokePos;
 		vSmokePos[0] = readcoord();

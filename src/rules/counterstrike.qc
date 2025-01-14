@@ -745,9 +745,9 @@ CodeCallback_StartGameType(void)
 	string spawnT;
 
 	/* players can buy these any time. so they should be precached for speed. */
-	ents.Precache("player_vip");
-	ents.Precache("player_terrorist");
-	ents.Precache("player_counterterrorist");
+	precache.Entity("player_vip");
+	precache.Entity("player_terrorist");
+	precache.Entity("player_counterterrorist");
 
 	spawnCT = entityDef.GetString("player_counterterrorist", "spawnpoint");
 	spawnT = entityDef.GetString("player_terrorist", "spawnpoint");

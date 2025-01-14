@@ -107,7 +107,6 @@ ClientGame_RendererRestart(string rstr)
 	Obituary_Precache();
 	Damage_Precache();
 
-	FX_Blood_Init();
 	FX_Smokenade_Init();
 	HLSprite_Init();
 

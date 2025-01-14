@@ -421,7 +421,7 @@ void CSPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
 	randLoc.y += cos(radian) * distance;
 
 	/* Go to the random waypoint. */
-	RouteToPosition(Nodes_PositionOfClosestNode(randLoc));
+	RouteToPosition(ncNavInfo::PositionOfClosestNode(randLoc));
 }
 
 void
