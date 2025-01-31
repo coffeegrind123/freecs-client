@@ -7,6 +7,7 @@
 #define SERVER
 #define VALVE
 #define CSTRIKE
+
 #define BULLETPENETRATION
 //#define BULLETPATTERNS
 
@@ -17,21 +18,21 @@
 ../../../src/botlib/botinfo.h
 ../../../src/gs-entbase/server.src
 ../../../src/gs-entbase/shared.src
-../shared/defs.h
-defs.h
-../shared/include.src
-hostage_entity.qc
-armoury_entity.qc
-func_bomb_target.qc
-func_buyzone.qc
-info_buyzone.qc
-func_escapezone.qc
-func_hostage_rescue.qc
-info_hostage_rescue.qc
-func_vip_safetyzone.qc
-info_map_parameters.qc
+../../../cstrike/src/shared/defs.h
+../../../cstrike/src/server/defs.h
+../../../cstrike/src/shared/include.src
+../../../cstrike/src/server/hostage_entity.qc
+../../../cstrike/src/server/armoury_entity.qc
+../../../cstrike/src/server/func_bomb_target.qc
+../../../cstrike/src/server/func_buyzone.qc
+../../../cstrike/src/server/info_buyzone.qc
+../../../cstrike/src/server/func_escapezone.qc
+../../../cstrike/src/server/func_hostage_rescue.qc
+../../../cstrike/src/server/info_hostage_rescue.qc
+../../../cstrike/src/server/func_vip_safetyzone.qc
+../../../cstrike/src/server/info_map_parameters.qc
 ../../../src/botlib/include.src
-server.qc
+../../../cstrike/src/server/server.qc
 ../../../src/server/include.src
 ../../../src/shared/include.src
 #endlist

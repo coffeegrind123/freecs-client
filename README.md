@@ -1,39 +1,15 @@
-# Tactical Retreat (FreeCS)
+# Tactical Retreat
 [As seen on phoronix.com](https://phoronix.com/scan.php?page=news_item&px=FreeCS-Open-Counter-Strike)
 
-Clean-room reimplementation of Counter-Strike 1.5 (mod-version).
-
-Aiming for a stable reimagining of the original mod in QuakeC.
-Not aiming for accuracy, but for a smooth, exploit and bug-free
-experience over the Internet.
-
-Done in my freetime for countless reasons, but most important to me: to learn everything there is to know about one of my favorite games.
-
-This is all 100% new, original code written by good old trial and error.
-**Differences exist** and features are slowly being implemented one by one.
-This allows the code to be fully free and unencumbered, unlike similar projects.
-
-Featuring proper weapon prediction to enable stress-free netplay.
-
-The engine you want to use to run this is FTEQW (https://www.fteqw.org), which is a project unrelated to this. It just happens to support the file-formats FreeHL needs.
+Allows you to play Counter-Strike 1.5 (mod-version) with Rad-Therapy.
 
 ![Preview 1](img/preview1.jpg)
 ![Preview 2](img/preview2.jpg)
 ![Preview 3](img/preview3.jpg)
 ![Preview 4](img/preview4.jpg)
 
-## Features and Improvements
-
-- Native support for Windows/Mac/Linux/BSD and wherever else FTEQW runs on
-- Better support for higher display modes and aspect ratios
-- Much easier modding by having the entire logic be in modern QuakeC
-- Netcode that's always improving and more advanced prediction
-- Open-source code for transparent modding
-- Very permissive license (ISC/BSD)
-- The code doesn't rely on others work, so nobody can shut it down :-)
-
 ## Installing 
-To run it, all you need is [FTEQW](https://www.fteqw.org), [FreeHL](https://www.frag-net.com/pkgs/package_valve.pk3), and [the latest release .pk3 file](https://www.frag-net.com/pkgs/package_cstrike.pk3), which you save into `Half-Life/valve/` and `Half-Life/cstrike/` respectively. That's about it. You can install updates through the **Configuration > Updates** menu from here on out.
+To run it, all you need is [FTEQW](https://www.fteqw.org), [Rad-Therapy](https://www.frag-net.com/pkgs/package_valve.pk3), and [the latest release .pk3 file](https://www.frag-net.com/pkgs/package_cstrike.pk3), which you save into `Half-Life/valve/` and `Half-Life/cstrike/` respectively. That's about it. You can install updates through the **Configuration > Updates** menu from here on out.
 
 ### Disclaimer
 Please **do not** file bugs if you see missing/broken content **while not** using the original Half-Life and Counter-Strike 1.5 data.
@@ -88,7 +64,7 @@ We've had people ask in the oddest of places for help, please don't do that.
 ## License
 ISC License
 
-Copyright (c) 2016-2024 Marco Cawthorne <marco@icculus.org>
+Copyright (c) 2016-2025 Marco "eukara" Cawthorne <marco@icculus.org>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

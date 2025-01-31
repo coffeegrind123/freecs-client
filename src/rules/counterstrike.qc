@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma PROGS_DAT  "../../zpak001.pk3dir/progs/counterstrike.dat"
+#pragma PROGS_DAT  "../../progs/counterstrike.dat"
 
 #include "../../../src/server/api.h"
 
