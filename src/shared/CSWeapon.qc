@@ -30,10 +30,26 @@ public:
 #endif
 
 	virtual bool CanFire(void);
-	virtual void Draw(void);
 	virtual void Release(void);
 	virtual void FiredWeaponAttack(string);
 	virtual void SwitchedToWeapon(void);
+	virtual void UpdateFireInfoCache(void);
+
+	int numProjectiles;
+	string traceInfo;
+	float accuracy;
+	float flAccuracyDivisor;
+	float flAccuracyMovementPenalty;
+	float flAccuracyMultiplier;
+	float flAccuracyAdd;
+	float flRangeModifier;
+	float flPenetrationPower;
+	float flBulletStrength;
+	float flMultiplierShots;
+	float flMultiplierStrength;
+	float flMultiplierInaccuracy;
+	vector bulletSpread;
+
 };
 
 void
@@ -72,21 +88,7 @@ CSWeapon::FiredWeaponAttack(string defName)
 		return;
 	}
 
-	int numProjectiles = GetSubDefInt(defName, "numProjectiles");
-	string traceInfo = GetSubDefString(defName, "def_onFire");
-	float flAccuracyDivisor = GetSubDefFloat(defName,"accuracyDivisor");
-	float flAccuracyMovementPenalty = GetSubDefFloat(defName,"accuracyMovementPenalty");
-	float flAccuracyMultiplier = GetSubDefFloat(defName,"accuracyMultiplier");
-	float flAccuracyAdd= GetSubDefFloat(defName,"accuracyAdd");
-	float flRangeModifier = GetSubDefFloat(defName,"rangeModifier");
-	float flPenetrationPower = GetSubDefFloat(defName,"penetrationPower");
-	float flBulletStrength = GetSubDefFloat(defName,"bulletStrength");
-	float flMultiplierShots = GetSubDefFloat(defName,"multiplierShots");
-	float flMultiplierStrength = GetSubDefFloat(defName,"multiplierStrength");
-	float flMultiplierInaccuracy = GetSubDefFloat(defName,"multiplierInaccuracy");
-	float accuracy = Cstrike_CalculateAccuracy(ourOwner, flAccuracyDivisor, flAccuracyMovementPenalty) / flAccuracyMultiplier;
-	accuracy += flAccuracyAdd;
-	vector bulletSpread = [accuracy, accuracy];
+
 
 	/* always fire at least 1 */
 	if (numProjectiles <= 0i) {
@@ -121,25 +123,41 @@ CSWeapon::FiredWeaponAttack(string defName)
 }
 
 void
-CSWeapon::Draw(void)
-{
-	super::Draw();
-
-#ifdef CLIENT
-	CSPlayer ourOwner = (CSPlayer)owner;
-	ourOwner.cs_cross_mindist = GetDefInt("crossMinDist");
-	ourOwner.cs_cross_deltadist = GetDefInt("crossDeltaDist");
-	CStrikeView_UpdateGeomset(ourOwner);
-#endif
-}
-
-void
 CSWeapon::Release(void)
 {
 	owner.v_angle = input_angles;
 	Cstrike_ShotMultiplierUpdate((CSPlayer)owner);
 	input_angles = owner.v_angle;
 	super::Release();
+}
+
+void
+CSWeapon::UpdateFireInfoCache(void)
+{
+	super::UpdateFireInfoCache();
+
+	numProjectiles = GetSubDefInt(m_strLastFireInfo, "numProjectiles");
+	traceInfo = GetSubDefString(m_strLastFireInfo, "def_onFire");
+	flAccuracyDivisor = GetSubDefFloat(m_strLastFireInfo,"accuracyDivisor");
+	flAccuracyMovementPenalty = GetSubDefFloat(m_strLastFireInfo,"accuracyMovementPenalty");
+	flAccuracyMultiplier = GetSubDefFloat(m_strLastFireInfo,"accuracyMultiplier");
+	flAccuracyAdd= GetSubDefFloat(m_strLastFireInfo,"accuracyAdd");
+	flRangeModifier = GetSubDefFloat(m_strLastFireInfo,"rangeModifier");
+	flPenetrationPower = GetSubDefFloat(m_strLastFireInfo,"penetrationPower");
+	flBulletStrength = GetSubDefFloat(m_strLastFireInfo,"bulletStrength");
+	flMultiplierShots = GetSubDefFloat(m_strLastFireInfo,"multiplierShots");
+	flMultiplierStrength = GetSubDefFloat(m_strLastFireInfo,"multiplierStrength");
+	flMultiplierInaccuracy = GetSubDefFloat(m_strLastFireInfo,"multiplierInaccuracy");
+	accuracy = Cstrike_CalculateAccuracy(owner, flAccuracyDivisor, flAccuracyMovementPenalty) / flAccuracyMultiplier;
+	accuracy += flAccuracyAdd;
+	bulletSpread = [accuracy, accuracy];
+
+#ifdef CLIENT
+	CSPlayer ourOwner = (CSPlayer)owner;
+	ourOwner.cs_cross_mindist = GetSubDefInt(m_strLastFireInfo, "crossMinDist");
+	ourOwner.cs_cross_deltadist = GetSubDefInt(m_strLastFireInfo, "crossDeltaDist");
+	CStrikeView_UpdateGeomset(ourOwner);
+#endif
 }
 
 #ifdef CLIENT
