@@ -34,6 +34,8 @@ float spr_hudnum[10] = {
 	216 / 256
 };
 
+var bool g_csDrawTime = false;
+
 /* precaches */
 void
 HUD_Init(void)
@@ -67,6 +69,10 @@ HUD_Init(void)
 	precache_model("sprites/top.spr");
 	precache_model("sprites/top_left.spr");
 	precache_model("sprites/top_right.spr");
+
+	if (serverinfo.GetString("mode") == "counterstrike") {
+		g_csDrawTime = true;
+	}
 }
 
 /* seperator for mainly ammo */
@@ -118,6 +124,10 @@ HUD_DrawNums(float fNumber, vector vecPos, float fAlpha, vector vColor)
 void
 HUD_DrawTimer(int ncSpectator)
 {
+	if (g_csDrawTime == false) {
+		return;
+	}
+
 	int iMinutes, iSeconds, iTens, iUnits;
 	vector time_pos;
 	
