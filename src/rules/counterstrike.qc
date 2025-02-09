@@ -737,17 +737,20 @@ CS_PlayerRemovedFromGame(entity targetPlayer)
 	Round_CheckUponDeath(targetPlayer);
 }
 
+void
+CodeCallback_Precache(void)
+{
+	precache.Entity("player_vip");
+	precache.Entity("player_terrorist");
+	precache.Entity("player_counterterrorist");
+}
+
 /* Callbacks, functions that are called from Nuclide */
 void
 CodeCallback_StartGameType(void)
 {
 	string spawnCT;
 	string spawnT;
-
-	/* players can buy these any time. so they should be precached for speed. */
-	precache.Entity("player_vip");
-	precache.Entity("player_terrorist");
-	precache.Entity("player_counterterrorist");
 
 	spawnCT = entityDef.GetString("player_counterterrorist", "spawnpoint");
 	spawnT = entityDef.GetString("player_terrorist", "spawnpoint");
@@ -756,9 +759,9 @@ CodeCallback_StartGameType(void)
 	motd.LoadDefault();
 
 	/* the only teams CS will ever need... ? */
-	teams.SetUp(TEAM_T, "Terrorist", [153, 204, 255], true);
+	teams.SetUp(TEAM_T, "Terrorist", [255, 63, 63], true);
 	teams.SetSpawnPoint(TEAM_T, spawnT);
-	teams.SetUp(TEAM_CT, "Counter-Terrorist", [255, 63, 63], true);
+	teams.SetUp(TEAM_CT, "Counter-Terrorist", [153, 204, 255], true);
 	teams.SetSpawnPoint(TEAM_CT, spawnCT);
 
 	/* evaluate our world */
