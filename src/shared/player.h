@@ -777,11 +777,13 @@ CSPlayer::SendEntity(entity ePEnt, float flChanged)
 void
 CSPlayer::Physics_Fall(float impactspeed)
 {
+#if 0
 	/* apply some predicted punch to the player */
 	if (impactspeed >= 580)
 		punchangle += [15,0,(input_sequence & 1) ? 15 : -15];
 	else if (impactspeed >= 400)
 		punchangle += [15,0,0];
+#endif
 
 	impactspeed *= 1.25f;
 
