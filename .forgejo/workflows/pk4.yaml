@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 1
         repository: fn/valve
         ref: Develop
-        path: "./${{ github.event.repository.name }}"
+        path: "./valve"
 
     - uses: actions/checkout@v3
       with:
