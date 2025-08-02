@@ -17,7 +17,7 @@
 static vguiWindow winChooseTeam;
 
 string
-VGUI_ChooseTeam_MapInfo(void)
+CSVGUI_ChooseTeam_MapInfo(void)
 {
 	static string mapinfo = __NULL__;
 
@@ -40,7 +40,7 @@ VGUI_ChooseTeam_MapInfo(void)
 
 /* returns true if you should join CT, else T */
 bool
-VGUI_ChooseTeam_AutoQuery(void)
+CSVGUI_ChooseTeam_AutoQuery(void)
 {
 	int teamT = 0;
 	int teamCT = 0;
@@ -60,7 +60,7 @@ VGUI_ChooseTeam_AutoQuery(void)
 }
 
 void
-VGUI_ChooseTeam(void)
+CSVGUI_ChooseTeam(void)
 {
 	static int initialized;
 	static vguiButton btnJoinT;
@@ -74,13 +74,13 @@ VGUI_ChooseTeam(void)
 
 	static void VGUI_ChooseTeam_CT(void) {
 		localcmd("cmd joinTeam 2\n");
-		VGUI_ChooseClassCT();
+		CSVGUI_ChooseClassCT();
 		winChooseTeam.Hide();
 	}
 
 	static void VGUI_ChooseTeam_T(void) {
 		localcmd("cmd joinTeam 1\n");
-		VGUI_ChooseClassT();
+		CSVGUI_ChooseClassT();
 		winChooseTeam.Hide();
 	}
 

@@ -27,9 +27,9 @@ Nightvision_Toggle(void)
 	pSeatLocal->m_iNightvision = 1 - pSeatLocal->m_iNightvision;
 
 	if (pSeatLocal->m_iNightvision) {
-		Sound_Play(self, CHAN_AUTO, "nvg.on");
+		SoundDef_Play(self, CHAN_AUTO, "nvg.on");
 	} else {
-		Sound_Play(self, CHAN_AUTO, "nvg.off");
+		SoundDef_Play(self, CHAN_AUTO, "nvg.off");
 	}
 }
 

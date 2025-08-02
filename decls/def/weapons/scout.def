@@ -20,6 +20,7 @@ entityDef weapon_scout
 
 	"speed_mod"	"1.04"
 	"price"		"1250"
+	"animPrefix"	"rifle"
 
 	"crossMinDist"			"5.0"
 	"crossDeltaDist"		"3.0"

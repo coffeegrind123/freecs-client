@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Marco Cawthorne <marco@icculus.org>
+ * Copyright (c) 2016-2025 Marco Cawthorne <marco@icculus.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,10 +13,6 @@
  * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-
-#pragma PROGS_DAT  "../../progs/counterstrike.dat"
-
-#include "../../../src/server/api.h"
 
 #define TEAM_NONE 0i
 #define TEAM_T 1i
@@ -317,7 +313,7 @@ SwapTeams(void)
 	int ctScore = 0i;
 	int tScore = 0i;
 
-	for (entity teamPlayer = world; (teamPlayer = find(teamPlayer, ::classname, "player"));) {
+	for (entity teamPlayer = world;(teamPlayer = next.Player(teamPlayer));) {
 		if (teamPlayer.team == TEAM_CT) {
 			ents.Input(teamPlayer, "SetTeam", "1", world);
 			/*teamPlayer.charmodel -= 4;*/
@@ -533,14 +529,14 @@ Round_Restart(bool wipeProgress)
 	}
 
 
-	for (entity teamPlayer = world; (teamPlayer = find(teamPlayer, ::classname, "player"));) {
+	for (entity teamPlayer = world;(teamPlayer = next.Player(teamPlayer));) {
 		if (teamPlayer.team != TEAM_CT && teamPlayer.team != TEAM_T) {
 			continue;
 		}
 
 		ents.Input(teamPlayer, "NotifyRoundRestarted", "", world);
 
-		if (ents.isAlive(teamPlayer) == true && wipeProgress == false) {
+		if (is.Alive(teamPlayer) == true && wipeProgress == false) {
 			SoftRespawn(teamPlayer);
 		} else {
 			HardRespawn(teamPlayer);
@@ -795,16 +791,13 @@ CodeCallback_StartGameType(void)
 		}
 	}
 
-	/* function to create spawn points for spectators. */
-	other = world;
-
-	while ((other = nextent(other))) {
-		switch (other.classname) {
+	for (entity spawnPoint = world;(spawnPoint = nextent(spawnPoint));) {
+		switch (spawnPoint.classname) {
 		case "info_player_start":
 		case "trigger_camera":
 		case "info_player_deathmatch":
-			entity specSpawn = ents.Create("info_spectator_start", other.origin);
-			specSpawn.angles = other.angles;
+			entity specSpawn = ents.Create("info_spectator_start", spawnPoint.origin);
+			specSpawn.angles = spawnPoint.angles;
 			break;
 		default:
 			break;
@@ -898,7 +891,7 @@ CodeCallback_Input(entity activator, string inputName, string dataString)
 
 		/* balancing tweak: for every escaped T, each and every CT will lose funds */
 		if (cvars.GetInteger("fcs_escapepenalty") != 0i) {
-			for (entity teamPlayer = world; (teamPlayer = find(teamPlayer, ::classname, "player"));) {
+			for (entity teamPlayer = world;(teamPlayer = next.Player(teamPlayer));) {
 				if (teamPlayer.team == TEAM_CT) {
 					Money_AddMoney(teamPlayer, cvars.GetInteger("fcs_escapepenalty"));
 				}
@@ -960,7 +953,7 @@ CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker
 	playerEntity.deaths++;
 
 	/* update player scores */
-	if (ents.isPlayer(attacker)) {
+	if (is.Player(attacker)) {
 		if (playerEntity == attacker) {
 			attacker.frags--;
 		} else if (playerEntity.team == attacker.team) {
@@ -973,7 +966,7 @@ CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker
 	}
 
 	/* scoreboard death icon */
-	if (ents.isPlayer(playerEntity)) {
+	if (is.Player(playerEntity)) {
 		userinfo.SetString(playerEntity, "*icon1", "d_skull");
 		userinfo.SetString(playerEntity, "*icon1_r", "1");
 		userinfo.SetString(playerEntity, "*icon1_g", "0");
@@ -990,7 +983,7 @@ bool
 CodeCallback_CallRequestTeam(entity playerEntity, int teamNum)
 {
 	/* can't switch teams while alive. */
-	if (ents.isAlive(playerEntity) == true) {
+	if (is.Alive(playerEntity) == true) {
 		return (false);
 	}
 

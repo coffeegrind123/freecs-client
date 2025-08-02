@@ -18,6 +18,7 @@ entityDef weapon_m3
 	"act_idle"		"0"
 
 	"snd_fire"		"Weapon_M3.Single"
+	"animPrefix"	"shotgun"
 
 	"speed_mod"			"0.92"
 	"price"				"1700"

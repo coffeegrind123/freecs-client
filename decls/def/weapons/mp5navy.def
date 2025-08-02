@@ -19,6 +19,7 @@ entityDef weapon_mp5navy
 
 	"speed_mod"		"1.0"
 	"price"			"1500"
+	"animPrefix"	"mp5"
 
 	"crossMinDist"				"5.0"
 	"crossDeltaDist"			"2.0"

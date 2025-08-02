@@ -15,7 +15,7 @@
  */
 
 void
-VGUI_ShowMOTD(void)
+CSVGUI_ShowMOTD(void)
 {
 	static int initialized;
 	static vguiButton winMotdClose;

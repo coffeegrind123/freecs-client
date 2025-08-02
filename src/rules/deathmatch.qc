@@ -14,10 +14,6 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma PROGS_DAT  "../../progs/deathmatch.dat"
-
-#include "../../../src/server/api.h"
-
 bool
 IsTeamplay(void)
 {
@@ -132,7 +128,7 @@ CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker
 	playerEntity.deaths++;
 
 	/* update score-counter */
-	if (ents.isPlayer(attacker)) {
+	if (is.Player(attacker)) {
 		if (playerEntity == attacker) {
 			attacker.frags--;
 		} else {

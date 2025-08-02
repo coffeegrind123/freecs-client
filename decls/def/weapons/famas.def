@@ -19,6 +19,7 @@ entityDef weapon_famas
 
 
 	"snd_fire"	"Weapon_FAMAS.Single"
+	"animPrefix"	"carbine"
 
 	"speed_mod"			""
 	"price"				""

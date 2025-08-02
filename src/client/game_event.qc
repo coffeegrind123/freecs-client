@@ -18,9 +18,6 @@ int
 ClientGame_EventParse(float fHeader)
 {
 switch (fHeader) {
-	case EV_OBITUARY:
-		Obituary_Parse();
-		break;
 	case EV_SMOKE:
 		vector vSmokePos;
 		vSmokePos[0] = readcoord();

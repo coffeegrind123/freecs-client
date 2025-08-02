@@ -20,7 +20,7 @@
 #include "entities.h"
 #include "events.h"
 #include "CSProjectile.h"
-#include "../../../valve/src/shared/HLWeapon.h"
+#include "../../../valve/src/shared/Weapon.h"
 
 #define TEAM_T		1
 #define TEAM_CT		2

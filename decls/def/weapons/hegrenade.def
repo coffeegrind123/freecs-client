@@ -19,6 +19,7 @@ entityDef weapon_hegrenade
 	"act_draw"		"3"
 	"act_delay"		"1"
 	"act_release"		"2"
+	"animPrefix"	"grenade"
 
 	// HLWeapon specific
 	"hudSlot"		"3"

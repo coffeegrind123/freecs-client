@@ -17,6 +17,7 @@ entityDef weapon_tmp
 	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_TMP.Single"
+	"animPrefix"	"onehand"
 
 	"speed_mod"	"1.0"
 	"price"		"1250"

@@ -19,6 +19,7 @@ entityDef weapon_m249
 
 	"speed_mod"	"0.88"
 	"price"		"5750"
+	"animPrefix"	"para"
 
 	"crossMinDist"			"6"
 	"crossDeltaDist"		"3"

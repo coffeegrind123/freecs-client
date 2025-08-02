@@ -19,6 +19,7 @@ entityDef weapon_deagle
 
 	"speed_mod"		"1.0"
 	"price"			"650"
+	"animPrefix"	"onehand"
 
 	"crossMinDist"				"8"
 	"crossDeltaDist"			"3"

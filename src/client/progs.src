@@ -9,18 +9,17 @@
 
 
 #includelist
-../../../src/shared/fteextensions.qc
+../../../src/common/include.src
 ../../../src/shared/defs.h
 ../../../cstrike/src/shared/defs.h
-../../../cstrike/src/client/defs.h
 ../../../src/client/defs.h
+../../../cstrike/src/client/defs.h
 ../../../src/vgui/include.src
 ../../../src/gs-entbase/client.src
 ../../../src/gs-entbase/shared.src
 ../shared/include.src
 ../../../cstrike/src/client/radar.qc
 ../../../cstrike/src/client/nightvision.qc
-../../../valve/src/client/damage.qc
 ../../../cstrike/src/client/draw.qc
 ../../../cstrike/src/client/textmenu.qc
 ../../../cstrike/src/client/init.qc
@@ -31,14 +30,8 @@
 ../../../valve/src/client/camera.qc
 ../../../valve/src/client/viewmodel.qc
 ../../../cstrike/src/client/crosshair.qc
-../../../valve/src/client/obituary.qc
-../../../valve/src/client/hud_dmgnotify.qc
-../../../cstrike/src/client/hud_ammonotify.qc
 ../../../cstrike/src/client/vgui_spectator.qc
-../../../cstrike/src/client/hud.qc
 ../../../valve/src/client/hud_sprite.qc
-../../../valve/src/client/HLWeaponSelect.qc
-../../../valve/src/client/hud_weaponselect.qc
 ../../../valve/src/client/scoreboard.qc
 ../../../cstrike/src/client/radio.qc
 ../../../src/client/include.src

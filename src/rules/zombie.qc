@@ -14,10 +14,6 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma PROGS_DAT  "../../progs/zombie.dat"
-
-#include "../../../src/server/api.h"
-
 void
 WaveTimer_Tick(void)
 {
@@ -93,13 +89,13 @@ CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker
 	playerEntity.deaths++;
 
 	/* update score-counter */
-	if (ents.isPlayer(attacker)) {
+	if (is.Player(attacker)) {
 		if (playerEntity == attacker) {
 			attacker.frags--;
 		} else {
 			attacker.frags++;
 		}
-	} else if (ents.isSentient(attacker)) {
+	} else if (is.Sentient(attacker)) {
 		teams.AddScore(attacker.team, 1);
 	}
 }
@@ -110,7 +106,7 @@ CodeCallback_NPCKilled(entity npcEntity, entity inflictor, entity attacker, stri
 	combat.Obituary(npcEntity.netname, attacker.netname, weapon, "");
 
 	/* update score-counter */
-	if (ents.isPlayer(attacker)) {
+	if (is.Player(attacker)) {
 		if (npcEntity == attacker) {
 			attacker.frags--;
 		} else {

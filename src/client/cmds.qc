@@ -14,12 +14,9 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-void VGUI_ChooseTeam(void);
-void VGUI_BuyMenu(void);
-void HUD_DrawWeaponSelect_Back(void);
-void HUD_DrawWeaponSelect_Forward(void);
-void HUD_DrawWeaponSelect_Last(void);
-void HUD_SlotSelect(int);
+void CSVGUI_ChooseTeam(void);
+void CSVGUI_BuyMenu(void);
+void CSVGUI_ShowMOTD(void);
 
 void
 CMD_ChooseTeam(void)
@@ -29,7 +26,7 @@ CMD_ChooseTeam(void)
 
 	/* handle both VGUI and text menus */
 	if (ClientGame_IsUsingVGUI())
-		VGUI_ChooseTeam();
+		CSVGUI_ChooseTeam();
 	else
 		Textmenu_Toggle("TEAM_SELECT");
 }
@@ -46,7 +43,7 @@ CMD_BuyMenu(void)
 
 	/* handle both VGUI and text menus */
 	if (ClientGame_IsUsingVGUI())
-		VGUI_BuyMenu();
+		CSVGUI_BuyMenu();
 	else
 		Textmenu_Toggle("BUY");
 }
@@ -55,50 +52,15 @@ int
 ClientGame_ConsoleCommand(void)
 {
 	switch(argv(0)) {
-	case "invnext":
-		pSeatLocal->weaponSelectionHUD.SelectNext(false);
-		break;
-	case "invprev":
-		pSeatLocal->weaponSelectionHUD.SelectPrevious(false);
-		break;
-	case "lastinv":
-		HUD_DrawWeaponSelect_Last();
-		break;
-	case "slot1":
-		HUD_SlotSelect(0);
-		break;
-	case "slot2":
-		HUD_SlotSelect(1);
-		break;
-	case "slot3":
-		HUD_SlotSelect(2);
-		break;
-	case "slot4":
-		HUD_SlotSelect(3);
-		break;
-	case "slot5":
-		HUD_SlotSelect(4);
-		break;
-	case "slot6":
-		HUD_SlotSelect(5);
-		break;
-	case "slot7":
-		HUD_SlotSelect(6);
-		break;
-	case "slot8":
-		HUD_SlotSelect(7);
-		break;
-	case "slot9":
-		HUD_SlotSelect(8);
-		break;
-	case "slot10":
-		HUD_SlotSelect(9);
-		break;
+	case "showTeamSelectionMenu":
 	case "chooseteam":
 		CMD_ChooseTeam();
 		break;
 	case "buy":
 		CMD_BuyMenu();
+		break;
+	case "showMOTD":
+		CSVGUI_ShowMOTD();
 		break;
 	case "radio1":
 		Textmenu_Toggle("RADIOA");

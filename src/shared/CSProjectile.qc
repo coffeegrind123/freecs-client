@@ -156,7 +156,7 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 	}
 
 	if (trace_ent.takedamage != DAMAGE_NO && trace_ent.iBleeds) {
-		Sound_Play(trace_ent, CHAN_BODY, "damage_bullet.hit");
+		SoundDef_Play(trace_ent, CHAN_BODY, "damage_bullet.hit");
 
 		ncPlayer pl = (ncPlayer)trace_ent;
 		/* modify the damage based on the location */
@@ -165,18 +165,18 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 			/* the helmet is one power house */
 			if (pl.HasItem("item_kevlar_helmet") == true) {
 				flDamage = 0;
-				Sound_Play(trace_ent, CHAN_BODY, "player.headshotarmor");
+				SoundDef_Play(trace_ent, CHAN_BODY, "player.headshotarmor");
 				pl.RemoveItem("item_kevlar_helmet");
 				return;
 			} else {
 				flDamage *= 4;
-				Sound_Play(trace_ent, CHAN_BODY, "player.headshot");
+				SoundDef_Play(trace_ent, CHAN_BODY, "player.headshot");
 			}
 			break;
 		case BODY_STOMACH:
 			flDamage *= 0.9;
 			if (pl.armor > 0)
-				Sound_Play(trace_ent, CHAN_BODY, "player.hitarmor");
+				SoundDef_Play(trace_ent, CHAN_BODY, "player.hitarmor");
 			break;
 		case BODY_LEGLEFT:
 		case BODY_LEGRIGHT:

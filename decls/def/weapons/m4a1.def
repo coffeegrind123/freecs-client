@@ -18,6 +18,7 @@ entityDef weapon_m4a1
 	"altMode"			"1"
 	"act_modeOn"		"6"
 	"act_modeOff"		"13"
+	"animPrefix"	"carbine"
 
 	// Unsilenced
 	"act_fire"	"8,9,10"

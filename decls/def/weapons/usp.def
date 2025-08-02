@@ -31,6 +31,7 @@ entityDef weapon_usp
 	"fireRate"			".15"
 	"semiAuto"			"1"
 	"ammoRequired" 		"1"
+	"animPrefix"	"onehand"
 
 	"altMode"		"1"
 	"act_modeOn"		"7"

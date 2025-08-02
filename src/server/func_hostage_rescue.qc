@@ -51,7 +51,7 @@ func_hostage_rescue::Respawn(void)
 void
 func_hostage_rescue::Touch(entity eToucher)
 {
-	if (isPlayer(eToucher)) {
+	if (is.Player(eToucher)) {
 		CSPlayer pl = (CSPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
@@ -67,10 +67,11 @@ func_hostage_rescue::Touch(entity eToucher)
 		return;
 	}
 
-	if (!(hosty.m_eFollowing))
+	#warning Needs API
+	if (!(hosty.m_useFollowChain))
 		return;
 
-	g_grMode.Input(hosty.m_eFollowing, "HostageRescued", "");
+	g_grMode.Input(hosty.m_useFollowChain, "HostageRescued", "");
 
 	hosty.Disappear();
 }

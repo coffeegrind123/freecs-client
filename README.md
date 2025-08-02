@@ -1,7 +1,7 @@
-# Tactical Retreat
+# Tactical-Retreat
 [As seen on phoronix.com](https://phoronix.com/scan.php?page=news_item&px=FreeCS-Open-Counter-Strike)
 
-Allows you to play Counter-Strike 1.5 (mod-version) with Rad-Therapy.
+Allows you to play the original modification CS 1.5 with Rad-Therapy.
 
 ![Preview 1](img/preview1.jpg)
 ![Preview 2](img/preview2.jpg)
@@ -12,24 +12,20 @@ Allows you to play Counter-Strike 1.5 (mod-version) with Rad-Therapy.
 To run it, all you need is [FTEQW](https://www.fteqw.org), [Rad-Therapy](https://www.frag-net.com/pkgs/package_valve.pk3), and [the latest release .pk3 file](https://www.frag-net.com/pkgs/package_cstrike.pk3), which you save into `Half-Life/valve/` and `Half-Life/cstrike/` respectively. That's about it. You can install updates through the **Configuration > Updates** menu from here on out.
 
 ### Disclaimer
-Please **do not** file bugs if you see missing/broken content **while not** using the original Half-Life and Counter-Strike 1.5 data.
+Please **do not** file bugs if you see missing/broken content **while not** using the original data. The version on Steam is not the same game as the mod (which was free)
 
 ## Building
-Here's the quick and dirty instructions for those unfamilar:
+Here's the quick and dirty instructions:
 
 ```
-$ git clone https://code.idtech.space/vera/nuclide Nuclide-SDK
-$ cd Nuclide-SDK
+$ git clone https://code.idtech.space/vera/nuclide Nuclide-SDK && cd Nuclide-SDK
 
 # (only required if you don't have an up-to-date FTEQW & FTEQCC in your PATH)
-$ make update
-$ make fteqw
+$ make update && make fteqw
 
 # build the menu (from valve/) then our own game-logic:
-$ git clone https://code.idtech.space/fn/valve valve
-$ git clone https://code.idtech.space/fn/cstrike cstrike
-$ make game GAME=valve
-$ make game GAME=cstrike
+$ git clone https://code.idtech.space/fn/valve valve && make game GAME=valve
+$ git clone https://code.idtech.space/fn/cstrike cstrike && make game GAME=cstrike
 ```
 
 You can also issue `make` inside `valve/src/` and `cstrike/src`, but it won't generate some additional helper files.

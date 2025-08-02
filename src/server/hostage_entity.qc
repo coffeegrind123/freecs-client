@@ -94,7 +94,7 @@ class CSHostage:ncTalkMonster
 void
 CSHostage::CSHostage(void)
 {
-	Sound_Precache("hostage_entity.follow");
+	SoundDef_Precache("hostage_entity.follow");
 	m_bUsedOnce = false;
 }
 
@@ -113,8 +113,9 @@ CSHostage::OnPlayerUse(void)
 		return;
 	}
 
-	if (m_eFollowing == world) {
-		Sound_Speak(this, "hostage_entity.follow");
+	#warning Needs API
+	if (m_useFollowChain == world) {
+		SoundDef_Speak(this, "hostage_entity.follow");
 	}
 
 	/* CT reward, first time only */
@@ -157,7 +158,7 @@ CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, 
 	}
 
 	/* penalties */
-	if (isPlayer(attacker) == false) {
+	if (is.Player(attacker) == false) {
 		return;
 	}
 
@@ -182,7 +183,7 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 			break;
 		}
 
-		if (isPlayer(attacker) == true) {
+		if (is.Player(attacker) == true) {
 			g_grMode.Input(attacker, "HostageKilled", itos(damageDealt));
 		}
 	}

@@ -17,6 +17,7 @@ entityDef weapon_ump45
 	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_UMP45.Single"
+	"animPrefix"	"onehand"
 
 	"speed_mod"	"1.0"
 	"price"		"1700"

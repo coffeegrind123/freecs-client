@@ -416,6 +416,7 @@ HUD_DrawArmor(void)
 void
 HUD_DrawAmmo1(void)
 {
+#if 0
 	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
@@ -433,12 +434,14 @@ HUD_DrawAmmo1(void)
 	pos = g_hudmins + [g_hudres[0] - 152, g_hudres[1] - 42];
 	HUD_DrawNums(pl.a_ammo1, pos, pSeatLocal->m_flAmmo1Alpha, g_hud_color);
 	HUD_DrawSeperator(pos + [30,0]);
+#endif
 }
 
 /* leftover type ammo */
 void
 HUD_DrawAmmo2(void)
 {
+#if 0
 	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
@@ -455,12 +458,14 @@ HUD_DrawAmmo2(void)
 
 	pos = g_hudmins + [g_hudres[0] - 72, g_hudres[1] - 42];
 	HUD_DrawNums(pl.a_ammo2, pos, pSeatLocal->m_flAmmo2Alpha, g_hud_color);
+#endif
 }
 
 /* special ammo */
 void
 HUD_DrawAmmo3(void)
 {
+#if 0
 	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
 	vector pos;
 
@@ -477,12 +482,14 @@ HUD_DrawAmmo3(void)
 
 	pos = g_hudmins + [g_hudres[0] - 72, g_hudres[1] - 74];
 	HUD_DrawNums(pl.a_ammo3, pos, pSeatLocal->m_flAmmo3Alpha, g_hud_color);
+#endif
 }
 
 /* ammo bar */
 void
 HUD_DrawAmmoBar(vector pos, float val, float max, float a)
 {
+#if 0
 	if (val <= 0)
 		return;
 
@@ -490,6 +497,7 @@ HUD_DrawAmmoBar(vector pos, float val, float max, float a)
 	perc = val / max;
 	drawfill(pos + [10,5], [20,4], g_hud_color, a, DRAWFLAG_NORMAL);
 	drawfill(pos + [10,5], [20 * perc,4], [0,1,0], a, DRAWFLAG_NORMAL);
+#endif
 }
 
 /* flashlight/torch indicator */

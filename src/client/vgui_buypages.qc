@@ -147,7 +147,7 @@ enum
 };
 
 void
-VGUI_BuyMenu_Page(int buyPage)
+CSVGUI_BuyMenu_Page(int buyPage)
 {
 	static int initialized;
 	static vguiButton btnCancel;

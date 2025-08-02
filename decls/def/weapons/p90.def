@@ -19,6 +19,7 @@ entityDef weapon_p90
 
 	"speed_mod"		"0.98"
 	"price"			"2350"
+	"animPrefix"	"onehand"
 
 	"crossMinDist"				"7"
 	"crossDeltaDist"			"3"

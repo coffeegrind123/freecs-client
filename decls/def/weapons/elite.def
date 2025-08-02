@@ -19,6 +19,7 @@ entityDef weapon_elite
 
 	"snd_fire"		"Weapon_ELITE.Single"
 	"snd_altfire"		"Weapon_ELITE.Single"
+	"animPrefix"	"dualpistols"
 
 	"altAlternates"		"1"
 	"speed_mod"			"1.0"

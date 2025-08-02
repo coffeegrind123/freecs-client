@@ -19,6 +19,7 @@ entityDef weapon_g3sg1
 
 	"speed_mod"	"0.84"
 	"price"		"5000"
+	"animPrefix"	"rifle"
 
 	"crossMinDist"				"6"
 	"crossDeltaDist"			"4"

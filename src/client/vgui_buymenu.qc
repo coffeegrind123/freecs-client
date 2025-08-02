@@ -37,19 +37,19 @@ CSBuyMenuButton::OnMouseUp(void)
 
 	switch (categorySelection) {
 		case 1:
-			VGUI_BuyMenu_Page(BUYPAGE_PISTOLS);
+			CSVGUI_BuyMenu_Page(BUYPAGE_PISTOLS);
 			break;
 		case 2:
-			VGUI_BuyMenu_Page(BUYPAGE_SHOTGUNS);
+			CSVGUI_BuyMenu_Page(BUYPAGE_SHOTGUNS);
 			break;
 		case 3:
-			VGUI_BuyMenu_Page(BUYPAGE_SMGS);
+			CSVGUI_BuyMenu_Page(BUYPAGE_SMGS);
 			break;
 		case 4:
-			VGUI_BuyMenu_Page(BUYPAGE_RIFLES);
+			CSVGUI_BuyMenu_Page(BUYPAGE_RIFLES);
 			break;
 		case 5:
-			VGUI_BuyMenu_Page(BUYPAGE_MGS);
+			CSVGUI_BuyMenu_Page(BUYPAGE_MGS);
 			break;
 		case 6:
 			sendevent("AmmoBuyPrimary", "");
@@ -58,7 +58,7 @@ CSBuyMenuButton::OnMouseUp(void)
 			sendevent("AmmoBuySecondary", "");
 			break;
 		case 8:
-			VGUI_BuyMenu_Page(BUYPAGE_EQUIPMENT);
+			CSVGUI_BuyMenu_Page(BUYPAGE_EQUIPMENT);
 			break;
 	}
 
@@ -99,7 +99,7 @@ CSBuyMenuButton::OnMouseEntered(void)
 }
 
 void
-VGUI_BuyMenu(void)
+CSVGUI_BuyMenu(void)
 {
 	static int initialized;
 	static CSBuyMenuButton btnPistols;

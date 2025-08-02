@@ -65,7 +65,7 @@ enumflags
 };
 
 class
-CSPlayer:HLPlayer
+CSPlayer:hlPlayer
 {
 	int ingame;
 
@@ -186,7 +186,7 @@ CSPlayer::Physics_InputPreMove(void)
 float
 punchangle_recovery(float punchangle)
 {
-	return 0.05 * (-0.2 * pow(1.2, fabs(punchangle)) + 4);
+	return input_timelength * (-0.2 * pow(1.2, fabs(punchangle)) + 4);
 }
 
 void
@@ -195,16 +195,16 @@ CSPlayer::Physics_InputPostMove(void)
 	//start of this function is taken from super::Physics_InputPostMove
 	float punch;
 	/* timers, these are predicted and shared across client and server */
-	w_attack_next = max(0, w_attack_next - input_timelength);
-	w_reload_next = max(0, w_reload_next - input_timelength);
-	w_idle_next = max(0, w_idle_next - input_timelength);
-	weapontime += input_timelength;
+	m_timeUntilNextAttack = max(0, m_timeUntilNextAttack - input_timelength);
+	m_timeUntilReloaded = max(0, m_timeUntilReloaded - input_timelength);
+	m_timeUntilNextIdle = max(0, m_timeUntilNextIdle - input_timelength);
+	m_weaponAnimTime += input_timelength;
 	punch = max(0, 1.0f - (input_timelength * 4));
-	if (punchangle[0] < 0) {
-		punchangle[0] += punchangle_recovery(punchangle[0]);
+	if (m_punchAngle[0] < 0) {
+		m_punchAngle[0] += punchangle_recovery(m_punchAngle[0]);
 	}
-	punchangle[1] *= punch;
-	punchangle[2] *= punch;
+	m_punchAngle[1] *= punch;
+	m_punchAngle[2] *= punch;
 
 	/* player animation code */
 	UpdatePlayerAnimation(input_timelength);
@@ -216,7 +216,7 @@ CSPlayer::Physics_InputPostMove(void)
 		AddVFlags(VFL_NOATTACK);
 
 		if (input_buttons & INPUT_BUTTON0) {
-			w_attack_next = (w_attack_next > 0.1) ? w_attack_next : 0.1f;
+			m_timeUntilNextAttack = (m_timeUntilNextAttack > 0.1) ? m_timeUntilNextAttack : 0.1f;
 		}
 	}
 
@@ -780,9 +780,9 @@ CSPlayer::Physics_Fall(float impactspeed)
 #if 0
 	/* apply some predicted punch to the player */
 	if (impactspeed >= 580)
-		punchangle += [15,0,(input_sequence & 1) ? 15 : -15];
+		m_punchAngle += [15,0,(input_sequence & 1) ? 15 : -15];
 	else if (impactspeed >= 400)
-		punchangle += [15,0,0];
+		m_punchAngle += [15,0,0];
 #endif
 
 	impactspeed *= 1.25f;

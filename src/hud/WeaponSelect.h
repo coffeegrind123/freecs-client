@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Marco Cawthorne <marco@icculus.org>
+ * Copyright (c) 2024 Marco Cawthorne <marco@icculus.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,18 +14,34 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-void
-Game_Worldspawn(void)
+class
+HLWeaponSelect
 {
-	precache_sound("weapons/ric_metal-2.wav");
-	precache_sound("player/pl_pain2.wav");
-	precache_sound("player/pl_pain4.wav");
-	SoundDef_Precache("buy.kevlar");
-	SoundDef_Precache("buy.weapon");
-	SoundDef_Precache("buy.ammo");
-	SoundDef_Precache("player.headshot");
-	SoundDef_Precache("player.hitarmor");
-	SoundDef_Precache("player.headshotarmor");
-	SoundDef_Precache("Player.FlashLightOff");
-	SoundDef_Precache("Player.FlashLightOn");
-}
+public:
+	void HLWeaponSelect(void);
+
+	virtual void Draw(void);
+	virtual void SelectSlot(int, bool);
+	virtual void SelectNext(bool);
+	virtual void SelectPrevious(bool);
+	virtual void DrawBar(vector, float);
+
+	nonvirtual void Event_Opened(void);
+	nonvirtual void Event_Closed(void);
+	nonvirtual void Event_SelectionChanged(void);
+	nonvirtual void Event_SelectionTriggered(void);
+
+	virtual bool Active(void);
+	virtual void Trigger(void);
+	virtual void Deactivate(void);
+
+	virtual void DrawSlotNum(vector, float);
+
+private:
+	float m_flHUDWeaponSelectTime;
+	entity m_selectedWeapon;
+	entity m_firstWeapon;
+	entity m_lastWeapon;
+	int m_iWantSlot;
+	int m_iWantSlotPos;
+};

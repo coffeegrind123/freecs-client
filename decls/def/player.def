@@ -1,7 +1,95 @@
 entityDef player
 {
 	"spawnclass" "CSPlayer"
-	
+
+	"spine"				"Bip01 Spine"
+	"torsoStart"		"Bip01 Spine"
+	"torsoEnd"			"-- Neck smooth"
+
+	"act_idle"				"1"
+	"act_idle_crouch"		"2"
+	"act_walk"				"3"
+	"act_run"				"4"
+	"act_walk_crouch"		"5"
+	"act_jump"				"6"
+
+	"act_swim"				"8"
+	"act_treadwater"		"9"
+
+	"act_aim_crouch_carbine"	"10"
+	"act_attack_crouch_carbine"	"11"
+	"act_reload_crouch_carbine"	"12"
+	"act_aim_carbine"			"13"
+	"act_attack_carbine"		"14"
+	"act_reload_carbine"		"15"
+
+	"act_aim_crouch_onehand"	"16"
+	"act_attack_crouch_onehand"	"17"
+	"act_reload_crouch_onehand"	"18"
+	"act_aim_onehand"			"19"
+	"act_attack_onehand"		"20"
+	"act_reload_onehand"		"21"
+
+	"act_aim_crouch_dualpistols"			"22"
+	"act_attack_crouch_dualpistols"			"23"
+	"act_attackAlt_crouch_dualpistols"	"24"
+	"act_reload_crouch_dualpistols"			"25"
+	"act_aim_dualpistols"					"26"
+	"act_attack_dualpistols"				"27"
+	"act_attackAlt_dualpistols"				"28"
+	"act_reload_dualpistols"				"29"
+
+	"act_aim_crouch_rifle"		"30"
+	"act_attack_crouch_rifle"	"31"
+	"act_reload_crouch_rifle"	"32"
+	"act_aim_rifle"				"33"
+	"act_attack_rifle"			"34"
+	"act_reload_rifle"			"35"
+
+	"act_aim_crouch_mp5"		"36"
+	"act_attack_crouch_mp5"		"37"
+	"act_reload_crouch_mp5"		"38"
+	"act_aim_mp5"				"39"
+	"act_attack_mp5"			"40"
+	"act_reload_mp5"			"41"
+
+	"act_aim_crouch_shotgun"	"42"
+	"act_attack_crouch_shotgun"	"43"
+	"act_reload_crouch_shotgun"	"44"
+	"act_aim_shotgun"			"45"
+	"act_attack_shotgun"		"46"
+	"act_reload_shotgun"		"47"
+
+	"act_aim_crouch_para"		"48"
+	"act_attack_crouch_para"	"49"
+	"act_reload_crouch_para"	"50"
+	"act_aim_para"				"51"
+	"act_attack_para"			"52"
+	"act_reload_para"			"53"
+
+	"act_aim_crouch_grenade"	"58"
+	"act_attack_crouch_grenade"	"59"
+	"act_aim_grenade"			"56"
+	"act_attack_grenade"		"57"
+
+	"act_aim_crouch_c4"			"60"
+	"act_attack_crouch_c4"		"61"
+	"act_aim_c4"				"62"
+	"act_attack_c4"				"63"
+	"act_reload_c4"				"64"
+
+	"act_aim_crouch_knife"		"73"
+	"act_attack_crouch_knife"	"74"
+	"act_aim_knife"				"75"
+	"act_attack_knife"			"76"
+
+	"act_aim_crouch_ak47"		"77"
+	"act_attack_crouch_ak47"	"78"
+	"act_reload_crouch_ak47"	"79"
+	"act_aim_ak47"				"80"
+	"act_attack_ak47"			"81"
+	"act_reload_ak47"			"82"
+
 	"snd_stepladderLeft"	"step_ladder.left"
 	"snd_stepladderRight"	"step_ladder.right"
 	"snd_fall"				"Player.FallDamage"

@@ -11,6 +11,7 @@ entityDef weapon_xm1014
 	"clipSize"			"7"
 
 	"ammoType"			"ammo_buckshot"
+	"animPrefix"		"shotgun"
 
 	"act_fire"		"1,2"
 	"act_reloadStart"	"5"

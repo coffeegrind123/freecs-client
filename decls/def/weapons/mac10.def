@@ -16,6 +16,7 @@ entityDef weapon_mac10
 	"act_idle"	"0"
 
 	"snd_fire"	"Weapon_MAC10.Single"
+	"animPrefix"	"onehand"
 
 	"speed_mod"	"1.0"
 	"price"		"1400"

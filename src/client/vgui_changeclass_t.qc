@@ -113,7 +113,7 @@ CSClassButtonT::OnMouseEntered(void)
 }
 
 void
-VGUI_ChooseClassT(void)
+CSVGUI_ChooseClassT(void)
 {
 	static int initialized;
 	static vguiLabel lblSelectClass;

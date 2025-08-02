@@ -18,6 +18,7 @@ entityDef weapon_flashbang
 	"ammoType"				"ammo_flashbang"
 	"ammoRequired"			"1"
 	"inv_ammo_flashbang"	"1"
+	"animPrefix"	"grenade"
 
 	"silent_fire"			"1"
 	"primed_fuse"			"4"

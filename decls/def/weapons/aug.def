@@ -16,6 +16,7 @@ entityDef weapon_aug
 	"act_idle"		"0"
 
 	"snd_fire"		"Weapon_AUG.Single"
+	"animPrefix"	"carbine"
 
 	"speed_mod"			"0.96"
 	"price"				"3500"

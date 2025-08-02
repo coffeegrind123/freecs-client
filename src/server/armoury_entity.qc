@@ -200,7 +200,7 @@ armoury_entity::Touch(entity eToucher)
 		sound(pl, CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
 	}
 
-	Logging_Pickup(pl, this, __NULL__);
+	ncStats::PickupItem(this, pl);
 	m_iLeft--;
 
 	if (m_iLeft <= 0) {
@@ -231,7 +231,7 @@ armoury_entity::SpawnKey(string strKey, string strValue)
 		m_iID = stoi(strValue);
 
 		if (m_iID < 0 || m_iID >= 19) {
-			NSLog("^1armoury_entity with invalid item %i. ignoring\n", m_iID);
+			EntError("^1armoury_entity with invalid item %i. ignoring\n", m_iID);
 			Destroy();
 		}
 		break;

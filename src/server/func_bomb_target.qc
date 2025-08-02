@@ -45,7 +45,7 @@ func_bomb_target::Touch(entity eToucher)
 {
 	CSPlayer pl = (CSPlayer)eToucher;
 
-	if (isPlayer(pl) == false) {
+	if (is.Player(pl) == false) {
 		return;
 	}
 

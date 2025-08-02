@@ -35,6 +35,7 @@ CSSpectateHUD::CSSpectateHUD(void)
 void
 CSSpectateHUD::Draw(void)
 {
+#if 0
 	vector vecPos = g_vec_null;
 	float flSep;
 	string strText;
@@ -106,4 +107,5 @@ CSSpectateHUD::Draw(void)
 	vecPos[0] = flSep + 8 + 17;
 	vecPos[1] = g_hudmins[1] + 17;
 	drawstring(vecPos, strText, [12,12], SPEC_FG_COL, 1.0f, DRAWFLAG_NORMAL);
+#endif
 }

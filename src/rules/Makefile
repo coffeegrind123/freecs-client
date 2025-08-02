@@ -1,7 +1,7 @@
 QCC=fteqcc
 
 all:
-	mkdir -pv ../../progs/
-	$(QCC) $(CFLAGS) -I../../../src/server counterstrike.qc
-	$(QCC) $(CFLAGS) -I../../../src/server deathmatch.qc
-	$(QCC) $(CFLAGS) -I../../../src/server zombie.qc
+	mkdir -p ../../progs/
+	$(QCC) $(CFLAGS) counterstrike.src
+	$(QCC) $(CFLAGS) deathmatch.src
+	$(QCC) $(CFLAGS) zombie.src

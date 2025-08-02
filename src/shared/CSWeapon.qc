@@ -19,7 +19,7 @@ void Cstrike_DrawCrosshair(CSPlayer);
 #endif
 
 class
-CSWeapon:HLWeapon
+CSWeapon:hlWeapon
 {
 public:
 	void CSWeapon(void);
@@ -64,7 +64,7 @@ CSWeapon::CanFire(void)
 	bool returnValue = super::CanFire();
 	
 	if (returnValue == true) {
-		if (!owner.gflags & GF_BOMBZONE && GetSpawnBool("onlyInBombZone")) {
+		if (!(owner.gflags & GF_BOMBZONE) && GetSpawnBool("onlyInBombZone")) {
 			returnValue = false;
 		}
 	}
@@ -136,26 +136,26 @@ CSWeapon::UpdateFireInfoCache(void)
 {
 	super::UpdateFireInfoCache();
 
-	numProjectiles = GetSubDefInt(m_strLastFireInfo, "numProjectiles");
-	traceInfo = GetSubDefString(m_strLastFireInfo, "def_onFire");
-	flAccuracyDivisor = GetSubDefFloat(m_strLastFireInfo,"accuracyDivisor");
-	flAccuracyMovementPenalty = GetSubDefFloat(m_strLastFireInfo,"accuracyMovementPenalty");
-	flAccuracyMultiplier = GetSubDefFloat(m_strLastFireInfo,"accuracyMultiplier");
-	flAccuracyAdd= GetSubDefFloat(m_strLastFireInfo,"accuracyAdd");
-	flRangeModifier = GetSubDefFloat(m_strLastFireInfo,"rangeModifier");
-	flPenetrationPower = GetSubDefFloat(m_strLastFireInfo,"penetrationPower");
-	flBulletStrength = GetSubDefFloat(m_strLastFireInfo,"bulletStrength");
-	flMultiplierShots = GetSubDefFloat(m_strLastFireInfo,"multiplierShots");
-	flMultiplierStrength = GetSubDefFloat(m_strLastFireInfo,"multiplierStrength");
-	flMultiplierInaccuracy = GetSubDefFloat(m_strLastFireInfo,"multiplierInaccuracy");
+	numProjectiles = GetSubDefInt(m_weaponLastFireInfo, "numProjectiles");
+	traceInfo = GetSubDefString(m_weaponLastFireInfo, "def_onFire");
+	flAccuracyDivisor = GetSubDefFloat(m_weaponLastFireInfo,"accuracyDivisor");
+	flAccuracyMovementPenalty = GetSubDefFloat(m_weaponLastFireInfo,"accuracyMovementPenalty");
+	flAccuracyMultiplier = GetSubDefFloat(m_weaponLastFireInfo,"accuracyMultiplier");
+	flAccuracyAdd= GetSubDefFloat(m_weaponLastFireInfo,"accuracyAdd");
+	flRangeModifier = GetSubDefFloat(m_weaponLastFireInfo,"rangeModifier");
+	flPenetrationPower = GetSubDefFloat(m_weaponLastFireInfo,"penetrationPower");
+	flBulletStrength = GetSubDefFloat(m_weaponLastFireInfo,"bulletStrength");
+	flMultiplierShots = GetSubDefFloat(m_weaponLastFireInfo,"multiplierShots");
+	flMultiplierStrength = GetSubDefFloat(m_weaponLastFireInfo,"multiplierStrength");
+	flMultiplierInaccuracy = GetSubDefFloat(m_weaponLastFireInfo,"multiplierInaccuracy");
 	accuracy = Cstrike_CalculateAccuracy(owner, flAccuracyDivisor, flAccuracyMovementPenalty) / flAccuracyMultiplier;
 	accuracy += flAccuracyAdd;
 	bulletSpread = [accuracy, accuracy];
 
 #ifdef CLIENT
 	CSPlayer ourOwner = (CSPlayer)owner;
-	ourOwner.cs_cross_mindist = GetSubDefInt(m_strLastFireInfo, "crossMinDist");
-	ourOwner.cs_cross_deltadist = GetSubDefInt(m_strLastFireInfo, "crossDeltaDist");
+	ourOwner.cs_cross_mindist = GetSubDefInt(m_weaponLastFireInfo, "crossMinDist");
+	ourOwner.cs_cross_deltadist = GetSubDefInt(m_weaponLastFireInfo, "crossDeltaDist");
 	CStrikeView_UpdateGeomset(ourOwner);
 #endif
 }
@@ -169,17 +169,17 @@ CSWeapon::AddedToInventory(void)
 	m_ammoIcon = GetDefString("ammoIcon");
 
 	if (m_ammoIcon == "") {
-		m_ammoIcon = sprintf("%s.ammo", strtolower(classname));
+		m_ammoIcon = sprintf("%s.ammo", strtolower(declclass));
 	}
 
 	m_crossHair = GetDefString("crosshair");
 
 	if (m_crossHair == "") {
-		m_crossHair = sprintf("%s.crosshair", strtolower(classname));
+		m_crossHair = sprintf("%s.crosshair", strtolower(declclass));
 	}
 
-	m_iHudSlot = GetDefInt("hudSlot");
-	m_iHudSlotPos = GetDefInt("hudSlotPos");
+	m_weaponHUDSlot = GetDefInt("hudSlot");
+	m_weaponHUDSlotPos = GetDefInt("hudSlotPos");
 }
 
 void
@@ -189,28 +189,5 @@ CSWeapon::UpdateGUI(void)
 
 	/* draw crosshair */
 	Cstrike_DrawCrosshair(ourOwner);
-
-	/* draw ammo icon */
-	if (m_ammoIcon) {
-		vector ammoPos = g_hudmins + [g_hudres[0] - 48, g_hudres[1] - 42];
-		HLSprite_Draw_RGBA(m_ammoIcon, ammoPos, g_hud_color, pSeatLocal->m_flAmmo2Alpha, true);
-	}
-
-	if (m_bAmmoRequired == false) {
-		return;
-	}
-
-	if (m_iClipSize > 0i) {
-		ourOwner.a_ammo1 = m_iClip;
-		HUD_DrawAmmo1();
-	}
-
-	ourOwner.a_ammo2 = ourOwner.GetReserveAmmo(m_primaryAmmoType);
-	HUD_DrawAmmo2();
-
-	if (m_secondaryAmmoType && m_primaryAmmoType != m_secondaryAmmoType) {
-		ourOwner.a_ammo3 = ourOwner.GetReserveAmmo(m_secondaryAmmoType);
-		HUD_DrawAmmo3();
-	}
 }
 #endif

@@ -4,3 +4,6 @@ exec default_video.cfg
 exec default_valve.cfg
 exec default_cstrike.cfg
 exec default_aliases.cfg
+exec fte.cfg
+exec config.cfg
+exec autoexec.cfg

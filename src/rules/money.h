@@ -37,9 +37,9 @@ Money_AddMoney(entity targetPlayer, int addCash)
 	}
 
 	if (addCash > 0i) {
-		NSLog("Paying %s ^7$%i. Cash = $%i\n", targetPlayer.netname, addCash, currentCash);
+		ncLog("Paying %s ^7$%i. Cash = $%i\n", targetPlayer.netname, addCash, currentCash);
 	} else if (addCash < 0i) {
-		NSLog("Fining %s ^7$%i. Cash = $%i\n", targetPlayer.netname, addCash, currentCash);
+		ncLog("Fining %s ^7$%i. Cash = $%i\n", targetPlayer.netname, addCash, currentCash);
 	}
 
 	userinfo.SetInteger(targetPlayer, "*money", currentCash);

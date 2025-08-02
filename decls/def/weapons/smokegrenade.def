@@ -15,6 +15,7 @@ entityDef weapon_smokegrenade
 	"def_onFire"		"projectile_smokegrenade"
 	"def_onRelease"		"projectile_smokegrenade"
 	"inv_name"			"smokegrenade"
+	"animPrefix"	"grenade"
 
 	"silent_fire"			"1"
 	"primed_fuse"			"4"

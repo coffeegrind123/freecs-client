@@ -19,6 +19,7 @@ entityDef weapon_sg550
 
 	"speed_mod"	"0.84"
 	"price"		"4200"
+	"animPrefix"	"carbine"
 
 	"crossMinDist"			"5.0"
 	"crossDeltaDist"		"3.0"

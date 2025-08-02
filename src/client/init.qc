@@ -41,12 +41,8 @@ ClientGame_Init(float apilevel, string enginename, float engineversion)
 	registercommand("invnext");
 	registercommand("invprev");
 
-	Obituary_Init();
-
-	Sound_Precache("nvg.on");
-	Sound_Precache("nvg.off");
-
-	pSeatLocal->weaponSelectionHUD = spawn(HLWeaponSelect);
+	SoundDef_Precache("nvg.on");
+	SoundDef_Precache("nvg.off");
 }
 
 bool
@@ -66,17 +62,13 @@ ClientGame_IsUsingVGUI(void)
 #endif
 }
 
-void VGUI_ShowMOTD(void);
 void CMD_ChooseTeam(void);
 void
 ClientGame_InitDone(void)
 {
-	if (serverkey("mode") == "Counter-Strike")
-	if (serverkeyfloat("sv_playerslots") > 1)
-		VGUI_ShowMOTD();
+	//CSVGUI_ChooseTeam();
 }
 
-void HLSprite_Init(void);
 void
 ClientGame_RendererRestart(string rstr)
 {
@@ -91,24 +83,8 @@ ClientGame_RendererRestart(string rstr)
 	g_cs_scope7 = spriteframe("sprites/bottom.spr", 0, 0.0f);
 	g_cs_scope8 = spriteframe("sprites/bottom_right.spr", 0, 0.0f);
 
-	precache_model("models/pshell.mdl");
-	precache_model("models/rshell.mdl");
-	precache_model("models/rshell_big.mdl");
-	precache_model("models/shotgunshell.mdl");
-
-	/* there's also muzzleflash.spr, but that's just MUZZLE_SMALL again */
-	precache_model("sprites/muzzleflash1.spr");
-	precache_model("sprites/muzzleflash2.spr");
-	precache_model("sprites/muzzleflash3.spr");
-	MUZZLE_RIFLE = (int)getmodelindex("sprites/muzzleflash1.spr");
-	MUZZLE_SMALL = (int)getmodelindex("sprites/muzzleflash2.spr");
-	MUZZLE_WEIRD = (int)getmodelindex("sprites/muzzleflash3.spr");
-
-	Obituary_Precache();
-	Damage_Precache();
 
 	FX_Smokenade_Init();
-	HLSprite_Init();
-
 	Radar_Init();
+	font.Load("fonts/scoreboard.font", FONT_SCOREBOARD);
 }
