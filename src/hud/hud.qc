@@ -1,5 +1,31 @@
 
 
+var float g_csMoneyDelta;
+var float g_csMoneyAlpha;
+var vector g_csMoneyColor;
+var float g_csMoneyOldValue;
+
+var float g_csTimeAlpha;
+var float g_csTimeUnitsOld;
+
+var bool g_csDrawTime = false;
+
+var string g_csDollarSprite;
+var string g_csPlusSprite;
+var string g_csMinusSprite;
+var string g_csTimerSprite;
+
+float
+GetGameTime(void)
+{
+	return max(0.0f, serverkeyfloat("cs_gametime") - time);
+}
+
+float
+GetMoneyAmount(void)
+{
+	return 15000;
+}
 
 void
 HLHUD_AmmoNotify_Draw(__inout vector pos)
@@ -228,11 +254,17 @@ HLHUD_BigNums(vector pos, string numString, float alpha)
 void
 HUD_Init(void)
 {
-	for (int i = 0; i < 61i; i++) {
+	for (int i = 0; i < HLHUD_SPRITES; i++) {
 		g_spriteSheets[i] = atlasPic.Load(g_hlSpriteNames[i]);
 	}
 
 	weaponSelectionHUD = spawn(HLWeaponSelect);
+	
+	
+
+	if (serverinfo.GetString("mode") == "counterstrike") {
+		g_csDrawTime = true;
+	}
 }
 
 void
@@ -265,6 +297,11 @@ HUD_ReloadVideoResources(void)
 
 	g_dmg1_spr = precache.SpriteFrame("sprites/640hud8.spr", 0, 0.0f);
 	g_dmg2_spr = precache.SpriteFrame("sprites/640hud9.spr", 0, 0.0f);
+	
+	g_csDollarSprite = atlasPic.Load("dollar");
+	g_csPlusSprite = atlasPic.Load("plus");
+	g_csMinusSprite = atlasPic.Load("minus");
+	g_csTimerSprite = atlasPic.Load("stopwatch");
 }
 
 void
@@ -300,7 +337,7 @@ HLHUD_DrawHealth(vector pos, float healthValue)
 	if (healthValue > 25) {
 		atlasPic.Draw_RGBA(
 			g_spriteSheets[S_CROSS],
-			pos + [-72,-4],
+			pos + [-72,-1],
 			g_fg_color * g_healthAlpha,
 			g_fg_alphaScale, 
 			true
@@ -309,7 +346,7 @@ HLHUD_DrawHealth(vector pos, float healthValue)
 	} else {
 		atlasPic.Draw_RGBA(
 			g_spriteSheets[S_CROSS],
-			pos + [-72,-4],
+			pos + [-72,-1],
 			[1,0,0],
 			g_fg_alphaScale, 
 			true
@@ -323,7 +360,7 @@ HLHUD_DrawArmor(vector pos, float armorValue)
 {
 	atlasPic.Draw_RGBA(
 		g_spriteSheets[S_SUIT_EMPTY],
-		pos + [-80,-9],
+		pos + [-80,-1],
 		g_fg_color * g_armorAlpha,
 		g_fg_alphaScale, 
 		true
@@ -334,7 +371,7 @@ HLHUD_DrawArmor(vector pos, float armorValue)
 
 		atlasPic.DrawBottom_RGBA(
 			g_spriteSheets[S_SUIT_FULL],
-			pos + [-80,-9],
+			pos + [-80,-1],
 			perc,
 			g_fg_color * g_armorAlpha,
 			g_fg_alphaScale, 
@@ -471,6 +508,174 @@ HLHUD_DrawAmmo3(vector pos, float ammoValue)
 }
 
 void
+CSHUD_DrawMoney(vector money_pos, float moneyValue)
+{
+	float endalpha;
+
+	/* if the money differs from last frame, paint it appropriately */
+	if (moneyValue > g_csMoneyOldValue) {
+		/* effect already in progress from something else, go add on top of it! */
+		if (g_csMoneyAlpha > 0) {
+			g_csMoneyDelta += (g_csMoneyOldValue - moneyValue);
+		} else {
+			g_csMoneyDelta = g_csMoneyOldValue - moneyValue;
+		}
+		/* make it green for a short time */
+		g_csMoneyColor = [0,1,0];
+		g_csMoneyAlpha = 1.0;
+	} else if (moneyValue < g_csMoneyOldValue) {
+		/* same one as above */
+		if (g_csMoneyAlpha > 0) {
+			g_csMoneyDelta += (g_csMoneyOldValue - moneyValue);
+		} else {
+			g_csMoneyDelta = g_csMoneyOldValue - moneyValue;
+		}
+		/* make it red */
+		g_csMoneyColor = [1,0,0];
+		g_csMoneyAlpha = 1.0;
+		g_csMoneyDelta = g_csMoneyOldValue - moneyValue;
+	}
+
+	/* maximum alpha is variable. */
+	endalpha = g_csMoneyAlpha * HUD_ALPHA;
+
+	atlasPic.Draw_RGBA(
+		g_csDollarSprite,
+		money_pos,
+		g_fg_color,
+		HUD_ALPHA - endalpha,
+		true
+	);
+
+	/* if the alpha/color effect is active, draw the money twice in their
+	 * varying alphas/colors  */
+	if (g_csMoneyAlpha > 0) {
+		/* red/green dollar sign */
+		atlasPic.Draw_RGBA(
+			g_csDollarSprite,
+			money_pos,
+			g_csMoneyColor,
+			endalpha,
+			true
+		);
+
+		/* draw the +/- symbols depending on whether
+		 * or not we made or lost money */
+		if (g_csMoneyDelta < 0) {
+			atlasPic.Draw_RGBA(
+				g_csMinusSprite,
+				money_pos + [0,-32],
+				g_csMoneyColor,
+				endalpha,
+				true
+			);
+		} else {
+			atlasPic.Draw_RGBA(
+				g_csPlusSprite,
+				money_pos + [0,-32],
+				g_csMoneyColor,
+				endalpha,
+				true
+			);
+		}
+
+		/* shift the numbers for reverse drawing */
+		money_pos[0] += (24 * 5);
+
+		/* draw the red/green overlay numbers on top of ours */
+		HLHUD_DrawNums(moneyValue, money_pos, endalpha, g_csMoneyColor);
+
+		/* draw above how much money we've lost/gotten from all this */
+		HLHUD_DrawNums(fabs(g_csMoneyDelta), money_pos + [0,-32], endalpha, g_csMoneyColor);
+	} else {
+		money_pos[0] += (24 * 5);
+	}
+
+	/* regular number */
+	HLHUD_DrawNums(
+		moneyValue,
+		money_pos,
+		HUD_ALPHA - endalpha,
+		g_fg_color
+	);
+
+	g_csMoneyOldValue = moneyValue;
+	g_csMoneyAlpha = max(0, g_csMoneyAlpha - (clframetime * 0.5));
+}
+
+
+
+
+/* timer */
+void
+CSHUD_DrawTimer(vector time_pos, float gameTime)
+{
+	if (g_csDrawTime == false) {
+		return;
+	}
+
+	int iMinutes, iSeconds, iTens, iUnits;
+
+	if (gameTime < -1) {
+		return;
+	}
+
+	iMinutes = gameTime / 60;
+	iSeconds = gameTime - 60 * iMinutes;
+	iTens = iSeconds / 10;
+	iUnits = iSeconds - 10 * iTens;
+
+	/* Flashing red numbers */
+	if ((iMinutes == 0) &&  (iTens <= 1)) {
+		float fAlpha;
+		
+		/* 0:00 is fully red */
+		if ((iTens == 0) && (iUnits == 0)) {
+			fAlpha = 1;
+		} else {
+			fAlpha = fabs(sin(time * 20));
+		}
+		
+		HLHUD_DrawNumber(iMinutes, time_pos + [48,0], fAlpha, [1,0,0]);
+		HLHUD_DrawNumber(iTens, time_pos + [75,0], fAlpha, [1,0,0]);
+		HLHUD_DrawNumber(iUnits, time_pos + [99,0],fAlpha, [1,0,0]);
+		HLHUD_DrawNumber(iMinutes, time_pos + [48,0], 1 - fAlpha, g_fg_color);
+		HLHUD_DrawNumber(iTens, time_pos + [75,0], 1 - fAlpha, g_fg_color);
+		HLHUD_DrawNumber(iUnits, time_pos + [99,0],1 - fAlpha, g_fg_color);
+		
+		/* : symbol */
+		draw.Rect(time_pos + [70,6], [3,3], [1,0,0], fAlpha, DRAWFLAG_ADDITIVE);
+		draw.Rect(time_pos + [70,16], [3,3], [1,0,0], fAlpha, DRAWFLAG_ADDITIVE);
+		draw.Rect(time_pos + [70,6], [3,3], g_fg_color, 1 - fAlpha, DRAWFLAG_ADDITIVE);
+		draw.Rect(time_pos + [70,16], [3,3], g_fg_color, 1 - fAlpha, DRAWFLAG_ADDITIVE);
+		
+		/* clock */
+		atlasPic.Draw_RGBA(g_csTimerSprite, time_pos, [1,0,0], fAlpha, true);
+		atlasPic.Draw_RGBA(g_csTimerSprite, time_pos, g_fg_color, 1 - fAlpha, true);
+	} else {
+		if (iUnits != g_csTimeUnitsOld) {
+			g_csTimeAlpha = 1.0;
+		}
+	
+		if (g_csTimeAlpha >= HUD_ALPHA) {
+			g_csTimeAlpha -= clframetime * 0.5;
+		} else {
+			g_csTimeAlpha = HUD_ALPHA;
+		}
+		HLHUD_DrawNumber(iMinutes, time_pos + [48,0], g_csTimeAlpha, g_fg_color);
+		HLHUD_DrawNumber(iTens, time_pos + [75,0], g_csTimeAlpha, g_fg_color);
+		HLHUD_DrawNumber(iUnits, time_pos + [95,0], g_csTimeAlpha, g_fg_color);
+		
+		draw.Rect(time_pos + [70,6], [3,3], g_fg_color, g_csTimeAlpha, DRAWFLAG_ADDITIVE);
+		draw.Rect(time_pos + [70,16], [3,3], g_fg_color, g_csTimeAlpha, DRAWFLAG_ADDITIVE);
+
+		atlasPic.Draw_RGBA(g_csTimerSprite, time_pos, g_fg_color, g_csTimeAlpha, true);
+		g_csTimeUnitsOld = iUnits;
+	}
+}
+
+
+void
 HUD_Draw(void)
 {
 	vector pos;
@@ -551,11 +756,22 @@ HUD_Draw(void)
 	HLHUD_DrawHealth(pos, healthValue); 
 	pos = hud_mins + [198, hud_size[1] - 42];
 	HLHUD_DrawArmor(pos, armorValue);
+	
+	pos = hud_mins + [hud_size[0] - 160, hud_size[1] - 72];
+	CSHUD_DrawMoney(pos, GetMoneyAmount());
+
+	if (0) {
+		pos = hud_mins + [(hud_size[0] / 2) - 62, 16];
+	} else {
+		pos = hud_mins + [(hud_size[0] / 2) - 62, hud_size[1] - 42];
+	}
+
+	CSHUD_DrawTimer(pos, GetGameTime());
 
 	weaponSelectionHUD.Draw();
 
 	if (g_spriteCrosshair != -1i) {
-		atlasPic.DrawCrosshair(g_spriteCrosshair);
+		//atlasPic.DrawCrosshair(g_spriteCrosshair);
 	}
 
 	pos = hud_mins + [hud_size[0] - 52, 16];
@@ -593,12 +809,6 @@ HUD_Draw(void)
 	HLHUD_DrawAmmo2(pos, ammoValue);
 
 	HLHUD_ClampTimers();
-}
-
-void
-HUD_DrawSpectator(vector hud_mins, vector hud_size)
-{
-
 }
 
 void
@@ -820,4 +1030,84 @@ HUD_Obituary(string targetName, string attackerName, string weaponDef, string me
 	}
 
 	g_killMsgTime = time + KILLMESSAGE_TIME;
+}
+
+
+
+#define SPEC_SEP_COL [0.204,0.196,0.114]
+#define SPEC_FG_COL [0.561,0.561,0.212]
+
+void
+HUD_DrawSpectator(void)
+{
+	vector vecPos = g_vec_null;
+	float flSep;
+	string strText;
+	int iMinutes, iSeconds;
+	float moneyValue = GetMoneyAmount();
+
+	vector m_vecOrigin = screen.Mins();
+	vector m_vecSize = screen.Size();
+
+	vector hudMins = screen.HUDMins();
+	vector hudRes = screen.HUDSize();
+
+	/* parts on top and bottom */
+	draw.Rect(m_vecOrigin, [m_vecSize[0], 32], [0,0,0], 0.75f);
+	draw.Rect(m_vecOrigin + [0, m_vecSize[1]-32], [m_vecSize[0], 32], [0,0,0], 0.75f);
+
+	/* tracking player box */
+	draw.RectOutline(hudMins + [(hudRes[0] / 2) - 111, hudRes[1]-26], [222,20], 1.0f, SPEC_SEP_COL, 1.0f);
+
+	strText = strcat(Colors_RGB8_to_HEX(teams.Color(spectating.Team())), spectating.Name());
+	vecPos[0] = hudMins[0] + (hudRes[0] / 2) - (font.StringWidth(strText, true, FONT_CHAT) / 2);
+	vecPos[1] = hudRes[1]-21;
+	draw.Text_RGB(vecPos, strText, [1,1,1], FONT_CHAT);
+
+	/* tracking mode box */
+	draw.RectOutline(hudMins + [(hudRes[0] / 2) + 128, hudRes[1]-26], [172,20], 1.0f, SPEC_SEP_COL, 1.0f);
+	strText = spectating.LocalizedMode();
+	vecPos[0] = (hudMins[0] + (hudRes[0] / 2) + 214) - (font.StringWidth(strText, true, FONT_CHAT) / 2);
+	vecPos[1] = hudRes[1]-21;
+	draw.Text_RGB(vecPos, strText, SPEC_FG_COL, FONT_CHAT);
+
+	if (spectating.Mode() == SPECMODE_FIRSTPERSON) {
+		atlasPic.DrawCrosshair(g_spriteCrosshair);
+	}
+
+	/* money */
+	strText = sprintf("$ %d", moneyValue);
+	flSep = font.StringWidth(strText, true, FONT_CHAT);
+
+	if (flSep < 42)
+		flSep = 42;
+
+	flSep = hudMins[0] + (hudRes[0] - flSep) - 10;
+
+	vecPos[0] = flSep + 8;
+	vecPos[1] = hudMins[1] + 3;
+	draw.Text_RGB(vecPos, strText, SPEC_FG_COL, FONT_CHAT);
+
+	/* score/money separator */
+	draw.Rect([flSep,1], [4,30], SPEC_SEP_COL, 1.0f);
+
+	/* team scores */
+	strText = sprintf("Terrorist Forces: %i", teams.Score(1));
+	vecPos[0] = flSep - font.StringWidth(strText, true, FONT_CHAT) - 2;
+	vecPos[1] = hudMins[1] + 3;
+	draw.Text_RGB(vecPos, strText, SPEC_FG_COL, FONT_CHAT);
+
+	strText = sprintf("CT Forces: %i", teams.Score(2));
+	vecPos[0] = flSep - font.StringWidth(strText, true, FONT_CHAT) - 2;
+	vecPos[1] = hudMins[1] + 16;
+	draw.Text_RGB(vecPos, strText, SPEC_FG_COL, FONT_CHAT);
+
+	/* time display */
+	draw.Pic([flSep + 8, 15], "gfx/vgui/640_timer", [14, 14], [1,1,1], 1.0f, DRAWFLAG_NORMAL);
+	iMinutes = GetGameTime() / 60;
+	iSeconds = GetGameTime() - 60 * iMinutes;
+	strText = sprintf("%i:%02i", iMinutes, iSeconds);
+	vecPos[0] = flSep + 8 + 17;
+	vecPos[1] = hudMins[1] + 17;
+	draw.Text_RGB(vecPos, strText, SPEC_FG_COL, FONT_CHAT);
 }
