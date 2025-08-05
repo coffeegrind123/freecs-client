@@ -24,7 +24,7 @@ GetGameTime(void)
 float
 GetMoneyAmount(void)
 {
-	return 15000;
+	return player.GetFloat("*money");
 }
 
 void
