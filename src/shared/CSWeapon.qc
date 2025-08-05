@@ -156,7 +156,11 @@ CSWeapon::UpdateFireInfoCache(void)
 	CSPlayer ourOwner = (CSPlayer)owner;
 	ourOwner.cs_cross_mindist = GetSubDefInt(m_weaponLastFireInfo, "crossMinDist");
 	ourOwner.cs_cross_deltadist = GetSubDefInt(m_weaponLastFireInfo, "crossDeltaDist");
+
+/* no geomset support */
+#ifndef NOVO
 	CStrikeView_UpdateGeomset(ourOwner);
+#endif
 #endif
 }
 

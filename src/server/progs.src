@@ -31,6 +31,7 @@
 ../../../cstrike/src/server/info_hostage_rescue.qc
 ../../../cstrike/src/server/func_vip_safetyzone.qc
 ../../../cstrike/src/server/info_map_parameters.qc
+../../../valve/src/server/HLSuit.qc
 ../../../src/botlib/include.src
 ../../../cstrike/src/server/server.qc
 ../../../src/server/include.src

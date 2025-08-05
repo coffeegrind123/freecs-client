@@ -5,6 +5,7 @@ entityDef player
 	"spine"				"Bip01 Spine"
 	"torsoStart"		"Bip01 Spine"
 	"torsoEnd"			"-- Neck smooth"
+	"twistYaw"			"Bone01"
 
 	"act_idle"				"1"
 	"act_idle_crouch"		"2"
@@ -191,4 +192,12 @@ entityDef player_csdm
 	"item"				"item_suit"
 	"model"				"models/player/vip/vip.mdl"
 	"weapon"			"weapon_knife,weapon_usp"
+}
+
+entityDef player_gungame
+{
+	"inherit" 			"player_mp"
+	"item"				"item_suit"
+	"model"				"models/player/vip/vip.mdl"
+	"weapon"			"weapon_usp"
 }

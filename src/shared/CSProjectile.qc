@@ -105,6 +105,8 @@ CSProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultipl
 	if (m_eMultiTarget) {
 		_ApplyDamage();
 	}
+
+	Destroy();
 }
 
 void

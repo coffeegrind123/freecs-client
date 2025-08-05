@@ -1,7 +1,7 @@
 // used in the training mission, HUD etc.
 entityDef item_suit
 {
-	"spawnclass"	"ncItem"
+	"spawnclass"	"HLSuit"
 	"model"			"models/w_kevlar.mdl"
 	"mins"			"-16 -16 0"
 	"maxs"			"16 16 16"
