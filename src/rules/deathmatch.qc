@@ -15,30 +15,25 @@
  */
 
 bool
-IsTeamplay(void)
-{
-	return cvars.GetBool("mp_teamplay");
-}
-
-bool
 AllowFlashlight(void)
 {
 	return cvars.GetBool("mp_flashlight");
 }
 
 void
+CodeCallback_Precache(void)
+{
+	precache.Entity("player_csdm");
+	precache.Entity("csdm_spawnpoint");
+}
+
+
+void
 CodeCallback_StartGameType(void)
 {
 	motd.LoadDefault();
-
-	if (IsTeamplay() == true) {
-		teams.SetUp(1, "Terrorist", [153, 204, 255], true);
-		teams.SetSpawnPoint(1, "info_player_deathmatch");
-		teams.SetUp(2, "Counter-Terrorist", [255, 63, 63], true);
-		teams.SetSpawnPoint(2, "info_player_deathmatch");
-	} else {
-		game.SetSpawnPoint("info_player_deathmatch");
-	}
+	game.SetSpawnPoint("csdm_spawnpoint");
+	cvars.SetInteger("g_infiniteAmmo", 2i);
 }
 
 void
@@ -47,48 +42,13 @@ HLDM_PlayerSpawn(entity playerEntity)
 	string playerModel;
 
 	ents.ChangeToClass(playerEntity, "player_csdm");
-
-	if (IsTeamplay() == true) {
-		float teamCount = 2;
-		float playerTeam = playerEntity.team;
-		string teamModel;
-
-		/* not part of a team? pick one of the ones we have */
-		/* TODO: this should sort us into the lowest team */
-		if (playerTeam == 0) {
-			playerTeam = 1 + floor(random(0, teamCount)); /* teams start at 1 after all */
-			ents.Input(playerEntity, "SetTeam", ftos(playerTeam), playerEntity);
-		}
-
-		teamModel = argv(playerTeam - 1);
-		playerModel = sprintf("models/player/%s/%s.mdl", teamModel, teamModel);
-	} else {
-		/* interpret the 'model' InfoKey */
-		playerModel = userinfo.GetString(playerEntity, "model");
-
-		if (playerModel != "") {
-			playerModel = sprintf("models/player/%s/%s.mdl", playerModel, playerModel);
-		}
-	}
-
-	/* fallback is always models/player.mdl for Half-Life */
-	if (playerModel == "" || exists.InVFS(playerModel) == false) {
-		playerModel = "models/player.mdl";
-	}
-
-	playerEntity.modelindex = getmodelindex(playerModel); /* keep OG size */
 	game.TeleportToSpawn(playerEntity);
 }
 
 void
 CodeCallback_PlayerSpawn(entity playerEntity)
 {
-	if (IsTeamplay() == false) {
-		HLDM_PlayerSpawn(playerEntity);
-	} else {
-		ents.ChangeToClass(playerEntity, "spectator");
-		game.TeleportToSpawn(playerEntity);
-	}
+	HLDM_PlayerSpawn(playerEntity);
 }
 
 

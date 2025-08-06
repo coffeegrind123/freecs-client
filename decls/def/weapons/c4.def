@@ -6,7 +6,7 @@ entityDef weapon_c4
 	"editor_usage"		"C4 Bomb Weapon, Bomb Defusal Gamemode Entity"
 	"editor_rotatable"	"1"
 
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"model"				"models/w_backpack.mdl"
 	"model_view"		"models/v_c4.mdl"
 	"snd_acquire"		"weapon.pickup"

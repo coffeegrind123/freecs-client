@@ -103,7 +103,7 @@ void
 CSHostage::OnPlayerUse(void)
 {
 	if (eActivator.team == TEAM_T) {
-		CSPlayer pl = (CSPlayer)eActivator;
+		csPlayer pl = (csPlayer)eActivator;
 
 		if (serverinfo.GetBool("cs_hints") == true)
 		if (pl.m_hostMessageT == false) {

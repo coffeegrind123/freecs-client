@@ -57,6 +57,10 @@ We've had people ask in the oddest of places for help, please don't do that.
 - To my supporters on Patreon, who are always eager to follow what I do.
 - Any and all people trying it, tinkering with it etc. :)
 
+## Acknowledgements
+
+**AssKicR** and **Romaaa** for their initial deathmatch spawn point information, originally provided to *BAILOPAN* their [CSDM](https://www.bailopan.net/csdm) mod.
+
 ## License
 ISC License
 

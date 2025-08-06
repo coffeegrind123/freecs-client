@@ -1,0 +1,130 @@
+{
+"classname" "csdm_spawnpoint"
+"origin" "323 -1007 67"
+"angles" "0 90 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "321 -1242 67"
+"angles" "0 178 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "128 -2027 67"
+"angles" "0 -34 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "224 -2214 67"
+"angles" "0 60 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "153 -1854 -60"
+"angles" "0 34 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "121 -236 67"
+"angles" "0 -90 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-419 357 51"
+"angles" "0 -18 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-100 1353 51"
+"angles" "0 -6 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "534 1473 51"
+"angles" "0 -141 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1478 659 435"
+"angles" "0 -149 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-603 701 435"
+"angles" "0 -42 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-70 -120 195"
+"angles" "0 165 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-937 218 -204"
+"angles" "0 -45 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-917 1111 -204"
+"angles" "0 -1 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-419 1244 -204"
+"angles" "0 -94 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-506 541 -204"
+"angles" "0 -104 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1120 376 -204"
+"angles" "0 -142 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1587 31 -204"
+"angles" "0 129 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1587 31 -204"
+"angles" "0 129 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "695 -1291 -204"
+"angles" "0 105 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-246 -1259 -204"
+"angles" "0 54 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-947 -1067 -204"
+"angles" "0 1 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "288 -360 -60"
+"angles" "0 -86 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "196 -523 115"
+"angles" "0 23 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "728 1625 51"
+"angles" "0 -136 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-867 -672 307"
+"angles" "0 27 0"
+}

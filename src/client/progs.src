@@ -23,15 +23,12 @@
 ../../../cstrike/src/client/draw.qc
 ../../../cstrike/src/client/textmenu.qc
 ../../../cstrike/src/client/init.qc
-../../../valve/src/client/flashlight.qc
 ../../../cstrike/src/client/entities.qc
 ../../../cstrike/src/client/cmds.qc
 ../../../cstrike/src/client/game_event.qc
 ../../../valve/src/client/camera.qc
 ../../../valve/src/client/viewmodel.qc
 ../../../cstrike/src/client/crosshair.qc
-../../../cstrike/src/client/vgui_spectator.qc
-../../../valve/src/client/hud_sprite.qc
 ../../../valve/src/client/scoreboard.qc
 ../../../cstrike/src/client/radio.qc
 ../../../src/client/include.src

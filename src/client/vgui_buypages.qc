@@ -133,7 +133,7 @@ CSBuyItemButton::OnMouseEntered(void)
 	int i = GetTag();
 	lblBuyItemDescr.SetTitle(g_butItemDescr[i]);
 	imgBuyItemPic.SetImage(g_buyItemList[i].imgPath);
-	lblBuyItemTitle.SetTitle(Titles_GetTextBody(g_buyItemList[i].titleName));
+	lblBuyItemTitle.SetTitle(localize(Titles_GetTextBody(g_buyItemList[i].titleName)));
 }
 
 enum
@@ -164,7 +164,7 @@ CSVGUI_BuyMenu_Page(int buyPage)
 	static CSBuyItemButton btnBuyItem8;
 	static CSBuyItemButton btnBuyItem9;
 
-	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
+	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
 
 	int inTeam = getplayerkeyfloat(pl.entnum-1, "*team");
 
@@ -181,7 +181,7 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		winBuyMenuPage.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
 		lblBuyScreenTitle = spawn(vguiLabel);
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_select_category_of_purchase"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_select_category_of_purchase")));
 		lblBuyScreenTitle.SetTextSize(19);
 		lblBuyScreenTitle.SetPos([40, 38]);
 		lblBuyScreenTitle.SetSize('400 24');
@@ -258,7 +258,7 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem9.SetFunc(VGUI_BuyMenu_Pistols_Cancel);
 
 		btnCancel = spawn(vguiButton);
-		btnCancel.SetTitle(Titles_GetTextBody("Menu_Cancel"));
+		btnCancel.SetTitle(localize(Titles_GetTextBody("Menu_Cancel")));
 		btnCancel.SetPos('40 368');
 		btnCancel.SetSize('124 24');
 		btnCancel.SetKeyEquivalent("0");
@@ -296,7 +296,7 @@ CSVGUI_BuyMenu_Page(int buyPage)
 
 	switch (buyPage) {
 	case BUYPAGE_PISTOLS:
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_pistol_selection"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_pistol_selection")));
 
 		if (inTeam == TEAM_CT) {
 			btnBuyItem5.Hide();
@@ -313,17 +313,17 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Hide();
 		btnBuyItem9.Hide();
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("KM45Tactical"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("KM45Tactical")));
 		btnBuyItem1.SetTag(BUYITEM_USP45);
-		btnBuyItem2.SetTitle(Titles_GetTextBody("Sidearm9X19mm"));
+		btnBuyItem2.SetTitle(localize(Titles_GetTextBody("Sidearm9X19mm")));
 		btnBuyItem2.SetTag(BUYITEM_GLOCK18);
-		btnBuyItem3.SetTitle(Titles_GetTextBody("NightHawk"));
+		btnBuyItem3.SetTitle(localize(Titles_GetTextBody("NightHawk")));
 		btnBuyItem3.SetTag(BUYITEM_DEAGLE);
-		btnBuyItem4.SetTitle(Titles_GetTextBody("P228Compact"));
+		btnBuyItem4.SetTitle(localize(Titles_GetTextBody("P228Compact")));
 		btnBuyItem4.SetTag(BUYITEM_P228);
-		btnBuyItem5.SetTitle(Titles_GetTextBody("Dual40"));
+		btnBuyItem5.SetTitle(localize(Titles_GetTextBody("Dual40")));
 		btnBuyItem5.SetTag(BUYITEM_ELITES);
-		btnBuyItem6.SetTitle(Titles_GetTextBody("ESFiveSeven"));
+		btnBuyItem6.SetTitle(localize(Titles_GetTextBody("ESFiveSeven")));
 		btnBuyItem6.SetTag(BUYITEM_FIVESEVEN);
 		break;
 	case BUYPAGE_SHOTGUNS:
@@ -339,13 +339,13 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Hide();
 		btnBuyItem9.Hide();
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("Leone12"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("Leone12")));
 		btnBuyItem1.SetTag(BUYITEM_M3);
-		btnBuyItem2.SetTitle(Titles_GetTextBody("AutoShotgun"));
+		btnBuyItem2.SetTitle(localize(Titles_GetTextBody("AutoShotgun")));
 		btnBuyItem2.SetTag(BUYITEM_XM1014);
 		break;
 	case BUYPAGE_SMGS:
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_smg_selection"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_smg_selection")));
 
 		if (inTeam == TEAM_CT) {
 			btnBuyItem2.Show();
@@ -362,19 +362,19 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Hide();
 		btnBuyItem9.Hide();
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("SubMachineGun"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("SubMachineGun")));
 		btnBuyItem1.SetTag(BUYITEM_MP5);
-		btnBuyItem2.SetTitle(Titles_GetTextBody("SchmidtMP"));
+		btnBuyItem2.SetTitle(localize(Titles_GetTextBody("SchmidtMP")));
 		btnBuyItem2.SetTag(BUYITEM_TMP);
-		btnBuyItem3.SetTitle(Titles_GetTextBody("ESC90"));
+		btnBuyItem3.SetTitle(localize(Titles_GetTextBody("ESC90")));
 		btnBuyItem3.SetTag(BUYITEM_P90);
-		btnBuyItem4.SetTitle(Titles_GetTextBody("Mac10_Short"));
+		btnBuyItem4.SetTitle(localize(Titles_GetTextBody("Mac10_Short")));
 		btnBuyItem4.SetTag(BUYITEM_MAC10);
-		btnBuyItem5.SetTitle(Titles_GetTextBody("KMUMP45"));
+		btnBuyItem5.SetTitle(localize(Titles_GetTextBody("KMUMP45")));
 		btnBuyItem5.SetTag(BUYITEM_UMP45);
 		break;
 	case BUYPAGE_RIFLES:
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_rifle_selection"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_rifle_selection")));
 
 		if (inTeam == TEAM_CT) {
 			btnBuyItem1.Hide();
@@ -396,35 +396,35 @@ CSVGUI_BuyMenu_Page(int buyPage)
 
 #if defined(CZERO) || defined(CSSOURCE)
 		if (inTeam == TEAM_CT) {
-			btnBuyItem9.SetTitle(Titles_GetTextBody("Famas"));
+			btnBuyItem9.SetTitle(localize(Titles_GetTextBody("Famas")));
 			btnBuyItem9.SetTag(BUYITEM_FAMAS);
 			btnBuyItem9.Show();
 		} else {
-			btnBuyItem9.SetTitle(Titles_GetTextBody("Galil"));
+			btnBuyItem9.SetTitle(localize(Titles_GetTextBody("Galil")));
 			btnBuyItem9.SetTag(BUYITEM_GALIL);
 			btnBuyItem9.Show();
 		}
 #endif
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("AK47"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("AK47")));
 		btnBuyItem1.SetTag(BUYITEM_AK47);
-		btnBuyItem2.SetTitle(Titles_GetTextBody("Krieg552"));
+		btnBuyItem2.SetTitle(localize(Titles_GetTextBody("Krieg552")));
 		btnBuyItem2.SetTag(BUYITEM_SG552);
-		btnBuyItem3.SetTitle(Titles_GetTextBody("M4A1_Short"));
+		btnBuyItem3.SetTitle(localize(Titles_GetTextBody("M4A1_Short")));
 		btnBuyItem3.SetTag(BUYITEM_M4A1);
-		btnBuyItem4.SetTitle(Titles_GetTextBody("Aug"));
+		btnBuyItem4.SetTitle(localize(Titles_GetTextBody("Aug")));
 		btnBuyItem4.SetTag(BUYITEM_AUG);
-		btnBuyItem5.SetTitle(Titles_GetTextBody("Schmidt"));
+		btnBuyItem5.SetTitle(localize(Titles_GetTextBody("Schmidt")));
 		btnBuyItem5.SetTag(BUYITEM_SCOUT);
-		btnBuyItem6.SetTitle(Titles_GetTextBody("Magnum"));
+		btnBuyItem6.SetTitle(localize(Titles_GetTextBody("Magnum")));
 		btnBuyItem6.SetTag(BUYITEM_AWP);
-		btnBuyItem7.SetTitle(Titles_GetTextBody("D3AU1"));
+		btnBuyItem7.SetTitle(localize(Titles_GetTextBody("D3AU1")));
 		btnBuyItem7.SetTag(BUYITEM_G3SG1);
-		btnBuyItem8.SetTitle(Titles_GetTextBody("Krieg550"));
+		btnBuyItem8.SetTitle(localize(Titles_GetTextBody("Krieg550")));
 		btnBuyItem8.SetTag(BUYITEM_SG550);
 		break;
 	case BUYPAGE_MGS:
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_machinegun_selection"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_machinegun_selection")));
 
 		btnBuyItem1.Show();
 		btnBuyItem2.Hide();
@@ -436,11 +436,11 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Hide();
 		btnBuyItem9.Hide();
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("ESM249"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("ESM249")));
 		btnBuyItem1.SetTag(BUYITEM_PARA);
 		break;
 	case BUYPAGE_EQUIPMENT:
-		lblBuyScreenTitle.SetTitle(Titles_GetTextBody("Title_equipment_selection"));
+		lblBuyScreenTitle.SetTitle(localize(Titles_GetTextBody("Title_equipment_selection")));
 
 		if (inTeam == TEAM_CT) {
 			btnBuyItem6.Show();
@@ -457,19 +457,19 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Hide();
 		btnBuyItem9.Hide();
 
-		btnBuyItem1.SetTitle(Titles_GetTextBody("Kevlar"));
+		btnBuyItem1.SetTitle(localize(Titles_GetTextBody("Kevlar")));
 		btnBuyItem1.SetTag(BUYITEM_KEVLAR);
-		btnBuyItem2.SetTitle(Titles_GetTextBody("Kevlar_Helmet"));
+		btnBuyItem2.SetTitle(localize(Titles_GetTextBody("Kevlar_Helmet")));
 		btnBuyItem2.SetTag(BUYITEM_HELMET);
-		btnBuyItem3.SetTitle(Titles_GetTextBody("Flashbang"));
+		btnBuyItem3.SetTitle(localize(Titles_GetTextBody("Flashbang")));
 		btnBuyItem3.SetTag(BUYITEM_FLASHBANG);
-		btnBuyItem4.SetTitle(Titles_GetTextBody("HE_Grenade"));
+		btnBuyItem4.SetTitle(localize(Titles_GetTextBody("HE_Grenade")));
 		btnBuyItem4.SetTag(BUYITEM_HENADE);
-		btnBuyItem5.SetTitle(Titles_GetTextBody("Smoke_Grenade"));
+		btnBuyItem5.SetTitle(localize(Titles_GetTextBody("Smoke_Grenade")));
 		btnBuyItem5.SetTag(BUYITEM_SMOKE);
-		btnBuyItem6.SetTitle(Titles_GetTextBody("Defusal_Kit"));
+		btnBuyItem6.SetTitle(localize(Titles_GetTextBody("Defusal_Kit")));
 		btnBuyItem6.SetTag(BUYITEM_DEFUSE);
-		btnBuyItem7.SetTitle(Titles_GetTextBody("NightVision"));
+		btnBuyItem7.SetTitle(localize(Titles_GetTextBody("NightVision")));
 		btnBuyItem7.SetTag(BUYITEM_NIGHTVISION);
 		break;
 	}

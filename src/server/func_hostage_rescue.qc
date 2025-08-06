@@ -52,7 +52,7 @@ void
 func_hostage_rescue::Touch(entity eToucher)
 {
 	if (is.Player(eToucher)) {
-		CSPlayer pl = (CSPlayer)eToucher;
+		csPlayer pl = (csPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}

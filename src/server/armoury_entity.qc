@@ -165,12 +165,12 @@ armoury_entity::Restore(string strKey, string strValue)
 void
 armoury_entity::Touch(entity eToucher)
 {
-	CSPlayer pl;
+	csPlayer pl;
 	if (eToucher.classname != "player") {
 		return;
 	}
 
-	pl = (CSPlayer)eToucher;
+	pl = (csPlayer)eToucher;
 
 	/* armor is separate from weapons */
 	if (m_iID == 17 || m_iID == 16) {

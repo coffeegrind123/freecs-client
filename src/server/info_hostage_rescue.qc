@@ -53,7 +53,7 @@ void
 info_hostage_rescue::Touch(entity eToucher)
 {
 	if (is.Player(eToucher)) {
-		CSPlayer pl = (CSPlayer)eToucher;
+		csPlayer pl = (csPlayer)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}
@@ -69,7 +69,7 @@ info_hostage_rescue::Touch(entity eToucher)
 	}
 
 	/* some custom maps are very smart... */
-	if (!((CSPlayer)hosty.m_useFollowChain))
+	if (!((csPlayer)hosty.m_useFollowChain))
 		return;
 
 	g_grMode.Input(hosty.m_useFollowChain, "HostageRescued", "");

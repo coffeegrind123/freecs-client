@@ -29,12 +29,12 @@
 */
 
 var float autocvar_fcs_guns_recoil_strength = 1.0f;
-var bool autocvar_fcs_guns_random_recoil_direction = TRUE;
+var bool autocvar_fcs_guns_random_recoil_direction = true;
 var float autocvar_fcs_guns_movement_inaccuracy = 1.0f;
 var float autocvar_fcs_guns_firing_inaccuracy = 1.0f;
 
 float
-Cstrike_CalculateMovementInaccuracy(CSPlayer pl) {
+Cstrike_CalculateMovementInaccuracy(csPlayer pl) {
 	float m = 1.0f;
 	float maxspeed = 250;
 	float speedlimit_low = maxspeed/3;
@@ -57,7 +57,7 @@ Cstrike_CalculateMovementInaccuracy(CSPlayer pl) {
 
 /* called whenever a cstrike gun fires a successful shot */
 void
-Cstrike_ShotMultiplierAdd(CSPlayer pl, float shots, float strength, float inaccuracy)
+Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccuracy)
 {
 	int r;
 	inaccuracy = bound(.95,inaccuracy*50+0.1,1.6);
@@ -140,7 +140,7 @@ Cstrike_ShotMultiplierAdd(CSPlayer pl, float shots, float strength, float inaccu
 
 /* generate an accuracy value that we'll pass onto TraceAttack */
 float
-Cstrike_CalculateAccuracy(CSPlayer pl, float divisor, float movement_penalty=1)
+Cstrike_CalculateAccuracy(csPlayer pl, float divisor, float movement_penalty=1)
 {
 	float inacc = 0;
 	float m = Cstrike_CalculateMovementInaccuracy(pl);
@@ -165,12 +165,12 @@ Cstrike_CalculateAccuracy(CSPlayer pl, float divisor, float movement_penalty=1)
 
 
 void
-Cstrike_BulletRecoil_ApplyPre(CSPlayer pl, float strength) {
+Cstrike_BulletRecoil_ApplyPre(csPlayer pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
 	pl.v_angle += strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
 }
 void
-Cstrike_BulletRecoil_ApplyPost(CSPlayer pl, float strength) {
+Cstrike_BulletRecoil_ApplyPost(csPlayer pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
 	pl.v_angle -= strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
 }
@@ -178,7 +178,7 @@ Cstrike_BulletRecoil_ApplyPost(CSPlayer pl, float strength) {
 
 /* called whenever cstrike guns aren't firing */
 void
-Cstrike_ShotMultiplierUpdate(CSPlayer pl)
+Cstrike_ShotMultiplierUpdate(csPlayer pl)
 {
 	if ((pl.cs_shotmultiplier > 0) && (pl.cs_shottime <= 0.0f)) {
 		pl.cs_shottime = pl.m_timeUntilNextAttack + 0.01;
@@ -189,7 +189,7 @@ Cstrike_ShotMultiplierUpdate(CSPlayer pl)
 }
 
 void
-Cstrike_ShotReset(CSPlayer pl)
+Cstrike_ShotReset(csPlayer pl)
 {
 	pl.cs_shottime = 0.0f;
 	pl.cs_shotmultiplier = 0;
@@ -197,7 +197,7 @@ Cstrike_ShotReset(CSPlayer pl)
 
 #ifdef CLIENT
 void
-CStrikeView_UpdateGeomset(CSPlayer pl)
+CStrikeView_UpdateGeomset(csPlayer pl)
 {
 	if (getplayerkeyfloat(pl.entnum-1, "*team") == TEAM_CT) {
 		setcustomskin(pSeat->m_eViewModel, "", "geomset 0 2\ngeomset 1 1\n");

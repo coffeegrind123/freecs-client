@@ -1,6 +1,6 @@
 entityDef CSBaseMelee
 {
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"editor_color"		".3 .3 1"
 	"editor_mins"		"-16 -16 -16"
 	"editor_maxs"		"16 16 16"
@@ -11,7 +11,7 @@ entityDef CSBaseMelee
 
 entityDef CSBasePistol
 {
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"editor_color"		".3 .3 1"
 	"editor_mins"		"-16 -16 -16"
 	"editor_maxs"		"16 16 16"
@@ -26,7 +26,7 @@ entityDef CSBasePistol
 
 entityDef CSBaseRifle
 {
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"editor_color"		".3 .3 1"
 	"editor_mins"		"-16 -16 -16"
 	"editor_maxs"		"16 16 16"
@@ -40,7 +40,7 @@ entityDef CSBaseRifle
 
 entityDef CSBaseShotgun
 {
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"editor_color"		".3 .3 1"
 	"editor_mins"		"-16 -16 -16"
 	"editor_maxs"		"16 16 16"

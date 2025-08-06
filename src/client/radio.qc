@@ -15,102 +15,102 @@
  */
 
 string g_cstrikeRadioWAVs[43] = {
-	"radio/blow.wav",
-	"radio/bombdef.wav",
-	"radio/bombpl.wav",
-	"radio/circleback.wav",
-	"radio/clear.wav",
-	"radio/com_followcom.wav",
-	"radio/com_getinpos.wav",
-	"radio/com_go.wav",
-	"radio/com_reportin.wav",
-	"radio/ct_affirm.wav",
-	"radio/ct_backup.wav",
-	"radio/ct_coverme.wav",
-	"radio/ct_enemys.wav",
-	"radio/ct_fireinhole.wav",
-	"radio/ct_imhit.wav",
-	"radio/ct_inpos.wav",
-	"radio/ct_point.wav",
-	"radio/ct_reportingin.wav",
-	"radio/ctwin.wav",
-	"radio/enemydown.wav",
-	"radio/fallback.wav",
-	"radio/fireassis.wav",
-	"radio/followme.wav",
-	"radio/getout.wav",
-	"radio/go.wav",
-	"radio/hitassist.wav",
-	"radio/hosdown.wav",
-	"radio/letsgo.wav",
-	"radio/locknload.wav",
-	"radio/matedown.wav",
-	"radio/meetme.wav",
-	"radio/moveout.wav",
-	"radio/negative.wav",
-	"radio/position.wav",
-	"radio/regroup.wav",
-	"radio/rescued.wav",
-	"radio/roger.wav",
-	"radio/rounddraw.wav",
-	"radio/sticktog.wav",
-	"radio/stormfront.wav",
-	"radio/takepoint.wav",
-	"radio/terwin.wav",
-	"radio/vip.wav"
+	"blow.wav",
+	"bombdef.wav",
+	"bombpl.wav",
+	"circleback.wav",
+	"clear.wav",
+	"com_followcom.wav",
+	"com_getinpos.wav",
+	"com_go.wav",
+	"com_reportin.wav",
+	"ct_affirm.wav",
+	"ct_backup.wav",
+	"ct_coverme.wav",
+	"ct_enemys.wav",
+	"ct_fireinhole.wav",
+	"ct_imhit.wav",
+	"ct_inpos.wav",
+	"ct_point.wav",
+	"ct_reportingin.wav",
+	"ctwin.wav",
+	"enemydown.wav",
+	"fallback.wav",
+	"fireassis.wav",
+	"followme.wav",
+	"getout.wav",
+	"go.wav",
+	"hitassist.wav",
+	"hosdown.wav",
+	"letsgo.wav",
+	"locknload.wav",
+	"matedown.wav",
+	"meetme.wav",
+	"moveout.wav",
+	"negative.wav",
+	"position.wav",
+	"regroup.wav",
+	"rescued.wav",
+	"roger.wav",
+	"rounddraw.wav",
+	"sticktog.wav",
+	"stormfront.wav",
+	"takepoint.wav",
+	"terwin.wav",
+	"vip.wav"
 };
 
 string g_cstrikeRadioChat[43] = {
-	_("RADIO_BLOW"),
-	_("RADIO_BOMBDEF"),
-	_("RADIO_BOMBPL"),
-	_("RADIO_CIRCLEBACK"),
-	_("RADIO_CLEAR"),
-	_("RADIO_COM_FOLLOWCOM"),
-	_("RADIO_COM_GETINPOS"),
-	_("RADIO_COM_GO"),
-	_("RADIO_COM_REPORTIN"),
-	_("RADIO_CT_AFFIRM"),
-	_("RADIO_CT_BACKUP"),
-	_("RADIO_CT_COVERME"),
-	_("RADIO_CT_ENEMYS"),
-	_("RADIO_CT_FIREINHOLE"),
-	_("RADIO_CT_IMHIT"),
-	_("RADIO_CT_INPOS"),
-	_("RADIO_CT_POINT"),
-	_("RADIO_CT_REPORTINGIN"),
-	_("RADIO_CTWIN"),
-	_("RADIO_ENEMYDOWN"),
-	_("RADIO_FALLBACK"),
-	_("RADIO_FIREASSIS"),
-	_("RADIO_FOLLOWME"),
-	_("RADIO_GETOUT"),
-	_("RADIO_GO"),
-	_("RADIO_HITASSIST"),
-	_("RADIO_HOSDOWN"),
-	_("RADIO_LETSGO"),
-	_("RADIO_LOCKNLOAD"),
-	_("RADIO_MATEDOWN"),
-	_("RADIO_MEETME"),
-	_("RADIO_MOVEOUT"),
-	_("RADIO_NEGATIVE"),
-	_("RADIO_POSITION"),
-	_("RADIO_REGROUP"),
-	_("RADIO_RESCUED"),
-	_("RADIO_ROGER"),
-	_("RADIO_ROUNDDRAW"),
-	_("RADIO_STICKTOG"),
-	_("RADIO_STORMFRONT"),
-	_("RADIO_TAKEPOINT"),
-	_("RADIO_TERWIN"),
-	_("RADIO_VIP"),
+	"BLOW",
+	"BOMBDEF",
+	"BOMBPL",
+	"CIRCLEBACK",
+	"CLEAR",
+	"COM_FOLLOWCOM",
+	"COM_GETINPOS",
+	"COM_GO",
+	"COM_REPORTIN",
+	"CT_AFFIRM",
+	"CT_BACKUP",
+	"CT_COVERME",
+	"CT_ENEMYS",
+	"CT_FIREINHOLE",
+	"CT_IMHIT",
+	"CT_INPOS",
+	"CT_POINT",
+	"CT_REPORTINGIN",
+	"CTWIN",
+	"ENEMYDOWN",
+	"FALLBACK",
+	"FIREASSIS",
+	"FOLLOWME",
+	"GETOUT",
+	"GO",
+	"HITASSIST",
+	"HOSDOWN",
+	"LETSGO",
+	"LOCKNLOAD",
+	"MATEDOWN",
+	"MEETME",
+	"MOVEOUT",
+	"NEGATIVE",
+	"POSITION",
+	"REGROUP",
+	"RESCUED",
+	"ROGER",
+	"ROUNDDRAW",
+	"STICKTOG",
+	"STORMFRONT",
+	"TAKEPOINT",
+	"TERWIN",
+	"VIP",
 };
 
 void
 Radio_Init(void)
 {
 	for (int i = 0; i < g_cstrikeRadioWAVs.length; i++)
-		precache_sound(g_cstrikeRadioWAVs[i]);
+		precache_sound(strcat("radio/", g_cstrikeRadioWAVs[i]));
 }
 
 /*
@@ -123,12 +123,15 @@ Play a radio message that doesn't come from a player
 void
 Radio_PlayMessage(float fMessage)
 {
-	sound(world, CHAN_VOICE, g_cstrikeRadioWAVs[fMessage], 1, ATTN_NONE, 0, SOUNDFLAG_NOSPACIALISE);
+	string localizedRadioMessage = localize(strcat("#RADIO_", g_cstrikeRadioChat[fMessage]));
+	string messageSound = strcat("radio/", g_cstrikeRadioWAVs[fMessage]);
+
+	sound(world, CHAN_VOICE, messageSound, 1, ATTN_NONE, 0, SOUNDFLAG_NOSPACIALISE);
 
 	if (fMessage == RADIO_CTWIN || fMessage == RADIO_TERWIN || fMessage == RADIO_ROUNDDRAW) {
-		CSQC_Parse_CenterPrint(sprintf("%s", g_cstrikeRadioChat[fMessage]));
+		CSQC_Parse_CenterPrint(sprintf("%s", localizedRadioMessage));
 	} else {
-		CSQC_Parse_Print(sprintf("^2[RADIO]^xF80: %s", g_cstrikeRadioChat[fMessage]), PRINT_CHAT);
+		CSQC_Parse_Print(sprintf("^2[RADIO]^xF80: %s", localizedRadioMessage), PRINT_CHAT);
 	}
 }
 
@@ -142,6 +145,9 @@ This radio message does come from a player
 void
 Radio_PlayPlayerMessage(float fPlayerNum, float fMessage)
 {
-	sound(world, CHAN_VOICE, g_cstrikeRadioWAVs[fMessage], 1, ATTN_NONE, 0, SOUNDFLAG_NOSPACIALISE);
-	CSQC_Parse_Print(sprintf("^2[RADIO] %s%s^xF80: %s", HUD_GetChatColorHEX(stof(getplayerkeyvalue(fPlayerNum, "*team"))), getplayerkeyvalue(fPlayerNum, "name"), g_cstrikeRadioChat[fMessage]), PRINT_CHAT);
+	string localizedRadioMessage = localize(strcat("#RADIO_", g_cstrikeRadioChat[fMessage]));
+	string messageSound = strcat("radio/", g_cstrikeRadioWAVs[fMessage]);
+
+	sound(world, CHAN_VOICE, messageSound, 1, ATTN_NONE, 0, SOUNDFLAG_NOSPACIALISE);
+	CSQC_Parse_Print(sprintf("^2[RADIO] %s%s^xF80: %s", HUD_GetChatColorHEX(stof(getplayerkeyvalue(fPlayerNum, "*team"))), getplayerkeyvalue(fPlayerNum, "name"), localizedRadioMessage), PRINT_CHAT);
 }

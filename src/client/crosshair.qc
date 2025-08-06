@@ -27,7 +27,7 @@ var bool autocvar_cl_crosshair_additive = true;
 #define CS_CROSS_THICKNESS autocvar_cl_crosshair_thickness
 
 void
-Cstrike_DrawCrosshair(CSPlayer pl)
+Cstrike_DrawCrosshair(csPlayer pl)
 {
 	int cross_dist;
 	int line_length;

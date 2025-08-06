@@ -86,8 +86,8 @@ CT_SELECT(int classSelection)
 void
 BUY(int n)
 {
-	CSPlayer pl;
-	pl = (CSPlayer)pSeat->m_ePlayer;
+	csPlayer pl;
+	pl = (csPlayer)pSeat->m_ePlayer;
 	int inteam = getplayerkeyfloat(pl.entnum-1, "*team");
 
 	switch (n) {

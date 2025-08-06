@@ -1,6 +1,6 @@
 entityDef weapon_knife
 {
-	"spawnclass"		"CSWeapon"
+	"spawnclass"		"csWeapon"
 	"inherit"			"CSBaseMelee"
 	"editor_usage"		"Knife Weapon"
 

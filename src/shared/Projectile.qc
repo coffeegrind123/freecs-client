@@ -15,14 +15,14 @@
  */
 
 void
-CSProjectile::CSProjectile(void)
+csProjectile::csProjectile(void)
 {
 
 }
 
 #ifdef SERVER
 void
-CSProjectile::HasExploded(void)
+csProjectile::HasExploded(void)
 {
 	float flashTime = GetSpawnFloat("flashTime");
 	float smokeTime = GetSpawnFloat("smokeTime");
@@ -37,25 +37,25 @@ CSProjectile::HasExploded(void)
 }
 
 void
-CSProjectile::SetRangeModifier(float rangeModifier)
+csProjectile::SetRangeModifier(float rangeModifier)
 {
 	m_flRangeModifier = rangeModifier;
 }
 
 void
-CSProjectile::SetPenetrationMaxThickness(float maxThickness)
+csProjectile::SetPenetrationMaxThickness(float maxThickness)
 {
 	m_flMaxThickness = maxThickness;
 }
 
 void
-CSProjectile::SetPenetrationPower(int powerLevel)
+csProjectile::SetPenetrationPower(int powerLevel)
 {
 	m_iTotalPenetrations = powerLevel;
 }
 
 void
-CSProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultiplier)
+csProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultiplier)
 {
 	vector vecDir;
 	vector ownerAngle;
@@ -82,7 +82,7 @@ CSProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultipl
 			vecDir += random(-1,1) * m_vecSpread[0] * anglesToRight(launchDir);
 			vecDir += random(-1,1) * m_vecSpread[1] * anglesToUp(launchDir);
 		} else {
-			CSPlayer pl = (CSPlayer)owner;
+			csPlayer pl = (csPlayer)owner;
 
 			/* weapons have already applied their multiplier... so attempt this */
 			int multiplier = pl.cs_shotmultiplier - m_iShots;
@@ -110,7 +110,7 @@ CSProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultipl
 }
 
 void
-CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float flRange)
+csProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float flRange)
 {
 	vector range;
 	vector planeNormal;
@@ -230,12 +230,12 @@ CSProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 	}
 }
 
-CSProjectile
-CSProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread)
+csProjectile
+csProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread)
 {
 	entity oldself = self;
 
-	CSProjectile rocket = spawn(CSProjectile);
+	csProjectile rocket = spawn(csProjectile);
 	rocket.owner = theOwner;
 	self = rocket;
 	EntityDef_SpawnClassname(entityDef);

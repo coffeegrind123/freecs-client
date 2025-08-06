@@ -15,14 +15,14 @@
  */
 
 #ifdef CLIENT
-void Cstrike_DrawCrosshair(CSPlayer);
+void Cstrike_DrawCrosshair(csPlayer);
 #endif
 
 class
-CSWeapon:hlWeapon
+csWeapon:hlWeapon
 {
 public:
-	void CSWeapon(void);
+	void csWeapon(void);
 
 #ifdef CLIENT
 	virtual void AddedToInventory(void);
@@ -53,13 +53,13 @@ public:
 };
 
 void
-CSWeapon::CSWeapon(void)
+csWeapon::csWeapon(void)
 {
 
 }
 
 bool
-CSWeapon::CanFire(void)
+csWeapon::CanFire(void)
 {
 	bool returnValue = super::CanFire();
 	
@@ -73,15 +73,15 @@ CSWeapon::CanFire(void)
 }
 
 void
-CSWeapon::SwitchedToWeapon(void)
+csWeapon::SwitchedToWeapon(void)
 {
-	Cstrike_ShotReset((CSPlayer)owner);
+	Cstrike_ShotReset((csPlayer)owner);
 }
 
 void
-CSWeapon::FiredWeaponAttack(string defName)
+csWeapon::FiredWeaponAttack(string defName)
 {
-	CSPlayer ourOwner = (CSPlayer)owner;
+	csPlayer ourOwner = (csPlayer)owner;
 
 	if (GetSubDefBool(defName, "csWeaponMode") == false) {
 		super::FiredWeaponAttack(defName);
@@ -108,7 +108,7 @@ CSWeapon::FiredWeaponAttack(string defName)
 	}
 
 	for (int i = 0i; i < numProjectiles; i++) {
-		CSProjectile_SpawnDef(traceInfo, ourOwner, flRangeModifier, flPenetrationPower, bulletSpread);
+		csProjectile_SpawnDef(traceInfo, ourOwner, flRangeModifier, flPenetrationPower, bulletSpread);
 	}
 #endif
 
@@ -123,16 +123,16 @@ CSWeapon::FiredWeaponAttack(string defName)
 }
 
 void
-CSWeapon::Release(void)
+csWeapon::Release(void)
 {
 	owner.v_angle = input_angles;
-	Cstrike_ShotMultiplierUpdate((CSPlayer)owner);
+	Cstrike_ShotMultiplierUpdate((csPlayer)owner);
 	input_angles = owner.v_angle;
 	super::Release();
 }
 
 void
-CSWeapon::UpdateFireInfoCache(void)
+csWeapon::UpdateFireInfoCache(void)
 {
 	super::UpdateFireInfoCache();
 
@@ -153,7 +153,7 @@ CSWeapon::UpdateFireInfoCache(void)
 	bulletSpread = [accuracy, accuracy];
 
 #ifdef CLIENT
-	CSPlayer ourOwner = (CSPlayer)owner;
+	csPlayer ourOwner = (csPlayer)owner;
 	ourOwner.cs_cross_mindist = GetSubDefInt(m_weaponLastFireInfo, "crossMinDist");
 	ourOwner.cs_cross_deltadist = GetSubDefInt(m_weaponLastFireInfo, "crossDeltaDist");
 
@@ -166,7 +166,7 @@ CSWeapon::UpdateFireInfoCache(void)
 
 #ifdef CLIENT
 void
-CSWeapon::AddedToInventory(void)
+csWeapon::AddedToInventory(void)
 {
 	super::AddedToInventory();
 
@@ -187,9 +187,9 @@ CSWeapon::AddedToInventory(void)
 }
 
 void
-CSWeapon::UpdateGUI(void)
+csWeapon::UpdateGUI(void)
 {
-	CSPlayer ourOwner = (CSPlayer)GetOwner();
+	csPlayer ourOwner = (csPlayer)GetOwner();
 
 	/* draw crosshair */
 	Cstrike_DrawCrosshair(ourOwner);

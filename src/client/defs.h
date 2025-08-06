@@ -14,9 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "hud.h"
 #include "radio.h"
-#include "../../../valve/src/client/hud_sprite.h"
 
 var int autocvar_cl_autoweaponswitch = TRUE;
 

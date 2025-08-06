@@ -84,27 +84,27 @@ CSClassButtonCT::OnMouseEntered(void)
 
 	switch (classSelection) {
 		case 1:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Title_seal_team"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Title_seal_team")));
 			imgClassPreview.SetImage("gfx/vgui/640_urban");
 			lblClassDescription.SetTitle(g_classDescrSeal);
 			break;
 		case 2:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Title_gsg9"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Title_gsg9")));
 			imgClassPreview.SetImage("gfx/vgui/640_gsg9");
 			lblClassDescription.SetTitle(g_classDescrGSG9);
 			break;
 		case 3:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Title_sas"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Title_sas")));
 			imgClassPreview.SetImage("gfx/vgui/640_sas");
 			lblClassDescription.SetTitle(g_classDescrSAS);
 			break;
 		case 4:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Title_gign"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Title_gign")));
 			imgClassPreview.SetImage("gfx/vgui/640_gign");
 			lblClassDescription.SetTitle(g_classDescrGIGN);
 			break;
 		case 5:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Auto_Select"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
 			imgClassPreview.SetImage("gfx/vgui/640_ct_random");
 			lblClassDescription.SetTitle(g_classDescrAuto);
 			break;
@@ -134,7 +134,7 @@ CSVGUI_ChooseClassCT(void)
 		winClassSelectionCT.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
 		lblSelectClass = spawn(vguiLabel);
-		lblSelectClass.SetTitle(Titles_GetTextBody("Title_ct_model_selection"));
+		lblSelectClass.SetTitle(localize(Titles_GetTextBody("Title_ct_model_selection")));
 		lblSelectClass.SetTextSize(19);
 		lblSelectClass.SetPos([40, 38]);
 		lblSelectClass.SetSize([400, 24]);
@@ -168,31 +168,31 @@ CSVGUI_ChooseClassCT(void)
 		winClassSelectionCT.Add(lblClassDescription);
 
 		btnSeal = spawn(CSClassButtonCT);
-			btnSeal.SetTitle(Titles_GetTextBody("Seal_Team_6"));
+			btnSeal.SetTitle(localize(Titles_GetTextBody("Seal_Team_6")));
 			btnSeal.SetSize([124, 24]);
 			btnSeal.SetPos([40, 80]);
 			btnSeal.SetTag(1);
 			btnSeal.SetKeyEquivalent("1");
 		btnGSG9 = spawn(CSClassButtonCT);
-			btnGSG9.SetTitle(Titles_GetTextBody("GSG_9"));
+			btnGSG9.SetTitle(localize(Titles_GetTextBody("GSG_9")));
 			btnGSG9.SetSize([124, 24]);
 			btnGSG9.SetPos([40, 112]);
 			btnGSG9.SetTag(2);
 			btnGSG9.SetKeyEquivalent("2");
 		btnSAS = spawn(CSClassButtonCT);
-			btnSAS.SetTitle(Titles_GetTextBody("SAS"));
+			btnSAS.SetTitle(localize(Titles_GetTextBody("SAS")));
 			btnSAS.SetSize([124, 24]);
 			btnSAS.SetPos([40, 144]);
 			btnSAS.SetTag(3);
 			btnSAS.SetKeyEquivalent("3");
 		btnGIGN = spawn(CSClassButtonCT);
-			btnGIGN.SetTitle(Titles_GetTextBody("GIGN"));
+			btnGIGN.SetTitle(localize(Titles_GetTextBody("GIGN")));
 			btnGIGN.SetSize([124, 24]);
 			btnGIGN.SetPos([40, 176]);
 			btnGIGN.SetTag(4);
 			btnGIGN.SetKeyEquivalent("4");
 		btnAuto = spawn(CSClassButtonCT);
-			btnAuto.SetTitle(Titles_GetTextBody("Auto_Select"));
+			btnAuto.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
 			btnAuto.SetSize([124, 24]);
 			btnAuto.SetPos([40, 240]);
 			btnAuto.SetTag(5);

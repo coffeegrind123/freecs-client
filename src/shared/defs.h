@@ -19,7 +19,7 @@
 #include "buying.h"
 #include "entities.h"
 #include "events.h"
-#include "CSProjectile.h"
+#include "Projectile.h"
 #include "../../../valve/src/shared/Weapon.h"
 
 #define TEAM_T		1

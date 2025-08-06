@@ -15,10 +15,10 @@
 */
 
 class
-CSProjectile:ncProjectile
+csProjectile:ncProjectile
 {
 public:
-	void CSProjectile(void);
+	void csProjectile(void);
 
 #ifdef SERVER
 	virtual void HasExploded(void);

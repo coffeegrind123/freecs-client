@@ -49,7 +49,7 @@ func_vip_safetyzone::Respawn(void)
 void
 func_vip_safetyzone::Touch(entity eToucher)
 {
-	CSPlayer pl = (CSPlayer)eToucher;
+	csPlayer pl = (csPlayer)eToucher;
 
 	if (pl.classname != "player")
 		return;

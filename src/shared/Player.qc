@@ -56,91 +56,11 @@ GetVIPSafetyZoneByIndex(int index)
 	return GetEntityByNameAndIndex("func_vip_safetyzone", index);
 }
 
-/* all potential SendFlags bits we can possibly send */
-enumflags
-{
-	PLAYER_TOPFRAME = PLAYER_CUSTOMFIELDSTART,
-	PLAYER_BOTTOMFRAME = PLAYER_CUSTOMFIELDSTART,
-	PLAYER_CSTIMERS = PLAYER_CUSTOMFIELDSTART
-};
 
-class
-CSPlayer:hlPlayer
-{
-	int ingame;
 
-	void CSPlayer(void);
-
-	PREDICTED_FLOAT(cs_shotmultiplier)
-	PREDICTED_FLOAT(cs_shottime)
-	PREDICTED_FLOAT(cs_prev_hor_rec)
-	PREDICTED_INT(cs_hor_rec_sign)
-	PREDICTED_FLOAT(cs_rec_reverse_chance)
-
-	virtual void Physics_Fall(float);
-	virtual void Physics_Jump(void);
-	virtual void Physics_InputPreMove(void);
-
-	virtual void Physics_InputPostMove(void);
-
-#ifdef CLIENT
-	int playertype;
-
-	int cs_cross_mindist;
-	int cs_cross_deltadist;
-	float cs_crosshairdistance;
-
-	virtual void ReceiveEntity(float, float);
-	virtual void PredictPreFrame(void);
-	virtual void PredictPostFrame(void);
-#else
-	virtual void Input(entity, string, string);
-	virtual void ServerInputFrame(void);
-	virtual void EvaluateEntity(void);
-	virtual float SendEntity(entity, float);
-
-	nonvirtual void Bot_RunToConfront(void);
-	nonvirtual void Bot_RunToBomb(void);
-	nonvirtual void Bot_RunToBombsite(int);
-	nonvirtual void Bot_RunToRandomBombsite(void);
-	nonvirtual void Bot_RunToEscapeZone(int);
-	nonvirtual void Bot_RunToRandomEscapeZone(void);
-	nonvirtual void Bot_RunToVIPSafetyZone(int);
-	nonvirtual void Bot_RunToRandomVIPSafetyZone(void);
-	nonvirtual void Bot_RunToHostages(void);
-	nonvirtual void Bot_Roam(vector, int);
-	nonvirtual void Bot_CreateObjective(void);
-	nonvirtual void Bot_Buy(void);
-	nonvirtual void Bot_AimLerp(vector, float);
-
-	int charmodel;
-	int money;
-	float progress;
-
-	bool m_buyMessage;
-	bool m_hostMessageT;
-	bool m_seenFriend;
-	bool m_seenEnemy;
-	bool m_seenHostage;
-	bool m_seenBombSite;
-	bool m_bHasNightvision;
-
-	/* bot related vars */
-	int m_actionIsPlanting;
-	int m_actionIsDefusing;
-
-	/* Workaround:
-	* gflags is not yet set when CSBot_BuyStart_Shop() or Bot_CreateObjective()
-	* are called, so we back it up on PostFrame() and use that instead.
-	* Known issues it solves:
-	* - Check if the bot is in a Bomb Zone (gflags & GF_BOMBZONE)
-	* - Check if the bot is in a Buy Zone (gflags & GF_BUYZONE) */
-	int m_gflagsBackup;
-#endif
-};
 
 void
-CSPlayer::CSPlayer(void)
+csPlayer::csPlayer(void)
 {
 	ingame = false;
 	cs_shotmultiplier = 0;
@@ -173,7 +93,7 @@ CSPlayer::CSPlayer(void)
 }
 
 void
-CSPlayer::Physics_InputPreMove(void)
+csPlayer::Physics_InputPreMove(void)
 {
 	super::Physics_InputPreMove();
 	
@@ -190,7 +110,7 @@ punchangle_recovery(float punchangle)
 }
 
 void
-CSPlayer::Physics_InputPostMove(void)
+csPlayer::Physics_InputPostMove(void)
 {
 	//start of this function is taken from super::Physics_InputPostMove
 	float punch;
@@ -200,14 +120,35 @@ CSPlayer::Physics_InputPostMove(void)
 	m_timeUntilNextIdle = max(0, m_timeUntilNextIdle - input_timelength);
 	m_weaponAnimTime += input_timelength;
 	punch = max(0, 1.0f - (input_timelength * 4));
-	if (m_punchAngle[0] < 0) {
-		m_punchAngle[0] += punchangle_recovery(m_punchAngle[0]);
-	}
-	m_punchAngle[1] *= punch;
-	m_punchAngle[2] *= punch;
 
-	/* player animation code */
-	UpdatePlayerAnimation(input_timelength);
+	float flDamp;
+	float flForce;
+	if ( vlen( m_punchVelocity ) > 0.001 ) {
+		m_punchAngle += m_punchVelocity * input_timelength;
+
+		flForce = bound( 0, input_timelength * 65, 2 );
+		flDamp = 1 - ( input_timelength * 9 );
+
+		if ( flDamp < 0 ) {
+			flDamp = 0;
+		}
+		m_punchVelocity *= flDamp;
+		m_punchVelocity -= m_punchAngle * flForce;
+
+		m_punchAngle[0] = bound( -89, m_punchAngle[0], 89 );
+		m_punchAngle[1] = bound( -179, m_punchAngle[1], 179 );
+		m_punchAngle[2] = bound( -89, m_punchAngle[2], 89 );
+	} else if (vlen( m_punchAngle ) > 0.001) {
+		if (m_punchAngle[0] < 0) {
+			m_punchAngle[0] += punchangle_recovery(m_punchAngle[0]);
+		}
+
+		m_punchAngle[1] *= punch;
+		m_punchAngle[2] *= punch;
+	}
+
+
+
 	RemoveVFlags(VFL_FROZEN);
 	RemoveVFlags(VFL_NOATTACK);
 
@@ -220,6 +161,8 @@ CSPlayer::Physics_InputPostMove(void)
 		}
 	}
 
+	/* player animation code */
+	UpdatePlayerAnimation(input_timelength);
 	ProcessInput();
 }
 #ifdef CLIENT
@@ -227,11 +170,11 @@ CSPlayer::Physics_InputPostMove(void)
 
 /*
 =================
-CSPlayer::ReceiveEntity
+csPlayer::ReceiveEntity
 =================
 */
 void
-CSPlayer::ReceiveEntity(float flIsNew, float flChanged)
+csPlayer::ReceiveEntity(float flIsNew, float flChanged)
 {
 	ncPlayer::ReceiveEntity(flIsNew, flChanged);
 
@@ -259,14 +202,14 @@ CSPlayer::ReceiveEntity(float flIsNew, float flChanged)
 
 /*
 =================
-CSPlayer::PredictPostFrame
+csPlayer::PredictPostFrame
 
 Save the last valid server values away in the _net variants of each field
 so we can roll them back later.
 =================
 */
 void
-CSPlayer::PredictPreFrame(void)
+csPlayer::PredictPreFrame(void)
 {
 	super::PredictPreFrame();
 
@@ -279,13 +222,13 @@ CSPlayer::PredictPreFrame(void)
 
 /*
 =================
-CSPlayer::PredictPostFrame
+csPlayer::PredictPostFrame
 
 Where we roll back our values to the ones last sent/verified by the server.
 =================
 */
 void
-CSPlayer::PredictPostFrame(void)
+csPlayer::PredictPostFrame(void)
 {
 	super::PredictPostFrame();
 
@@ -303,7 +246,7 @@ CSPlayer::PredictPostFrame(void)
  * Copied code from nuclide botlib (inside bot::RunAI), maybe make this a
  * method there, could be usefull for other stuff?
  **/
-void CSPlayer::Bot_AimLerp(vector aimpos, float flLerp) {
+void csPlayer::Bot_AimLerp(vector aimpos, float flLerp) {
 	vector aimdir, vecNewAngles;
 
 	vector oldAngle = v_angle;
@@ -323,7 +266,7 @@ void CSPlayer::Bot_AimLerp(vector aimpos, float flLerp) {
 }
 
 void
-CSPlayer::Bot_RunToConfront(void)
+csPlayer::Bot_RunToConfront(void)
 {
 	entity t;
 
@@ -340,7 +283,7 @@ CSPlayer::Bot_RunToConfront(void)
 }
 /* go to the planted bomb */
 void
-CSPlayer::Bot_RunToBomb(void)
+csPlayer::Bot_RunToBomb(void)
 {
 	ncEntity e = __NULL__;
 	e = (ncEntity)find(e, ::model, "models/w_c4.mdl");
@@ -353,7 +296,7 @@ CSPlayer::Bot_RunToBomb(void)
 
 /* go to given bombsite */
 void
-CSPlayer::Bot_RunToBombsite(int bombsiteIndex)
+csPlayer::Bot_RunToBombsite(int bombsiteIndex)
 {
 	ncEntity e = GetBombsiteByIndex(bombsiteIndex);
 	RouteToPosition(e.WorldSpaceCenter());
@@ -362,14 +305,14 @@ CSPlayer::Bot_RunToBombsite(int bombsiteIndex)
 
 /* go to random bombsite */
 void
-CSPlayer::Bot_RunToRandomBombsite(void)
+csPlayer::Bot_RunToRandomBombsite(void)
 {
 	Bot_RunToBombsite(random(0, serverinfo.GetInteger("cs_bombzones")));
 }
 
 /* go to given escape zone */
 void
-CSPlayer::Bot_RunToEscapeZone(int index)
+csPlayer::Bot_RunToEscapeZone(int index)
 {
 	ncEntity e = GetEscapeZoneByIndex(index);
 	RouteToPosition(e.WorldSpaceCenter());
@@ -378,14 +321,14 @@ CSPlayer::Bot_RunToEscapeZone(int index)
 
 /* go to a random escape zone */
 void
-CSPlayer::Bot_RunToRandomEscapeZone(void)
+csPlayer::Bot_RunToRandomEscapeZone(void)
 {
 	Bot_RunToEscapeZone(random(0, serverinfo.GetInteger("cs_escapezones")));
 }
 
 /* go to given VIP Safety Zone */
 void
-CSPlayer::Bot_RunToVIPSafetyZone(int index)
+csPlayer::Bot_RunToVIPSafetyZone(int index)
 {
 	ncEntity e = GetVIPSafetyZoneByIndex(index);
 	RouteToPosition(e.WorldSpaceCenter());
@@ -394,13 +337,13 @@ CSPlayer::Bot_RunToVIPSafetyZone(int index)
 
 /* go to a random VIP Safety Zone */
 void
-CSPlayer::Bot_RunToRandomVIPSafetyZone(void)
+csPlayer::Bot_RunToRandomVIPSafetyZone(void)
 {
 	Bot_RunToVIPSafetyZone(random(0, serverinfo.GetInteger("cs_vipzones")));
 }
 
 void
-CSPlayer::Bot_RunToHostages(void)
+csPlayer::Bot_RunToHostages(void)
 {
 	ncEntity e = __NULL__;
 
@@ -411,7 +354,7 @@ CSPlayer::Bot_RunToHostages(void)
 }
 
 /** @brief Let the bot roam within a maximum distance from a given origin. */
-void CSPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
+void csPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
 	/* Get random point whitin a radius from the given origin */
 	int angle = random(0, 360); /* random angle. */
 	int distance = random(0, maxDistance); /* random distance */
@@ -425,7 +368,7 @@ void CSPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
 }
 
 void
-CSPlayer::Bot_CreateObjective(void)
+csPlayer::Bot_CreateObjective(void)
 {
 	/* Bomb defuse map */
 	if (serverinfo.GetInteger("cs_bombzones") > 0) {
@@ -507,7 +450,7 @@ CSPlayer::Bot_CreateObjective(void)
 						if (GetCurrentWeapon() != "weapon_c4") {
 						/* TODO: REPLACE THIS WITH NSNAVAI METHOD */
 							SwitchToWeapon("weapon_c4");
-							//Weapons_Draw((CSPlayer)self);
+							//Weapons_Draw((csPlayer)self);
 						}
 
 						if (!m_actionIsPlanting) {
@@ -579,11 +522,11 @@ CSPlayer::Bot_CreateObjective(void)
 float ConsoleCmd(string cmd);
 
 void
-CSPlayer::Bot_Buy(void)
+csPlayer::Bot_Buy(void)
 {
 	int done = 0;
 	int count = 0;
-	CSPlayer pl = (CSPlayer)self;
+	csPlayer pl = (csPlayer)self;
 	int playerMoney = userinfo.GetInteger(pl, "*money");
 	string weaponToBuy = "";
 	int weaponPrice = 0i;
@@ -642,7 +585,7 @@ CSPlayer::Bot_Buy(void)
 
 
 void
-CSPlayer::Input(entity eAct, string strInput, string strData)
+csPlayer::Input(entity eAct, string strInput, string strData)
 {
 	switch (strInput) {
 	case "RadioMessage":
@@ -718,13 +661,13 @@ CSPlayer::Input(entity eAct, string strInput, string strData)
 }
 
 void
-CSPlayer::ServerInputFrame(void)
+csPlayer::ServerInputFrame(void)
 {
 	super::ServerInputFrame();
 }
 
 void
-CSPlayer::EvaluateEntity(void)
+csPlayer::EvaluateEntity(void)
 {
 	super::EvaluateEntity();
 
@@ -743,11 +686,11 @@ CSPlayer::EvaluateEntity(void)
 
 /*
 =================
-CSPlayer::SendEntity
+csPlayer::SendEntity
 =================
 */
 float
-CSPlayer::SendEntity(entity ePEnt, float flChanged)
+csPlayer::SendEntity(entity ePEnt, float flChanged)
 {
 	/* don't broadcast invisible players */
 	if (IsFakeSpectator() && ePEnt != this)
@@ -775,7 +718,7 @@ CSPlayer::SendEntity(entity ePEnt, float flChanged)
 #endif
 
 void
-CSPlayer::Physics_Fall(float impactspeed)
+csPlayer::Physics_Fall(float impactspeed)
 {
 #if 0
 	/* apply some predicted punch to the player */
@@ -806,7 +749,7 @@ CSPlayer::Physics_Fall(float impactspeed)
 }
 
 void
-CSPlayer::Physics_Jump(void)
+csPlayer::Physics_Jump(void)
 {
 	if (waterlevel >= 2) {
 		if (watertype == CONTENT_WATER) {
@@ -822,3 +765,45 @@ CSPlayer::Physics_Jump(void)
 		velocity[2] += 260;
 	}
 }
+
+#ifdef SERVER
+void
+csPlayer::Death(entity inflictor, entity attacker, int damagePoints, vector dir, vector absImpactPos, int hitBody)
+{
+	/* either gib, or make a corpse */
+	if (GetHealth()< -200) {
+		float gibStrength = damagePoints * 2.0f;
+		BreakModel_Entity(this, dir, gibStrength);
+	} else {
+		float deathAnimation = CSANIM_DIE_FORWARD;
+
+		switch (hitBody) {
+		case BODY_HEAD:
+			deathAnimation = CSANIM_DIE_HEAD;
+			break;
+		case BODY_CHEST:
+			deathAnimation = CSANIM_DEATH3;
+			break;
+		case BODY_STOMACH:
+			deathAnimation = CSANIM_DIE_GUT;
+			break;
+		default:
+			bool isFacing = IsFacingPosition(absImpactPos);
+
+			/* we still want a change to play CSANIM_DIESIMPLE */
+			if (random() < 0.5)
+			if (isFacing == false) {
+				deathAnimation = CSANIM_DEATH1;
+			} else {
+				deathAnimation = random() < 0.5 ? CSANIM_DEATH2 : CSANIM_DIE_BACK;
+			}
+
+			break;
+		}
+
+		MakeCorpse(deathAnimation);
+	}
+	
+	ncPlayer::Death(inflictor,  attacker,  damagePoints,  dir, absImpactPos, hitBody);
+}
+#endif

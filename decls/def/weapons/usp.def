@@ -1,20 +1,3 @@
-#define USP45_IDLE			0
-#define USP45_SHOOT1		1
-#define USP45_SHOOT2		2
-#define USP45_SHOOT3		3
-#define USP45_SHOOTLAST		4
-#define USP45_RELOAD		5
-#define USP45_DRAW			6
-#define USP45_ADDSIL		7
-#define USP45_IDLEUNSIL		8
-#define USP45_SHOOT1UNSIL	9
-#define USP45_SHOOT2UNSIL	10
-#define USP45_SHOOT3UNSIL	11
-#define USP45_SHOOTLASTUNSIL	12
-#define USP45_RELOADUNSIL	13
-#define USP45_DRAWUNSIL		14
-#define USP45_DETACHSIL		15
-
 entityDef weapon_usp
 {
 	"inherit"			"CSBasePistol"

@@ -1,0 +1,100 @@
+{
+"classname" "csdm_spawnpoint"
+"origin" "483 2396 51"
+"angles" "0 178 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "986 1983 51"
+"angles" "0 172 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "996 2331 51"
+"angles" "0 141 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "983 1897 179"
+"angles" "0 163 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1017 1779 -100"
+"angles" "0 139 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-961 1123 59"
+"angles" "0 130 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1497 72 59"
+"angles" "0 50 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1119 -200 -100"
+"angles" "0 2 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1026 -1127 -100"
+"angles" "0 53 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1095 -1595 -100"
+"angles" "0 -36 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-288 -113 -100"
+"angles" "0 -102 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1039 -708 -100"
+"angles" "0 157 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "511 -372 -100"
+"angles" "0 -65 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1062 -159 -100"
+"angles" "0 143 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "149 392 -100"
+"angles" "0 -34 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "-1280 1304 -100"
+"angles" "0 -74 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "484 829 -100"
+"angles" "0 -121 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "161 93 -100"
+"angles" "0 1 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "1004 756 -140"
+"angles" "0 179 0"
+}
+{
+"classname" "csdm_spawnpoint"
+"origin" "909 1053 -44"
+"angles" "0 -161 0"
+}

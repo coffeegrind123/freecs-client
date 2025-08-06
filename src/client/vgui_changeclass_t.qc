@@ -85,27 +85,27 @@ CSClassButtonT::OnMouseEntered(void)
 
 	switch (classSelection) {
 		case 1:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Phoenix_Connexion"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Phoenix_Connexion")));
 			imgClassPreview.SetImage("gfx/vgui/640_terror");
 			lblClassDescription.SetTitle(g_classDescrPhoenix);
 			break;
 		case 2:
-			lblClassTitle.SetTitle(Titles_GetTextBody("L337_Krew"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("L337_Krew")));
 			imgClassPreview.SetImage("gfx/vgui/640_leet");
 			lblClassDescription.SetTitle(g_classDescrLeet);
 			break;
 		case 3:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Arctic_Avengers"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Arctic_Avengers")));
 			imgClassPreview.SetImage("gfx/vgui/640_arctic");
 			lblClassDescription.SetTitle(g_classDescrArctic);
 			break;
 		case 4:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Guerilla_Warfare"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Guerilla_Warfare")));
 			imgClassPreview.SetImage("gfx/vgui/640_guerilla");
 			lblClassDescription.SetTitle(g_classDescrGuerilla);
 			break;
 		case 5:
-			lblClassTitle.SetTitle(Titles_GetTextBody("Auto_Select"));
+			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
 			imgClassPreview.SetImage("gfx/vgui/640_t_random");
 			lblClassDescription.SetTitle(g_classDescrAuto);
 			break;
@@ -135,7 +135,7 @@ CSVGUI_ChooseClassT(void)
 		winClassSelection.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
 
 		lblSelectClass = spawn(vguiLabel);
-		lblSelectClass.SetTitle(Titles_GetTextBody("Title_terrorist_model_selection"));
+		lblSelectClass.SetTitle(localize(Titles_GetTextBody("Title_terrorist_model_selection")));
 		lblSelectClass.SetTextSize(19);
 		lblSelectClass.SetPos([40, 38]);
 		lblSelectClass.SetSize([400, 24]);
@@ -169,31 +169,31 @@ CSVGUI_ChooseClassT(void)
 		winClassSelection.Add(lblClassDescription);
 
 		btnPhoenix = spawn(CSClassButtonT);
-			btnPhoenix.SetTitle(Titles_GetTextBody("Phoenix_Connexion"));
+			btnPhoenix.SetTitle(localize(Titles_GetTextBody("Phoenix_Connexion")));
 			btnPhoenix.SetSize([124, 24]);
 			btnPhoenix.SetPos([40, 80]);
 			btnPhoenix.SetTag(1);
 			btnPhoenix.SetKeyEquivalent("1");
 		btnLeet = spawn(CSClassButtonT);
-			btnLeet.SetTitle(Titles_GetTextBody("L337_Krew"));
+			btnLeet.SetTitle(localize(Titles_GetTextBody("L337_Krew")));
 			btnLeet.SetSize([124, 24]);
 			btnLeet.SetPos([40, 112]);
 			btnLeet.SetTag(2);
 			btnLeet.SetKeyEquivalent("2");
 		btnArctic = spawn(CSClassButtonT);
-			btnArctic.SetTitle(Titles_GetTextBody("Arctic_Avengers"));
+			btnArctic.SetTitle(localize(Titles_GetTextBody("Arctic_Avengers")));
 			btnArctic.SetSize([124, 24]);
 			btnArctic.SetPos([40, 144]);
 			btnArctic.SetTag(3);
 			btnArctic.SetKeyEquivalent("3");
 		btnGuerilla = spawn(CSClassButtonT);
-			btnGuerilla.SetTitle(Titles_GetTextBody("Guerilla_Warfare"));
+			btnGuerilla.SetTitle(localize(Titles_GetTextBody("Guerilla_Warfare")));
 			btnGuerilla.SetSize([124, 24]);
 			btnGuerilla.SetPos([40, 176]);
 			btnGuerilla.SetTag(4);
 			btnGuerilla.SetKeyEquivalent("4");
 		btnAuto = spawn(CSClassButtonT);
-			btnAuto.SetTitle(Titles_GetTextBody("Auto_Select"));
+			btnAuto.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
 			btnAuto.SetSize([124, 24]);
 			btnAuto.SetPos([40, 240]);
 			btnAuto.SetTag(5);

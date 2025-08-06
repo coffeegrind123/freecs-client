@@ -760,6 +760,8 @@ CodeCallback_StartGameType(void)
 	teams.SetUp(TEAM_CT, "Counter-Terrorist", [153, 204, 255], true);
 	teams.SetSpawnPoint(TEAM_CT, spawnCT);
 
+	cvars.SetInteger("g_infiniteAmmo", 0i);
+
 	/* evaluate our world */
 	CS_CountHostages();
 	CS_CountBombZones();

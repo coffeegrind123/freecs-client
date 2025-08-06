@@ -17,7 +17,7 @@
 void
 Nightvision_Toggle(void)
 {
-	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
+	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
 
 	if (pl.HasItem("item_nightvision") == false) {
 		pSeatLocal->m_iNightvision = 0;
@@ -36,7 +36,7 @@ Nightvision_Toggle(void)
 void
 Nightvision_PreFrame(void)
 {
-	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
+	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
 
 	if (!pSeatLocal->m_iNightvision) {
 		return;
@@ -53,7 +53,7 @@ Nightvision_PreFrame(void)
 void
 Nightvision_PostFrame(void)
 {
-	CSPlayer pl = (CSPlayer)pSeat->m_ePlayer;
+	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
 
 	if (!pSeatLocal->m_iNightvision) {
 		return;

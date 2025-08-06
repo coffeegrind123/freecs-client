@@ -76,7 +76,7 @@ func_buyzone::SpawnKey(string strKey, string strValue)
 void
 func_buyzone::Touch(entity eToucher)
 {
-	CSPlayer pl = (CSPlayer)eToucher;
+	csPlayer pl = (csPlayer)eToucher;
 
 	if (!(eToucher.flags & FL_CLIENT))
 		return;

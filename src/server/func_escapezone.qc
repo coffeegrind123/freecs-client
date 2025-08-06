@@ -50,7 +50,7 @@ func_escapezone::Respawn(void)
 void
 func_escapezone::Touch(entity eToucher)
 {
-	CSPlayer pl = (CSPlayer)eToucher;
+	csPlayer pl = (csPlayer)eToucher;
 
 	/* disallow the wrong players */
 	if (pl.classname != "player")

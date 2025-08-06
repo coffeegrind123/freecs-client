@@ -72,7 +72,7 @@ void
 CSBombEntity::ClearProgress(void)
 {
 	if (m_eUser != world) {
-		CSPlayer pl = (CSPlayer)m_eUser;
+		csPlayer pl = (csPlayer)m_eUser;
 		pl.progress = 0.0f;
 		pl.RemoveVFlags(VFL_FROZEN);
 	}
@@ -81,7 +81,7 @@ CSBombEntity::ClearProgress(void)
 void
 CSBombEntity::OnPlayerUse(void)
 {
-	CSPlayer pl = (CSPlayer)eActivator;
+	csPlayer pl = (csPlayer)eActivator;
 
 	/* obvious check */
 	if (pl.team != TEAM_CT) {
@@ -100,7 +100,7 @@ CSBombEntity::Logic(void)
 {
 	/* check if we're being used */
 	if (m_eUser != world) {
-		CSPlayer pl = (CSPlayer)m_eUser;
+		csPlayer pl = (csPlayer)m_eUser;
 
 		/* we need to check if the user has changed every frame. */
 		if (!m_eUser.button5) {

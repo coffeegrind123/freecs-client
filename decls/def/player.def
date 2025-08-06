@@ -1,6 +1,6 @@
 entityDef player
 {
-	"spawnclass" "CSPlayer"
+	"spawnclass" "csPlayer"
 
 	"spine"				"Bip01 Spine"
 	"torsoStart"		"Bip01 Spine"
