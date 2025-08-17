@@ -34,6 +34,7 @@ public:
 	virtual void FiredWeaponAttack(string);
 	virtual void SwitchedToWeapon(void);
 	virtual void UpdateFireInfoCache(void);
+	virtual void WeaponStoppedReloading(void);
 
 	int numProjectiles;
 	string traceInfo;
@@ -74,6 +75,12 @@ csWeapon::CanFire(void)
 
 void
 csWeapon::SwitchedToWeapon(void)
+{
+	Cstrike_ShotReset((csPlayer)owner);
+}
+
+void
+csWeapon::WeaponStoppedReloading(void)
 {
 	Cstrike_ShotReset((csPlayer)owner);
 }

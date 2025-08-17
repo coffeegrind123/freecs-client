@@ -52,10 +52,10 @@ CSBuyMenuButton::OnMouseUp(void)
 			CSVGUI_BuyMenu_Page(BUYPAGE_MGS);
 			break;
 		case 6:
-			sendevent("AmmoBuyPrimary", "");
+			localcmd("cmd buyammo 0\n");
 			break;
 		case 7:
-			sendevent("AmmoBuySecondary", "");
+			localcmd("cmd buyammo 1\n");
 			break;
 		case 8:
 			CSVGUI_BuyMenu_Page(BUYPAGE_EQUIPMENT);

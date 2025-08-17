@@ -14,8 +14,8 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-var float autocvar_hlhud_weaponIconAlpha = 0.75;
-var float autocvar_hlhud_weaponIconSelectedAlpha = 1.0f;
+var float autocvar_cshud_weaponIconAlpha = 0.75;
+var float autocvar_cshud_weaponIconSelectedAlpha = 1.0f;
 
 void
 HLWeaponSelect::HLWeaponSelect(void)
@@ -172,8 +172,8 @@ HLWeaponSelect::Draw(void)
 				float ammo2Percentage = (float)weapon.GetAmmo2(linkedList) / (float)weapon.MaxAmmo(linkedList);
 
 				if (linkedList == m_selectedWeapon) {
-					atlasPic.Draw_RGBA(atlasPic.Load(weapon.GetSelectedIcon(linkedList)), vecPos, g_fg_color * autocvar_hlhud_weaponIconSelectedAlpha, g_fg_alphaScale, true);
-					atlasPic.Draw_RGBA(g_spriteSheets[S_SELECTION], vecPos, g_fg_color * autocvar_hlhud_weaponIconSelectedAlpha, g_fg_alphaScale, true);
+					atlasPic.Draw_RGBA(atlasPic.Load(weapon.GetSelectedIcon(linkedList)), vecPos, g_fg_color * autocvar_cshud_weaponIconSelectedAlpha, g_fg_alphaScale, true);
+					atlasPic.Draw_RGBA(g_spriteSheets[S_SELECTION], vecPos, g_fg_color * autocvar_cshud_weaponIconSelectedAlpha, g_fg_alphaScale, true);
 
 					if (weapon.AmmoRequired(linkedList) == true) {
 						DrawBar(vecPos, ammo1Percentage);
@@ -183,7 +183,7 @@ HLWeaponSelect::Draw(void)
 						DrawBar(vecPos + [35, 0], ammo2Percentage);
 					}
 				} else {
-					atlasPic.Draw_RGBA(atlasPic.Load(weapon.GetIcon(linkedList)), vecPos, g_fg_color * autocvar_hlhud_weaponIconAlpha, g_fg_alphaScale, true);
+					atlasPic.Draw_RGBA(atlasPic.Load(weapon.GetIcon(linkedList)), vecPos, g_fg_color * autocvar_cshud_weaponIconAlpha, g_fg_alphaScale, true);
 
 					if (weapon.AmmoRequired(linkedList) == true) {
 						DrawBar(vecPos, ammo1Percentage);
@@ -246,7 +246,7 @@ HLWeaponSelect::SelectNext(bool fastSwitch)
 		Event_SelectionChanged();
 	}
 
-	m_flHUDWeaponSelectTime = time + autocvar_hlhud_hideTime;
+	m_flHUDWeaponSelectTime = time + autocvar_cshud_hideTime;
 	m_iWantSlot = weapon.GetSlot(m_selectedWeapon);
 	m_iWantSlotPos = weapon.GetSlotPos(m_selectedWeapon);
 }
@@ -280,7 +280,7 @@ HLWeaponSelect::SelectPrevious(bool fastSwitch)
 		Event_SelectionChanged();
 	}
 
-	m_flHUDWeaponSelectTime = time + autocvar_hlhud_hideTime;
+	m_flHUDWeaponSelectTime = time + autocvar_cshud_hideTime;
 	m_iWantSlot = weapon.GetSlot(m_selectedWeapon);
 	m_iWantSlotPos = weapon.GetSlotPos(m_selectedWeapon);
 }

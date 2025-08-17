@@ -81,6 +81,9 @@ struct
 } g_seatslocal[4], *pSeatLocal;
 
 font_s FONT_SCOREBOARD;
+font_s FONT_SCORES_NORMAL;
+font_s FONT_SCORES_BOLD;
+
 
 void Cstrike_DrawSimpleCrosshair(void);
 void Cstrike_DrawScope(void);

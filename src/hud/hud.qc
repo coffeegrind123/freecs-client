@@ -15,6 +15,13 @@ var string g_csPlusSprite;
 var string g_csMinusSprite;
 var string g_csTimerSprite;
 
+var string g_csBuyZoneSprite;
+var string g_csRescueZoneSprite;
+var string g_csEscapeZoneSprite;
+var string g_csDefUserSprite;
+var string g_csC4Sprite;
+var string g_csSafetyZoneSprite;
+
 float
 GetGameTime(void)
 {
@@ -302,6 +309,13 @@ HUD_ReloadVideoResources(void)
 	g_csPlusSprite = atlasPic.Load("plus");
 	g_csMinusSprite = atlasPic.Load("minus");
 	g_csTimerSprite = atlasPic.Load("stopwatch");
+
+	g_csBuyZoneSprite = atlasPic.Load("buyzone");
+	g_csRescueZoneSprite = atlasPic.Load("rescue");
+	g_csEscapeZoneSprite = atlasPic.Load("escape");
+	g_csDefUserSprite = atlasPic.Load("defuser");
+	g_csC4Sprite = atlasPic.Load("c4");
+	g_csSafetyZoneSprite = atlasPic.Load("vipsafety");
 }
 
 void
@@ -674,6 +688,71 @@ CSHUD_DrawTimer(vector time_pos, float gameTime)
 	}
 }
 
+#define GF_SEMI_TOGGLED		(1<<0)
+#define GF_FLASHLIGHT		(1<<1)
+#define GF_BUYZONE			(1<<2)
+#define GF_RESCUEZONE		(1<<3)
+#define GF_BOMBZONE			(1<<4)
+
+void
+CSHUD_DrawZones(vector hudMins, vector hudRes)
+{
+	int zc = 0;
+	vector pos = [0,0,0];
+	bool inBuyZone = false;
+	bool hasC4 = false;
+	bool inRescueZone = false;
+	bool hasDefusalKit = false;
+
+	if (player.GetGameFlags() & GF_BUYZONE) {
+		zc++;
+		inBuyZone = true;
+	}
+	if (player.HasItem("weapon_c4")) {
+		zc++;
+		hasC4 = true;
+	}
+	if (player.GetGameFlags() & GF_RESCUEZONE) {
+		zc++;
+		inRescueZone = true;
+	}
+	if (player.HasItem("item_defuse")) {
+		zc++;
+		hasDefusalKit = true;
+	}
+
+	pos = hudMins + [16, (hudRes[1] / 2) - (zc * 16)];
+
+	if (inBuyZone) {
+		atlasPic.Draw_RGBA(g_csBuyZoneSprite, pos, [0,1,0], 1.0f, true);
+		pos[1] += 32;
+	}
+
+	if (hasC4) {
+		bool isRed = false;
+
+		if (player.GetGameFlags() & GF_BOMBZONE) {
+			isRed = (time*4) & 1 ? true : false;
+		}
+
+		if (isRed) {
+			atlasPic.Draw_RGBA(g_csC4Sprite, pos, [1,0,0], 1.0f, true);
+		} else {
+			atlasPic.Draw_RGBA(g_csC4Sprite, pos, [0,1,0], 1.0f, true);
+		}
+
+		pos[1] += 32;
+	}
+	if (inRescueZone) {
+		atlasPic.Draw_RGBA(g_csRescueZoneSprite, pos, [0,1,0], 1.0f, true);
+		pos[1] += 32;
+	}
+	if (hasDefusalKit) {
+		atlasPic.Draw_RGBA(g_csDefUserSprite, pos, [0,1,0], 1.0f, true);
+		pos[1] += 32;
+	}
+
+}
 
 void
 HUD_Draw(void)
@@ -693,6 +772,8 @@ HUD_Draw(void)
 
 	HLHUD_UpdateTimers(healthValue, armorValue, clipValue, ammoValue, ammoValue2);
 	HLHUD_DamageNotifyDraw(hud_mins, hud_size);
+
+	CSHUD_DrawZones(hud_mins, hud_size);
 
 	if (1) {
 		pos = g_hudMins + [g_hudRes[0] - 192, g_hudRes[1] - 128];
@@ -746,7 +827,7 @@ HUD_Draw(void)
 			vector screenSize = screen.Size();
 			vector finalColor = [1,1,1];
 			finalColor[1] = finalColor[2] = 1.0 - (g_damageAlpha * autocvar_cg_damageFill);
-			draw.Pic(hud_mins, "fade_modulate", screenSize, finalColor, 1.0, DRAWFLAG_NORMAL);
+			draw.Pic([0,0], "fade_modulate", screenSize, finalColor, 1.0, DRAWFLAG_NORMAL);
 		}
 
 		g_damageAlpha -= clframetime;
@@ -756,7 +837,7 @@ HUD_Draw(void)
 	HLHUD_DrawHealth(pos, healthValue); 
 	pos = hud_mins + [198, hud_size[1] - 42];
 	HLHUD_DrawArmor(pos, armorValue);
-	
+
 	pos = hud_mins + [hud_size[0] - 160, hud_size[1] - 72];
 	CSHUD_DrawMoney(pos, GetMoneyAmount());
 
@@ -1046,7 +1127,7 @@ HUD_DrawSpectator(void)
 	int iMinutes, iSeconds;
 	float moneyValue = GetMoneyAmount();
 
-	vector m_vecOrigin = screen.Mins();
+	vector m_vecOrigin = [0,0];
 	vector m_vecSize = screen.Size();
 
 	vector hudMins = screen.HUDMins();

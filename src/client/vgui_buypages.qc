@@ -30,7 +30,7 @@ typedef enum
 	BUYITEM_FIVESEVEN,
 	BUYITEM_M3,
 	BUYITEM_XM1014,
-#if defined(CZERO) || defined(CSSOURCE)
+#if defined(COVERTOPS) || defined(NOVO)
 	BUYITEM_FAMAS,
 	BUYITEM_GALIL,
 #endif
@@ -60,46 +60,45 @@ typedef enum
 typedef struct
 {
 	string eventCmd; /* the sendevent type for this buy command */
-	float itemID; /* the id of the item */
 	string descrPath; /* path to the description file */
 	string imgPath; /* the path to the vgui image to use */
 	string titleName; /* the name of the titles.txt entry */
 } buyItems_t;
 
 const buyItems_t g_buyItemList [] = {
-	{ "CSBuy", BUY_USP45, "classes/usp.txt", "gfx/vgui/640_usp", "USP45" },
-	{ "CSBuy", BUY_GLOCK18, "classes/glock18.txt", "gfx/vgui/640_glock18", "Glock18" },
-	{ "CSBuy", BUY_DEAGLE, "classes/deagle.txt", "gfx/vgui/640_deagle", "DesertEagle" },
-	{ "CSBuy", BUY_P228, "classes/p228.txt", "gfx/vgui/640_p228", "P228" },
-	{ "CSBuy", BUY_ELITES, "classes/elite.txt", "gfx/vgui/640_elite", "Beretta96G" },
-	{ "CSBuy", BUY_FIVESEVEN, "classes/fiveseven.txt", "gfx/vgui/640_fiveseven", "FiveSeven" },
-	{ "CSBuy", BUY_M3, "classes/m3.txt", "gfx/vgui/640_m3", "Super90" },
-	{ "CSBuy", BUY_XM1014, "classes/xm1014.txt", "gfx/vgui/640_xm1014", "XM1014" },
-#if defined(CZERO) || defined(CSSOURCE)
-	{ "CSBuy", BUY_FAMAS, "classes/famas.txt", "gfx/vgui/640_famas", "Famas" },
-	{ "CSBuy", BUY_GALIL, "classes/galil.txt", "gfx/vgui/640_galil", "Galil" },
+	{ "usp", "classes/usp.txt", "gfx/vgui/640_usp", "USP45" },
+	{ "glock", "classes/glock18.txt", "gfx/vgui/640_glock18", "Glock18" },
+	{ "deagle", "classes/deagle.txt", "gfx/vgui/640_deagle", "DesertEagle" },
+	{ "p228", "classes/p228.txt", "gfx/vgui/640_p228", "P228" },
+	{ "elites", "classes/elite.txt", "gfx/vgui/640_elite", "Beretta96G" },
+	{ "giveseven", "classes/fiveseven.txt", "gfx/vgui/640_fiveseven", "FiveSeven" },
+	{ "m3", "classes/m3.txt", "gfx/vgui/640_m3", "Super90" },
+	{ "xm1014", "classes/xm1014.txt", "gfx/vgui/640_xm1014", "XM1014" },
+#if defined(COVERTOPS) || defined(NOVO)
+	{ "famas", "classes/famas.txt", "gfx/vgui/640_famas", "Famas" },
+	{ "galil", "classes/galil.txt", "gfx/vgui/640_galil", "Galil" },
 #endif
-	{ "CSBuy", BUY_AK47, "classes/ak47.txt", "gfx/vgui/640_ak47", "AK47" },
-	{ "CSBuy", BUY_SG552, "classes/sg552.txt", "gfx/vgui/640_sg552", "SG552" },
-	{ "CSBuy", BUY_M4A1, "classes/m4a1.txt", "gfx/vgui/640_m4a1", "M4A1" },
-	{ "CSBuy", BUY_AUG, "classes/aug.txt", "gfx/vgui/640_aug", "Aug" },
-	{ "CSBuy", BUY_SCOUT, "classes/scout.txt", "gfx/vgui/640_scout", "Scout" },
-	{ "CSBuy", BUY_AWP, "classes/awp.txt", "gfx/vgui/640_awp", "ArcticWarfareMagnum" },
-	{ "CSBuy", BUY_G3SG1, "classes/g3sg1.txt", "gfx/vgui/640_g3sg1", "G3SG1" },
-	{ "CSBuy", BUY_SG550, "classes/sg550.txt", "gfx/vgui/640_sg550", "SG550" },
-	{ "CSBuy", BUY_MP5, "classes/mp5.txt", "gfx/vgui/640_mp5", "mp5navy" },
-	{ "CSBuy", BUY_TMP, "classes/tmp.txt", "gfx/vgui/640_tmp", "tmp" },
-	{ "CSBuy", BUY_P90, "classes/p90.txt", "gfx/vgui/640_p90", "FNP90" },
-	{ "CSBuy", BUY_MAC10, "classes/mac10.txt", "gfx/vgui/640_mac10", "Mac10" },
-	{ "CSBuy", BUY_UMP45, "classes/ump45.txt", "gfx/vgui/640_ump45", "UMP45" },
-	{ "CSBuy", BUY_PARA, "classes/m249.txt", "gfx/vgui/640_m249", "M249" },
-	{ "CSBuy", BUY_VEST, "classes/kevlar.txt", "", "Kevlar_Vest" },
-	{ "CSBuy", BUY_VESTHELMET, "classes/kevlar_helmet.txt", "", "Kevlar_Vest_Ballistic_Helmet" },
-	{ "CSBuy", BUY_FLASHBANG, "classes/flashbang.txt", "gfx/vgui/640_flashbang", "Flashbang" },
-	{ "CSBuy", BUY_HEGRENADE, "classes/hegrenade.txt", "gfx/vgui/640_hegrenade", "High_Explosive_Grenade" },
-	{ "CSBuy", BUY_SMOKEGRENADE, "classes/smokegrenade.txt", "gfx/vgui/640_smokegrenade", "Smoke_Grenade" },
-	{ "CSBuy", BUY_DEFUSALKIT, "classes/defuse.txt", "", "Defusal_Kit" },
-	{ "CSBuy", BUY_NIGHTVISION, "classes/nightvision.txt", "", "Nightvision_Goggles" },
+	{ "ak47", "classes/ak47.txt", "gfx/vgui/640_ak47", "AK47" },
+	{ "sg552", "classes/sg552.txt", "gfx/vgui/640_sg552", "SG552" },
+	{ "m4a1", "classes/m4a1.txt", "gfx/vgui/640_m4a1", "M4A1" },
+	{ "aug", "classes/aug.txt", "gfx/vgui/640_aug", "Aug" },
+	{ "scout", "classes/scout.txt", "gfx/vgui/640_scout", "Scout" },
+	{ "awp", "classes/awp.txt", "gfx/vgui/640_awp", "ArcticWarfareMagnum" },
+	{ "g3sg1", "classes/g3sg1.txt", "gfx/vgui/640_g3sg1", "G3SG1" },
+	{ "sg550", "classes/sg550.txt", "gfx/vgui/640_sg550", "SG550" },
+	{ "mp5", "classes/mp5.txt", "gfx/vgui/640_mp5", "mp5navy" },
+	{ "tmp", "classes/tmp.txt", "gfx/vgui/640_tmp", "tmp" },
+	{ "p90", "classes/p90.txt", "gfx/vgui/640_p90", "FNP90" },
+	{ "mac10", "classes/mac10.txt", "gfx/vgui/640_mac10", "Mac10" },
+	{ "ump45", "classes/ump45.txt", "gfx/vgui/640_ump45", "UMP45" },
+	{ "m249", "classes/m249.txt", "gfx/vgui/640_m249", "M249" },
+	{ "vest", "classes/kevlar.txt", "", "Kevlar_Vest" },
+	{ "vesthelm", "classes/kevlar_helmet.txt", "", "Kevlar_Vest_Ballistic_Helmet" },
+	{ "flash", "classes/flashbang.txt", "gfx/vgui/640_flashbang", "Flashbang" },
+	{ "hegren", "classes/hegrenade.txt", "gfx/vgui/640_hegrenade", "High_Explosive_Grenade" },
+	{ "vsgren", "classes/smokegrenade.txt", "gfx/vgui/640_smokegrenade", "Smoke_Grenade" },
+	{ "defuser", "classes/defuse.txt", "", "Defusal_Kit" },
+	{ "nvg", "classes/nightvision.txt", "", "Nightvision_Goggles" },
 };
 
 string g_butItemDescr[29];
@@ -123,7 +122,8 @@ CSBuyItemButton::OnMouseUp(void)
 	int i = GetTag();
 
 	/* this is where we buy things */
-	sendevent(g_buyItemList[i].eventCmd, "f", g_buyItemList[i].itemID);
+	localcmd("%s\n", g_buyItemList[i].eventCmd);
+
 	winBuyMenuPage.Hide();
 }
 
@@ -394,7 +394,7 @@ CSVGUI_BuyMenu_Page(int buyPage)
 		btnBuyItem8.Show();
 		btnBuyItem9.Hide();
 
-#if defined(CZERO) || defined(CSSOURCE)
+#if defined(COVERTOPS) || defined(NOVO)
 		if (inTeam == TEAM_CT) {
 			btnBuyItem9.SetTitle(localize(Titles_GetTextBody("Famas")));
 			btnBuyItem9.SetTag(BUYITEM_FAMAS);

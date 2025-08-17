@@ -225,6 +225,7 @@ void
 Money_Purchase(entity customer, string desiredItem)
 {
 	int itemPrice = entityDef.GetInteger(desiredItem, "price");
+	string destSlot = entityDef.GetString(desiredItem, "hudSlot");
 
 	/* no free things in CS */
 	if (itemPrice <= 0i) {
@@ -232,7 +233,9 @@ Money_Purchase(entity customer, string desiredItem)
 	}
 
 	if ((Money_GetCapital(customer) - itemPrice) >= 0) {
+		ents.Input(customer, "DropWeaponInSlot", destSlot, world);
 		ents.Input(customer, "GiveItem", desiredItem, world);
+		ents.Input(customer, "SwitchToWeapon", desiredItem, world);
 		Money_AddMoney(customer, -itemPrice);
 	}
 }

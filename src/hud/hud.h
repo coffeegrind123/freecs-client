@@ -1,16 +1,21 @@
 font_s FONT_20;
 font_s FONT_CHAT;
 
-var vector autocvar_hlhud_fgColor  = [1, 160/255, 0];
-var float autocvar_hlhud_fgAlpha  = 100/255;
-var float autocvar_hlhud_fgAlphaScale  = 1.0;
-var float autocvar_hlhud_altBucket  = 0.0;
-var float autocvar_hlhud_bucketNumAlpha  = 0.5f;
-var float autocvar_hlhud_hideTime  = 3.0f;
+#ifndef COVERT_OPS
+var vector autocvar_cshud_fgColor  = [1, 160/255, 0];
+#else
+var vector autocvar_cshud_fgColor  = [0, 1, 0];
+#endif
 
-#define g_fg_color autocvar_hlhud_fgColor
-#define g_fg_alpha autocvar_hlhud_fgAlpha
-#define g_fg_alphaScale autocvar_hlhud_fgAlphaScale
+var float autocvar_cshud_fgAlpha  = 100/255;
+var float autocvar_cshud_fgAlphaScale  = 1.0;
+var float autocvar_cshud_altBucket  = 0.0;
+var float autocvar_cshud_bucketNumAlpha  = 0.5f;
+var float autocvar_cshud_hideTime  = 3.0f;
+
+#define g_fg_color autocvar_cshud_fgColor
+#define g_fg_alpha autocvar_cshud_fgAlpha
+#define g_fg_alphaScale autocvar_cshud_fgAlphaScale
 
 noref var string g_ammoPic;
 HLWeaponSelect weaponSelectionHUD;

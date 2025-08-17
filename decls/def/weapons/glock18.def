@@ -40,6 +40,7 @@ entityDef weapon_glock18
 	"altMode"					"1"
 	"actModeOn"					"3"
 	"actModeOff"				"3"
+	"hudSlot"		"1"
 }
 
 entityDef projectile_glock

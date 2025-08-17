@@ -3,7 +3,7 @@
 
 #define CSQC
 #define CLIENT
-#define VALVE
+#define CSTRIKE
 
 #includelist
 ../../../src/common/include.src

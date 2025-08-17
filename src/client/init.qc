@@ -87,4 +87,6 @@ ClientGame_RendererRestart(string rstr)
 	FX_Smokenade_Init();
 	Radar_Init();
 	font.Load("fonts/scoreboard.font", FONT_SCOREBOARD);
+	font.Load("fonts/scores_norm.font", FONT_SCORES_NORMAL);
+	font.Load("fonts/scores_bold.font", FONT_SCORES_BOLD);
 }
