@@ -106,7 +106,7 @@ csProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultipl
 		_ApplyDamage();
 	}
 
-	Destroy();
+	ScheduleThink(Destroy, 0.0f);
 }
 
 void

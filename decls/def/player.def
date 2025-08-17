@@ -1,9 +1,15 @@
 entityDef player
 {
-	"spawnclass" "csPlayer"
+	"spawnclass" 			"csPlayer"
+	"health"			"100"
+	"maxarmor"			"100"
+	"bleeds"			"1"
+	"armorProtection"		"0.2"
+	"armorBonus"			"0.5"
+	"propdata"			"actor_human"
 
 	"spine"				"Bip01 Spine"
-	"torsoStart"		"Bip01 Spine"
+	"torsoStart"			"Bip01 Spine"
 	"torsoEnd"			"-- Neck smooth"
 	"twistYaw"			"Bone01"
 
