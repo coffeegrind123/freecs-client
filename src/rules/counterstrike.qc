@@ -18,6 +18,7 @@
 #define TEAM_T 1i
 #define TEAM_CT 2i
 
+
 typedef enum
 {
 	STATE_INACTIVE = 0i,

@@ -26,12 +26,26 @@ CSVGUI_ShowMOTD(void)
 	
 	static void VGUI_ShowMOTD_Close(void)
 	{
-		CMD_ChooseTeam();
-		winMotd.Hide();
+		int playerTeam = player.GetTeam();
+		bool teamSelect = ((playerTeam == TEAM_UNASSIGNED) || (playerTeam == TEAM_SPECTATOR)) ? (true) : (false);
+
+		if (playerTeam == 0) {
+			teamSelect = true;
+		}
+
+		if (teams.OpenTeamCount() > 0i && teamSelect) {
+			localcmd("showTeamSelectionMenu\n");
+		}
+
+		if (winMotd) {
+			winMotd.Hide();
+		}
 	}
 
-	if (MOTD_GetLineCount() < 1i)
+	if (MOTD_GetLineCount() < 1i) {
+		VGUI_ShowMOTD_Close();
 		return;
+	}
 
 	if (!initialized) {
 		initialized = TRUE;

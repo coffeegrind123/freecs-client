@@ -21,9 +21,6 @@ void CSVGUI_ShowMOTD(void);
 void
 CMD_ChooseTeam(void)
 {
-	if (serverkeyfloat("sv_playerslots") <= 1)
-		return;
-
 	/* handle both VGUI and text menus */
 	if (ClientGame_IsUsingVGUI())
 		CSVGUI_ChooseTeam();

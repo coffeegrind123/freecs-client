@@ -94,14 +94,26 @@ Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccu
 	pl.cs_shottime = 0.2f;
 
 	float movement_inaccuracy = bound(0.92,Cstrike_CalculateMovementInaccuracy(pl),1.25);
+
+#ifdef NOVO
+	pl.m_punchVelocity[0] = -(pl.cs_shotmultiplier)*(strength*0.9+inaccuracy/9);
+	pl.m_punchVelocity[0] -= autocvar_fcs_guns_firing_inaccuracy * (1 + 3*inaccuracy * inaccuracy)/19;
+	pl.m_punchVelocity[0] *= autocvar_fcs_guns_recoil_strength;
+#else
 	pl.m_punchAngle[0] = -(pl.cs_shotmultiplier)*0.35*(strength*0.9+inaccuracy/9)+0.5;
 	pl.m_punchAngle[0] -= autocvar_fcs_guns_firing_inaccuracy * (1 + 3*inaccuracy * inaccuracy)/19;
 	pl.m_punchAngle[0] *= autocvar_fcs_guns_recoil_strength;
+#endif
+
 	if (pl.cs_shotmultiplier < 5) {
 		//here we add extra m_punchAngle for low multiplier values,
 		//so that tapping has more weight to it.
 		float extrapunch = bound(0.6f,shots*strength,0.8f);
+#ifdef NOVO
+		pl.m_punchVelocity[0] -= extrapunch;
+#else
 		pl.m_punchAngle[0] -= extrapunch;
+#endif
 	}
 	float hor_recoil
 		= pl.cs_shotmultiplier/185*(1 + (pseudorandom() - 0.5)/3)
@@ -114,7 +126,12 @@ Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccu
 	} else if (pl.cs_hor_rec_sign < 0) {
 		pl.cs_prev_hor_rec -= hor_recoil;
 	}
+#ifdef NOVO
+	pl.m_punchVelocity[1] = pl.cs_prev_hor_rec;
+#else
 	pl.m_punchAngle[1] = pl.cs_prev_hor_rec;
+#endif
+
 	r = (float)input_sequence % 5;
 	/*switch (r) {
 	case 1:
@@ -167,12 +184,21 @@ Cstrike_CalculateAccuracy(csPlayer pl, float divisor, float movement_penalty=1)
 void
 Cstrike_BulletRecoil_ApplyPre(csPlayer pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
+
+#ifdef NOVO
+	pl.v_angle += strength*pl.m_punchVelocity*(2 - pl.cs_shotmultiplier/100*0.2);
+#else
 	pl.v_angle += strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
+#endif
 }
 void
 Cstrike_BulletRecoil_ApplyPost(csPlayer pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
+#ifdef NOVO
+	pl.v_angle -= strength*pl.m_punchVelocity*(2 - pl.cs_shotmultiplier/100*0.2);
+#else
 	pl.v_angle -= strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
+#endif
 }
 
 
