@@ -17,7 +17,11 @@
 void
 csProjectile::csProjectile(void)
 {
-
+#ifdef SERVER
+	m_flMaxThickness = 0.0f;
+	m_iTotalPenetrations = 0i;
+	m_flRangeModifier = 0.0f;
+#endif
 }
 
 #ifdef SERVER
@@ -106,7 +110,7 @@ csProjectile::_LaunchHitscan(vector startPos, vector launchDir, float dmgMultipl
 		_ApplyDamage();
 	}
 
-	ScheduleThink(Destroy, 0.0f);
+	Destroy();
 }
 
 void
@@ -233,14 +237,9 @@ csProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 csProjectile
 csProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread)
 {
-	entity oldself = self;
-
 	csProjectile rocket = spawn(csProjectile);
 	rocket.owner = theOwner;
-	self = rocket;
-	EntityDef_SpawnClassname(entityDef);
-	self = oldself;
-
+	EntityDef_SwitchClass(rocket, entityDef);
 	rocket.m_vecSpread = spread;
 	rocket.SetRangeModifier(rangeMod);
 	rocket.SetPenetrationPower(power);

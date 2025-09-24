@@ -985,14 +985,14 @@ CodeCallback_PlayerKilled(entity playerEntity, entity inflictor, entity attacker
 bool
 CodeCallback_CallRequestTeam(entity playerEntity, int teamNum)
 {
-	/* can't switch teams while alive. */
-	if (is.Alive(playerEntity) == true) {
-		return (false);
-	}
-
 	/* can't switch teams while we're a VIP */
 	if (IsVIP(playerEntity) == true) {
 		return (false);
+	}
+
+	/* can't switch teams while alive. */
+	if (is.Alive(playerEntity) == true) {
+		ents.Input(playerEntity, "Kill", "", playerEntity);
 	}
 
 	/* sanity check, invalid team ID? auto team! */
