@@ -460,6 +460,8 @@ HLHUD_DrawObituaries(vector drawAtPos, bool rightAlign)
 		return;
 	}
 
+	drawAtPos += g_hudMins;
+
 	for (int i = 0i; i < g_killMsgCount; i++) {
 		float m_ofs1 = font.StringWidth(g_killMsgRecord[i].m_target, true, FONT_CHAT);
 		float m_ofs2 = atlasPic.GetWidth(g_killMsgRecord[i].m_icon);
@@ -857,6 +859,7 @@ HUD_Draw(void)
 
 	pos = hud_mins + [hud_size[0] - 52, 16];
 	HLHUD_DrawFlashlight(pos, staminaValue);
+	draw.RadarRect(hud_mins + [16,16], [128,128]);
 
 	if (weapon.AmmoRequired() == false) {
 		HLHUD_ClampTimers();
@@ -872,6 +875,7 @@ HUD_Draw(void)
 	}
 
 	pos = hud_mins + [hud_size[0] - 48, hud_size[1] - 42];
+
 
 	atlasPic.Draw_RGBA(
 		g_spriteAmmoIcon,

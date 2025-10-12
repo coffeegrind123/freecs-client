@@ -17,27 +17,21 @@
 #define CSRADAR_DISTANCE 1024
 
 var string g_cs_radar;
-var ncRadar g_csRadar;
 
 void
 Radar_Init(void)
 {
 	g_cs_radar = spriteframe("sprites/radar640.spr", 0, 0.0f);
-
-	g_csRadar = ncRadar::InitEmpty();
 }
 
 void
-Radar_Draw(void)
+Radar_Draw(vector atPosition, vector rectSize)
 {
-	vector radpos = g_view.GetHUDCanvasPos() + [16,16];
-
-	drawpic(radpos, g_cs_radar, [128,128], [1,1,1], 0.25f, DRAWFLAG_ADDITIVE);
-
-	/* these need constant adjustment for when the display changes */
-	g_csRadar.SetViewPosition(radpos);
-	g_csRadar.SetViewSize([128,128]);
-	g_csRadar.UpdateView();
-
-
+	vector drawPos = atPosition;
+	drawpic(drawPos, g_cs_radar, rectSize, [1,1,1], 0.25f, DRAWFLAG_ADDITIVE);
+	g_overview.SetViewPosition(drawPos);
+	g_overview.SetViewSize(rectSize);
+	g_overview.m_bDrawEntities = false;
+	g_overview.m_strMaterial = __NULL__;
+	g_overview.UpdateView();
 }
