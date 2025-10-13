@@ -1,4 +1,4 @@
-# Tactical-Retreat
+# Tactical-Retreat (FreeCS)
 [As seen on phoronix.com](https://phoronix.com/scan.php?page=news_item&px=FreeCS-Open-Counter-Strike)
 
 Allows you to play the original modification CS 1.5 with Rad-Therapy.
