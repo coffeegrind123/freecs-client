@@ -12,8 +12,8 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 1
-        ref: master
         repository: vera/nuclide
+        ref: master
 
     - uses: actions/checkout@v3
       with:
