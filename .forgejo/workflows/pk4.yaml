@@ -1,6 +1,9 @@
 name: pk4
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  pull_request:
+    types:
+      - merged
 
 jobs:
   build:
