@@ -41,7 +41,7 @@ entityDef weapon_c4
 entityDef fireInfo_c4Plant
 {
 	"def_onFire"		"projectile_c4bomb"
-	"testDistance"		"-64"
+	"testDistance"		"0"
 	"chargeTime"		"3"
 }
 
@@ -51,6 +51,6 @@ entityDef projectile_c4bomb
 	"def_plant"			"item_c4"
 	"plant"				"1"
 	"plantOnGround"		"1"
-	"plantDistance"		"64"
+	"plantDistance"		"32"
 	"plantOffset"		"8"
 }
