@@ -13,19 +13,19 @@ jobs:
       with:
         fetch-depth: 1
         repository: vera/nuclide
-        ref: master
+        ref: current
 
     - uses: actions/checkout@v3
       with:
         fetch-depth: 1
         repository: fn/valve
-        ref: master
+        ref: current
         path: "./valve"
 
     - uses: actions/checkout@v3
       with:
         fetch-depth: 1
-        ref: master
+        ref: current
         path: "./${{ github.event.repository.name }}"
 
     - name: apt install zip
