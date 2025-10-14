@@ -27,6 +27,8 @@ entityDef weapon_knife
 
 	"hudSlot"			"2"
 	"hudSlotPos"		"0"
+	"crosshair"		"none"
+	"ammoIcon"		"none"
 }
 
 entityDef projectile_knife

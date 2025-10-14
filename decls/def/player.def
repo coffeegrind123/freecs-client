@@ -4,14 +4,16 @@ entityDef player
 	"health"			"100"
 	"maxarmor"			"100"
 	"bleeds"			"1"
+	"propdata"			"actor_human"
 	"armorProtection"		"0.2"
 	"armorBonus"			"0.5"
-	"propdata"			"actor_human"
+	"model"				"models/player.mdl"
 
 	"spine"				"Bip01 Spine"
 	"torsoStart"			"Bip01 Spine"
 	"torsoEnd"			"-- Neck smooth"
 	"twistYaw"			"Bone01"
+	"animBackend"			"2"
 
 	"act_idle"				"1"
 	"act_idle_crouch"		"2"
@@ -96,6 +98,15 @@ entityDef player
 	"act_aim_ak47"				"80"
 	"act_attack_ak47"			"81"
 	"act_reload_ak47"			"82"
+
+	"dieHeadshot"		"88"
+	"dieChestshot"		"87"
+	"dieGutshot"		"89"
+	"dieForward"		"85,93"
+	"dieBackward"		"86,91"
+	"dieLeft"		"90"
+	"dieRight"		"92"
+	"dieCrouch"		"94"
 
 	"snd_stepladderLeft"	"step_ladder.left"
 	"snd_stepladderRight"	"step_ladder.right"

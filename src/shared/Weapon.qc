@@ -25,7 +25,7 @@ public:
 	void csWeapon(void);
 
 #ifdef CLIENT
-	virtual void AddedToInventory(void);
+	virtual void ReloadCachedAttributes(void);
 	virtual void UpdateGUI(void);
 #endif
 
@@ -173,9 +173,9 @@ csWeapon::UpdateFireInfoCache(void)
 
 #ifdef CLIENT
 void
-csWeapon::AddedToInventory(void)
+csWeapon::ReloadCachedAttributes(void)
 {
-	super::AddedToInventory();
+	super::ReloadCachedAttributes();
 
 	m_ammoIcon = GetDefString("ammoIcon");
 
@@ -187,6 +187,8 @@ csWeapon::AddedToInventory(void)
 
 	if (m_crossHair == "") {
 		m_crossHair = sprintf("%s.crosshair", strtolower(declclass));
+	} else if (m_crossHair == "none") {
+		m_crossHair = __NULL__;
 	}
 
 	m_weaponHUDSlot = GetDefInt("hudSlot");
@@ -199,6 +201,9 @@ csWeapon::UpdateGUI(void)
 	csPlayer ourOwner = (csPlayer)GetOwner();
 
 	/* draw crosshair */
-	Cstrike_DrawCrosshair(ourOwner);
+
+	if (STRING_SET(m_crossHair)) {
+		Cstrike_DrawCrosshair(ourOwner);
+	}
 }
 #endif

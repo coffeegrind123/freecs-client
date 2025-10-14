@@ -36,6 +36,7 @@ entityDef weapon_c4
 	"team"				"1"	// Terrorists only!
 	"onlyInBombZone"	"1"
 	"removeOnEmpty"		"1"
+	"crosshair"		"none"
 }
 
 entityDef fireInfo_c4Plant

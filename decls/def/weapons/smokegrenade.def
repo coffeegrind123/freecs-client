@@ -33,6 +33,7 @@ entityDef weapon_smokegrenade
 
 	"hudSlot"		"3"
 	"hudSlotPos"	"2"
+	"crosshair"		"none"
 }
 
 entityDef projectile_smokegrenade

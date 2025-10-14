@@ -32,6 +32,7 @@ entityDef weapon_flashbang
 
 	"hudSlot"		"3"
 	"hudSlotPos"	"1"
+	"crosshair"		"none"
 }
 
 entityDef projectile_flashgrenade
