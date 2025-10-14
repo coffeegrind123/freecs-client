@@ -127,7 +127,7 @@ CSBombEntity::Logic(void)
 
 	if (m_flDefusalState > 10.0f) {
 		StartSoundDef("weapon_c4bomb.disarmed", CHAN_VOICE, true);
-		g_grMode.Input(m_eUser, "BombDisarmed", "");
+		g_grMode.Input(m_eUser, "BombDefused", "");
 		Destroy();
 		return;
 	}
