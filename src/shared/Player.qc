@@ -775,27 +775,26 @@ csPlayer::Death(entity inflictor, entity attacker, int damagePoints, vector dir,
 		float gibStrength = damagePoints * 2.0f;
 		BreakModel_Entity(this, dir, gibStrength);
 	} else {
-		float deathAnimation = CSANIM_DIE_FORWARD;
+		float deathAnimation = Activities_GetSequenceForEntity(this, "dieSimple");
 
 		switch (hitBody) {
 		case BODY_HEAD:
-			deathAnimation = CSANIM_DIE_HEAD;
+			deathAnimation = Activities_GetSequenceForEntity(this, "dieHeadshot");
 			break;
 		case BODY_CHEST:
-			deathAnimation = CSANIM_DEATH3;
+			deathAnimation = Activities_GetSequenceForEntity(this, "dieChestshot");
 			break;
 		case BODY_STOMACH:
-			deathAnimation = CSANIM_DIE_GUT;
+			deathAnimation = Activities_GetSequenceForEntity(this, "dieGutshot");
 			break;
 		default:
 			bool isFacing = IsFacingPosition(absImpactPos);
 
-			/* we still want a change to play CSANIM_DIESIMPLE */
 			if (random() < 0.5)
 			if (isFacing == false) {
-				deathAnimation = CSANIM_DEATH1;
+				deathAnimation = Activities_GetSequenceForEntity(this, "dieForward");
 			} else {
-				deathAnimation = random() < 0.5 ? CSANIM_DEATH2 : CSANIM_DIE_BACK;
+				deathAnimation = Activities_GetSequenceForEntity(this, "dieBackward");
 			}
 
 			break;

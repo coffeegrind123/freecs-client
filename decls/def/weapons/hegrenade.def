@@ -27,6 +27,7 @@ entityDef weapon_hegrenade
 	"chargeTime"			"2"
 	"removeOnEmpty"			"1"
 	"drawAfterRelease"		"1"
+	"crosshair"		"none"
 }
 
 entityDef projectile_handgrenade
