@@ -138,7 +138,7 @@ CSBombEntity::Logic(void)
 		ncEntity bestTarget = __NULL__;
 		g_grMode.Input(m_eUser, "BombExploded", "");
 
-		combat.RadiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner, "");
+		combat.RadiusDamage(origin, g_cstrike_bombradius, 0i, 500i, real_owner, "");
 		//Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
 
 
