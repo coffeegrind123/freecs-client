@@ -20,7 +20,7 @@ public:
 	void CSBombEntity(void);
 
 #ifdef SERVER
-	virtual void Spawned(void);
+	virtual void Respawn(void);
 	virtual float SendEntity(entity, float);
 	virtual void ClearProgress(void);
 	virtual void OnPlayerUse(void);
@@ -191,9 +191,9 @@ CSBombEntity::OnRemoveEntity(void)
 }
 
 void
-CSBombEntity::Spawned(void)
+CSBombEntity::Respawn(void)
 {
-	super::Spawned();
+	super::Respawn();
 
 	/* throw this in with the other temporary round entities */
 	classname = "remove_me";
