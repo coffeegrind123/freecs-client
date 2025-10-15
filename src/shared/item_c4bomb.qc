@@ -263,8 +263,8 @@ w_c4bomb_parse(void)
 	tm.origin[0] = readcoord();
 	tm.origin[1] = readcoord();
 	tm.origin[2] = readcoord();
-	tm.angles[0] = readcoord();
-	tm.angles[1] = readcoord();
+	tm.angles[0] = readcoord() + 90.0f;
+	tm.angles[1] = readcoord() + 90.0f;
 	tm.angles[2] = readcoord();
 	tm.modelindex = readshort();
 	setorigin(tm, tm.origin);
