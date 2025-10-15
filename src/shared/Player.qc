@@ -88,7 +88,6 @@ csPlayer::csPlayer(void)
 	/* bot related maps */
 	m_actionIsPlanting = FALSE;
 	m_actionIsDefusing = FALSE;
-	m_gflagsBackup = 0;
 #endif
 }
 
@@ -368,7 +367,7 @@ void csPlayer::Bot_Roam(vector roamOrigin, int maxDistance) {
 }
 
 void
-csPlayer::Bot_CreateObjective(void)
+csPlayer::CreateObjective(void)
 {
 	/* Bomb defuse map */
 	if (serverinfo.GetInteger("cs_bombzones") > 0) {
@@ -415,6 +414,7 @@ csPlayer::Bot_CreateObjective(void)
 						/* To far away from the bomb to defuse it, run to it! */
 						Bot_RunToBomb();
 					} else {
+						/* TODO this is broken, it probably doesn't aim right */
 						/* Aim at the bomb. */
 						input_buttons |= INPUT_BUTTON8; // duck
 						if ((HasVFlags(VFL_ONUSABLE))) {
@@ -445,7 +445,7 @@ csPlayer::Bot_CreateObjective(void)
 				/* T-bot: plant bomb */
 				if (HasItem("weapon_c4")) {
 					/* We carry the bomb */
-					if (m_gflagsBackup & GF_BOMBZONE) {
+					if (gflags & GF_BOMBZONE) {
 						/* We are at a bombsite and ready to plant the bomb */
 						if (GetCurrentWeapon() != "weapon_c4") {
 						/* TODO: REPLACE THIS WITH NSNAVAI METHOD */
@@ -457,9 +457,6 @@ csPlayer::Bot_CreateObjective(void)
 							ChatSayTeam("Going to plant the bomb!");
 							m_actionIsPlanting = TRUE;
 						}
-
-						/* Workaround */
-						gflags = m_gflagsBackup;
 
 						/* Duck and plant bomb. */
 						input_buttons = (INPUT_BUTTON0 | INPUT_BUTTON8);
@@ -475,7 +472,7 @@ csPlayer::Bot_CreateObjective(void)
 					/* T-bot: check if the bomb has been dropped */
 					ncEntity e = (ncEntity)find(world, ::model, "models/w_backpack.mdl");
 
-					if (e != __NULL__) {
+					if (e != __NULL__ && (e.IsOnGround())) {
 						/* The bomb backpack has been dropped */
 						/* Go fetch dropped bomb! */
 						ChatSayTeam("Arrr! Bomb on the ground, going to fetch it!");
@@ -536,9 +533,6 @@ csPlayer::Bot_Buy(void)
 	} else if (pl.team == TEAM_CT) {
 		weaponToBuy = userinfo.GetString(pl, "fav_primary_t");
 	}
-
-	/* Workaround */
-	pl.gflags = m_gflagsBackup;
 
 	if (STRING_SET(weaponToBuy)) {
 		weaponPrice = entityDef.GetInteger(weaponToBuy, "price");
