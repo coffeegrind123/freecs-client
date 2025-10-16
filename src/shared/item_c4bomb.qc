@@ -20,7 +20,7 @@ public:
 	void CSBombEntity(void);
 
 #ifdef SERVER
-	virtual void Spawned(void);
+	virtual void Respawn(void);
 	virtual float SendEntity(entity, float);
 	virtual void ClearProgress(void);
 	virtual void OnPlayerUse(void);
@@ -127,7 +127,7 @@ CSBombEntity::Logic(void)
 
 	if (m_flDefusalState > 10.0f) {
 		StartSoundDef("weapon_c4bomb.disarmed", CHAN_VOICE, true);
-		g_grMode.Input(m_eUser, "BombDisarmed", "");
+		g_grMode.Input(m_eUser, "BombDefused", "");
 		Destroy();
 		return;
 	}
@@ -138,7 +138,7 @@ CSBombEntity::Logic(void)
 		ncEntity bestTarget = __NULL__;
 		g_grMode.Input(m_eUser, "BombExploded", "");
 
-		combat.RadiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner, "");
+		combat.RadiusDamage(origin, g_cstrike_bombradius, 0i, 500i, real_owner, "");
 		//Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
 
 
@@ -191,9 +191,9 @@ CSBombEntity::OnRemoveEntity(void)
 }
 
 void
-CSBombEntity::Spawned(void)
+CSBombEntity::Respawn(void)
 {
-	super::Spawned();
+	super::Respawn();
 
 	/* throw this in with the other temporary round entities */
 	classname = "remove_me";
@@ -263,8 +263,8 @@ w_c4bomb_parse(void)
 	tm.origin[0] = readcoord();
 	tm.origin[1] = readcoord();
 	tm.origin[2] = readcoord();
-	tm.angles[0] = readcoord();
-	tm.angles[1] = readcoord();
+	tm.angles[0] = readcoord() + 90.0f;
+	tm.angles[1] = readcoord() + 90.0f;
 	tm.angles[2] = readcoord();
 	tm.modelindex = readshort();
 	setorigin(tm, tm.origin);

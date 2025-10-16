@@ -46,6 +46,7 @@ public:
 	virtual void ServerInputFrame(void);
 	virtual void EvaluateEntity(void);
 	virtual float SendEntity(entity, float);
+	virtual void CreateObjective(void);
 
 	nonvirtual void Bot_RunToConfront(void);
 	nonvirtual void Bot_RunToBomb(void);
@@ -57,7 +58,6 @@ public:
 	nonvirtual void Bot_RunToRandomVIPSafetyZone(void);
 	nonvirtual void Bot_RunToHostages(void);
 	nonvirtual void Bot_Roam(vector, int);
-	nonvirtual void Bot_CreateObjective(void);
 	nonvirtual void Bot_Buy(void);
 	nonvirtual void Bot_AimLerp(vector, float);
 #endif
@@ -94,12 +94,5 @@ private:
 	int m_actionIsPlanting;
 	int m_actionIsDefusing;
 
-	/* Workaround:
-	* gflags is not yet set when CSBot_BuyStart_Shop() or Bot_CreateObjective()
-	* are called, so we back it up on PostFrame() and use that instead.
-	* Known issues it solves:
-	* - Check if the bot is in a Bomb Zone (gflags & GF_BOMBZONE)
-	* - Check if the bot is in a Buy Zone (gflags & GF_BUYZONE) */
-	int m_gflagsBackup;
 #endif
 };

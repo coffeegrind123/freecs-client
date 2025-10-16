@@ -115,7 +115,9 @@ csWeapon::FiredWeaponAttack(string defName)
 	}
 
 	for (int i = 0i; i < numProjectiles; i++) {
-		csProjectile_SpawnDef(traceInfo, ourOwner, flRangeModifier, flPenetrationPower, bulletSpread);
+		vector firePos = ourOwner.m_xrInputRight.GetOrigin();
+		vector fireAng = ourOwner.m_xrInputRight.GetAngles() + ourOwner.m_punchAngle;
+		csProjectile_SpawnDef(traceInfo, ourOwner, flRangeModifier, flPenetrationPower, bulletSpread, firePos, fireAng);
 	}
 #endif
 

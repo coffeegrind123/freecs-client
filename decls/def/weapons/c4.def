@@ -53,5 +53,5 @@ entityDef projectile_c4bomb
 	"plant"				"1"
 	"plantOnGround"		"1"
 	"plantDistance"		"32"
-	"plantOffset"		"8"
+	"plantOffset"		"2"
 }
