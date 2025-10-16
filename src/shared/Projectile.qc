@@ -235,7 +235,7 @@ csProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 }
 
 csProjectile
-csProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread)
+csProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int power, vector spread, vector vecOrigin, vector vecAngles)
 {
 	csProjectile rocket = spawn(csProjectile);
 	rocket.owner = theOwner;
@@ -244,7 +244,8 @@ csProjectile_SpawnDef(string entityDef, ncEntity theOwner, float rangeMod, int p
 	rocket.SetRangeModifier(rangeMod);
 	rocket.SetPenetrationPower(power);
 	rocket.SetPenetrationMaxThickness((8 * power) * rangeMod);
-	rocket.Launch(theOwner.GetEyePos(), theOwner.GetViewAngle(), 0.0f, 0.0f, 0.0f);
+	rocket.Launch(vecOrigin, vecAngles, 0.0f, 0.0f, 0.0f);
 	return rocket;
 }
+
 #endif
