@@ -52,14 +52,23 @@ jobs:
           curl -fsSL "https://www.frag-net.com/pkgs/package_cstrike.pk3" -o build/downloads/package_cstrike.pk3
           curl -fsSL "https://archive.org/download/counter-strike-1.5/csv15full_cstrike.zip" -o build/downloads/cs15data.zip
 
+      - name: Find built binaries
+        id: bins
+        run: |
+          WIN=$(find build/fteqw/engine/release -maxdepth 1 -name "*.exe" ! -name "*.db" ! -name "*sv*" | head -1)
+          LIN=$(find build/fteqw/engine/release -maxdepth 1 -type f -executable ! -name "*.exe" ! -name "*.db" ! -name "*sv*" ! -name "*.o" | head -1)
+          echo "win=$WIN" >> "$GITHUB_OUTPUT"
+          echo "lin=$LIN" >> "$GITHUB_OUTPUT"
+          echo "Found: win=$WIN lin=$LIN"
+
       - name: Package clients
         run: |
           for PLATFORM in win64 linux64; do
             if [ "$PLATFORM" = "win64" ]; then
-              EXE_SRC="build/fteqw/engine/release/fteglqw64.exe"
+              EXE_SRC="${{ steps.bins.outputs.win }}"
               EXE_NAME="fteqw64.exe"
             else
-              EXE_SRC="build/fteqw/engine/release/fteglqw64"
+              EXE_SRC="${{ steps.bins.outputs.lin }}"
               EXE_NAME="fteqw64"
             fi
 
