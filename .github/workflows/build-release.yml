@@ -23,6 +23,11 @@ jobs:
             build-essential libgl-dev libasound2-dev libxss-dev libxrandr-dev \
             libxcursor-dev libxi-dev libpulse-dev
 
+      - name: Clone Nuclide SDK and valve base game
+        run: |
+          git clone --depth 1 https://code.idtech.space/vera/nuclide.git build/nuclide
+          git clone --depth 1 https://code.idtech.space/fn/valve.git build/valve
+
       - name: Clone and patch FTEQW
         run: |
           git clone --depth 1 https://github.com/fte-team/fteqw.git build/fteqw
@@ -82,6 +87,10 @@ jobs:
                         default_aliases.cfg default_cstrike.cfg default_cvar.cfg; do
               [ -e "$item" ] && cp -a "$item" "$PKG/cstrike/"
             done
+
+            cp -f build/nuclide/base/default_controls.cfg "$PKG/cstrike/"
+            cp -f build/nuclide/base/default_video.cfg "$PKG/cstrike/"
+            cp -f build/valve/default_valve.cfg "$PKG/cstrike/"
 
             cat > "$PKG/cstrike/autoexec.cfg" <<'CFG'
           set net_master1 "ms.cs16.net:27950"
