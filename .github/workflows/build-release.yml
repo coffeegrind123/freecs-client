@@ -20,7 +20,8 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update -qq
           sudo apt-get install -y -qq gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 \
-            build-essential libgl-dev libasound2-dev
+            build-essential libgl-dev libasound2-dev libxss-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libpulse-dev
 
       - name: Clone and patch FTEQW
         run: |
