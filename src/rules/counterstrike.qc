@@ -41,6 +41,7 @@ string g_csGameStateName[] =
 
 var csGameState_t g_csGameState;
 var float g_cs_gametime;
+var float g_cs_gameOverTime;
 var int g_csSwapTeamRoundCounter;
 var int g_iEscapedTerrorists;
 
@@ -451,8 +452,8 @@ Round_TimerUpdate(void)
 	if (GameState() != STATE_OVER) {
 		if (TimeLimit() > 0i) {
 			if (time >= TimeLimit()) {
-				/* IntermissionStart(); */
 				GameState_Set(STATE_OVER);
+				g_cs_gameOverTime = time + 5.0f;
 			}
 		}
 	}
@@ -462,7 +463,16 @@ Round_TimerUpdate(void)
 		/* if either win, go end this map.*/
 		if (teams.Score(TEAM_CT) >= WinLimit() ||
 			teams.Score(TEAM_T) >= WinLimit()) {
-			/* IntermissionStart(); */
+			GameState_Set(STATE_OVER);
+			g_cs_gameOverTime = time + 5.0f;
+		}
+	}
+
+	/* Game over: advance to next map after delay */
+	if (GameState() == STATE_OVER && g_cs_gameOverTime > 0.0f) {
+		if (time >= g_cs_gameOverTime) {
+			g_cs_gameOverTime = 0.0f;
+			localcmd("nextmap\n");
 		}
 	}
 
