@@ -9,6 +9,7 @@ FTEQW_DIR="$BUILD_DIR/fteqw"
 VALVE_PK3_URL="https://www.frag-net.com/pkgs/package_valve.pk3"
 CSTRIKE_PK3_URL="https://www.frag-net.com/pkgs/package_cstrike.pk3"
 CS15_URL="https://archive.org/download/counter-strike-1.5/csv15full_cstrike.zip"
+GOLDSRC_URL="https://mega.nz/file/sVwBhZKK#4WfFaQUi3gSFfK0ltdqgzT36gPbUtou3tb3GUWUSSio"
 
 err() { echo "ERROR: $*" >&2; exit 1; }
 msg() { echo "==> $*"; }
@@ -53,6 +54,16 @@ download "$VALVE_PK3_URL" "$DL_DIR/package_valve.pk3"
 download "$CSTRIKE_PK3_URL" "$DL_DIR/package_cstrike.pk3"
 download "$CS15_URL" "$DL_DIR/cs15data.zip"
 
+msg "Downloading HL1 valve data (GoldSrc Package)..."
+if [ ! -f "$DL_DIR/valve-data.pk3" ]; then
+    megadl "$GOLDSRC_URL" --path "$DL_DIR/"
+    GSRC_7Z=$(find "$DL_DIR" -name "GoldSrc*" -print -quit)
+    [ -n "$GSRC_7Z" ] || err "GoldSrc download failed"
+    7z x -o"$BUILD_DIR/goldsrc" "$GSRC_7Z" "Half-Life WON/valve/models/" "Half-Life WON/valve/sound/" "Half-Life WON/valve/sprites/" "Half-Life WON/valve/*.wad" -y
+    (cd "$BUILD_DIR/goldsrc/Half-Life WON/valve" && zip -qr "$DL_DIR/valve-data.pk3" models/ sound/ sprites/ *.wad)
+    rm -rf "$BUILD_DIR/goldsrc" "$GSRC_7Z"
+fi
+
 build_package() {
     local PLATFORM="$1" EXE_SRC="$2" EXE_NAME="$3" ZIP_NAME="$4"
     local PKG="$BUILD_DIR/pkg-$PLATFORM"
@@ -67,6 +78,7 @@ build_package() {
 
     msg "[$PLATFORM] Copying game data..."
     cp -f "$DL_DIR/package_valve.pk3" "$HLDIR/valve/package_valve.pk3"
+    cp -f "$DL_DIR/valve-data.pk3" "$HLDIR/valve/valve-data.pk3"
     cp -f "$DL_DIR/package_cstrike.pk3" "$HLDIR/cstrike/package_cstrike.pk3"
     cp -f "$DL_DIR/cs15data.zip" "$HLDIR/cstrike/pak0.pk3"
 

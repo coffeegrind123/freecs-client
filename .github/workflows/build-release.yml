@@ -21,7 +21,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 \
             build-essential libgl-dev libasound2-dev libxss-dev libxrandr-dev \
-            libxcursor-dev libxi-dev libpulse-dev
+            libxcursor-dev libxi-dev libpulse-dev megatools p7zip-full
 
       - name: Clone Nuclide SDK and valve base game
         run: |
@@ -52,6 +52,12 @@ jobs:
           curl -fsSL "https://www.frag-net.com/pkgs/package_cstrike.pk3" -o build/downloads/package_cstrike.pk3
           curl -fsSL "https://archive.org/download/counter-strike-1.5/csv15full_cstrike.zip" -o build/downloads/cs15data.zip
 
+      - name: Download and extract HL1 valve data
+        run: |
+          megadl "https://mega.nz/file/sVwBhZKK#4WfFaQUi3gSFfK0ltdqgzT36gPbUtou3tb3GUWUSSio" --path build/downloads/
+          7z x -obuild/goldsrc "build/downloads/GoldSrc Package 2.4.7z" "Half-Life WON/valve/models/" "Half-Life WON/valve/sound/" "Half-Life WON/valve/sprites/" "Half-Life WON/valve/*.wad" -y
+          (cd "build/goldsrc/Half-Life WON/valve" && zip -qr "$GITHUB_WORKSPACE/build/downloads/valve-data.pk3" models/ sound/ sprites/ *.wad)
+
       - name: Find built binaries
         id: bins
         run: |
@@ -79,6 +85,7 @@ jobs:
             chmod +x "$PKG/$EXE_NAME"
 
             cp -f build/downloads/package_valve.pk3 "$PKG/valve/"
+            cp -f build/downloads/valve-data.pk3 "$PKG/valve/"
             cp -f build/downloads/package_cstrike.pk3 "$PKG/cstrike/"
             cp -f build/downloads/cs15data.zip "$PKG/cstrike/pak0.pk3"
 
