@@ -1,7 +1,0 @@
-#pragma target fte_5768
-#pragma PROGS_DAT  "../../progs/counterstrike.dat"
-
-#includelist
-../../../src/rules.src
-counterstrike.qc
-#endlist

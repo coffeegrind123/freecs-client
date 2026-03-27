@@ -1,43 +1,52 @@
 #pragma target fte_5768
 //#pragma flag enable assumeint
 #pragma progs_dat  "../../csprogs.dat"
-#pragma forcecrc 54730
 
 #define CSQC
 #define CLIENT
 #define CSTRIKE
-
+#define CLASSIC_VGUI
 
 #includelist
-../../../src/common/include.src
+../../../src/shared/fteextensions.qc
 ../../../src/shared/defs.h
-../../../cstrike/src/shared/defs.h
+../shared/defs.h
+defs.h
 ../../../src/client/defs.h
-../../../cstrike/src/client/defs.h
 ../../../src/vgui/include.src
 ../../../src/gs-entbase/client.src
 ../../../src/gs-entbase/shared.src
 ../shared/include.src
-../../../cstrike/src/client/radar.qc
-../../../cstrike/src/client/nightvision.qc
-../../../cstrike/src/client/draw.qc
-../../../cstrike/src/client/textmenu.qc
-../../../cstrike/src/client/init.qc
-../../../cstrike/src/client/entities.qc
-../../../cstrike/src/client/cmds.qc
-../../../cstrike/src/client/game_event.qc
+
+radar.qc
+nightvision.qc
+../../../valve/src/client/damage.qc
+draw.qc
+textmenu.qc
+init.qc
+../../../valve/src/client/flashlight.qc
+entities.qc
+cmds.qc
+game_event.qc
 ../../../valve/src/client/camera.qc
 ../../../valve/src/client/viewmodel.qc
-../../../cstrike/src/client/crosshair.qc
+crosshair.qc
+../../../valve/src/client/obituary.qc
+../../../valve/src/client/hud_dmgnotify.qc
+hud_ammonotify.qc
+vgui_spectator.qc
+hud.qc
+hud_weaponselect.qc
+../../../valve/src/client/hud_sprite.qc
 ../../../valve/src/client/scoreboard.qc
-../../../cstrike/src/client/radio.qc
+radio.qc
+
 ../../../src/client/include.src
-../../../cstrike/src/client/vgui_buypages.qc
-../../../cstrike/src/client/vgui_buymenu.qc
-../../../cstrike/src/client/vgui_motd.qc
-../../../cstrike/src/client/vgui_changeclass_t.qc
-../../../cstrike/src/client/vgui_changeclass_ct.qc
-../../../cstrike/src/client/vgui_chooseteam.qc
+vgui_buypages.qc
+vgui_buymenu.qc
+vgui_motd.qc
+vgui_changeclass_t.qc
+vgui_changeclass_ct.qc
+vgui_chooseteam.qc
 ../../../src/shared/include.src
 #endlist
-

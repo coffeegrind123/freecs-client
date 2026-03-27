@@ -29,12 +29,24 @@
 */
 
 var float autocvar_fcs_guns_recoil_strength = 1.0f;
-var bool autocvar_fcs_guns_random_recoil_direction = true;
+var bool autocvar_fcs_guns_random_recoil_direction = TRUE;
 var float autocvar_fcs_guns_movement_inaccuracy = 1.0f;
 var float autocvar_fcs_guns_firing_inaccuracy = 1.0f;
 
+weapontype_t
+csweapon_ranged_type(player pl)
+{
+	return WPNTYPE_RANGED;
+}
+
+weapontype_t
+csweapon_melee_type(player pl)
+{
+	return WPNTYPE_CLOSE;
+}
+
 float
-Cstrike_CalculateMovementInaccuracy(csPlayer pl) {
+Cstrike_CalculateMovementInaccuracy(player pl) {
 	float m = 1.0f;
 	float maxspeed = 250;
 	float speedlimit_low = maxspeed/3;
@@ -49,7 +61,7 @@ Cstrike_CalculateMovementInaccuracy(csPlayer pl) {
 	}
 	if (!(pl.flags & FL_ONGROUND)) {
 		m = 2.5f;
-	}else if (pl.IsCrouching()) {
+	}else if (pl.flags & FL_CROUCHING) {
 		m *= 0.6f;
 	}
 	return bound(0.75f,m,2.5f);
@@ -57,7 +69,7 @@ Cstrike_CalculateMovementInaccuracy(csPlayer pl) {
 
 /* called whenever a cstrike gun fires a successful shot */
 void
-Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccuracy)
+Cstrike_ShotMultiplierAdd(player pl, float shots, float strength, float inaccuracy)
 {
 	int r;
 	inaccuracy = bound(.95,inaccuracy*50+0.1,1.6);
@@ -94,26 +106,14 @@ Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccu
 	pl.cs_shottime = 0.2f;
 
 	float movement_inaccuracy = bound(0.92,Cstrike_CalculateMovementInaccuracy(pl),1.25);
-
-#ifdef NOVO
-	pl.m_punchVelocity[0] = -(pl.cs_shotmultiplier)*(strength*0.9+inaccuracy/9);
-	pl.m_punchVelocity[0] -= autocvar_fcs_guns_firing_inaccuracy * (1 + 3*inaccuracy * inaccuracy)/19;
-	pl.m_punchVelocity[0] *= autocvar_fcs_guns_recoil_strength;
-#else
-	pl.m_punchAngle[0] = -(pl.cs_shotmultiplier)*0.35*(strength*0.9+inaccuracy/9)+0.5;
-	pl.m_punchAngle[0] -= autocvar_fcs_guns_firing_inaccuracy * (1 + 3*inaccuracy * inaccuracy)/19;
-	pl.m_punchAngle[0] *= autocvar_fcs_guns_recoil_strength;
-#endif
-
+	pl.punchangle[0] = -(pl.cs_shotmultiplier)*0.35*(strength*0.9+inaccuracy/9)+0.5;
+	pl.punchangle[0] -= autocvar_fcs_guns_firing_inaccuracy * (1 + 3*inaccuracy * inaccuracy)/19;
+	pl.punchangle[0] *= autocvar_fcs_guns_recoil_strength;
 	if (pl.cs_shotmultiplier < 5) {
-		//here we add extra m_punchAngle for low multiplier values,
+		//here we add extra punchangle for low multiplier values,
 		//so that tapping has more weight to it.
 		float extrapunch = bound(0.6f,shots*strength,0.8f);
-#ifdef NOVO
-		pl.m_punchVelocity[0] -= extrapunch;
-#else
-		pl.m_punchAngle[0] -= extrapunch;
-#endif
+		pl.punchangle[0] -= extrapunch;
 	}
 	float hor_recoil
 		= pl.cs_shotmultiplier/185*(1 + (pseudorandom() - 0.5)/3)
@@ -126,38 +126,35 @@ Cstrike_ShotMultiplierAdd(csPlayer pl, float shots, float strength, float inaccu
 	} else if (pl.cs_hor_rec_sign < 0) {
 		pl.cs_prev_hor_rec -= hor_recoil;
 	}
-#ifdef NOVO
-	pl.m_punchVelocity[1] = pl.cs_prev_hor_rec;
-#else
-	pl.m_punchAngle[1] = pl.cs_prev_hor_rec;
-#endif
-
+	pl.punchangle[1] = pl.cs_prev_hor_rec;
 	r = (float)input_sequence % 5;
 	/*switch (r) {
 	case 1:
-		pl.m_punchAngle[1] = -0.1;
+		pl.punchangle[1] = -0.1;
 		break;
 	case 2:
-		pl.m_punchAngle[1] = 0.25;
+		pl.punchangle[1] = 0.25;
 		break;
 	case 3:
-		pl.m_punchAngle[1] = -0.25;
+		pl.punchangle[1] = -0.25;
 		break;
 	case 4:
-		pl.m_punchAngle[1] = 0.5;
+		pl.punchangle[1] = 0.5;
 		break;
 	case 5:
-		pl.m_punchAngle[1] = 0.1;
+		pl.punchangle[1] = 0.1;
 		break;
 	default:
-		pl.m_punchAngle[1] = -0.5;
+		pl.punchangle[1] = -0.5;
 		break;
 	}*/
 }
 
+
+
 /* generate an accuracy value that we'll pass onto TraceAttack */
 float
-Cstrike_CalculateAccuracy(csPlayer pl, float divisor, float movement_penalty=1)
+Cstrike_CalculateAccuracy(player pl, float divisor, float movement_penalty=1)
 {
 	float inacc = 0;
 	float m = Cstrike_CalculateMovementInaccuracy(pl);
@@ -182,32 +179,23 @@ Cstrike_CalculateAccuracy(csPlayer pl, float divisor, float movement_penalty=1)
 
 
 void
-Cstrike_BulletRecoil_ApplyPre(csPlayer pl, float strength) {
+Cstrike_BulletRecoil_ApplyPre(player pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
-
-#ifdef NOVO
-	pl.v_angle += strength*pl.m_punchVelocity*(2 - pl.cs_shotmultiplier/100*0.2);
-#else
-	pl.v_angle += strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
-#endif
+	pl.v_angle += strength*pl.punchangle*(2 - pl.cs_shotmultiplier/100*0.2);
 }
 void
-Cstrike_BulletRecoil_ApplyPost(csPlayer pl, float strength) {
+Cstrike_BulletRecoil_ApplyPost(player pl, float strength) {
 	strength *= autocvar_fcs_guns_recoil_strength;
-#ifdef NOVO
-	pl.v_angle -= strength*pl.m_punchVelocity*(2 - pl.cs_shotmultiplier/100*0.2);
-#else
-	pl.v_angle -= strength*pl.m_punchAngle*(2 - pl.cs_shotmultiplier/100*0.2);
-#endif
+	pl.v_angle -= strength*pl.punchangle*(2 - pl.cs_shotmultiplier/100*0.2);
 }
 
 
 /* called whenever cstrike guns aren't firing */
 void
-Cstrike_ShotMultiplierUpdate(csPlayer pl)
+Cstrike_ShotMultiplierUpdate(player pl)
 {
 	if ((pl.cs_shotmultiplier > 0) && (pl.cs_shottime <= 0.0f)) {
-		pl.cs_shottime = pl.m_timeUntilNextAttack + 0.01;
+		pl.cs_shottime = pl.w_attack_next + 0.01;
 		pl.cs_shotmultiplier--;
 	}
 
@@ -215,15 +203,29 @@ Cstrike_ShotMultiplierUpdate(csPlayer pl)
 }
 
 void
-Cstrike_ShotReset(csPlayer pl)
+Cstrike_ShotReset(player pl)
 {
 	pl.cs_shottime = 0.0f;
 	pl.cs_shotmultiplier = 0;
 }
 
+void
+w_cstrike_weaponrelease(void)
+{
+	player pl = (player)self;
+	pl.punchangle[1] *= 0.95;
+	Cstrike_ShotMultiplierUpdate(pl);
+}
+
+void
+w_cstrke_switched(player pl)
+{
+	Cstrike_ShotReset(pl);
+}
+
 #ifdef CLIENT
 void
-CStrikeView_UpdateGeomset(csPlayer pl)
+CStrikeView_UpdateGeomset(player pl)
 {
 	if (getplayerkeyfloat(pl.entnum-1, "*team") == TEAM_CT) {
 		setcustomskin(pSeat->m_eViewModel, "", "geomset 0 2\ngeomset 1 1\n");

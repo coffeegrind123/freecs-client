@@ -52,7 +52,7 @@ FX_Impact_Init(void)
 void
 Wallpuff_Travel(void)
 {
-	ncEntity sprite = (ncEntity)self;
+	NSEntity sprite = (NSEntity)self;
 	vector newpos;
 
 	sprite.origin = sprite.origin_net;

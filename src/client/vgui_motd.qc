@@ -15,61 +15,47 @@
  */
 
 void
-CSVGUI_ShowMOTD(void)
+VGUI_ShowMOTD(void)
 {
 	static int initialized;
-	static vguiButton winMotdClose;
-	static vguiWindow winMotd;
-	static vguiLabel winMotdHostname;
-	static vguiLabel winMotdBody;
-	static vguiFrame frmWindow;
+	static VGUIButton winMotdClose;
+	static VGUIWindow winMotd;
+	static VGUILabel winMotdHostname;
+	static VGUILabel winMotdBody;
+	static VGUIFrame frmWindow;
 	
 	static void VGUI_ShowMOTD_Close(void)
 	{
-		int playerTeam = player.GetTeam();
-		bool teamSelect = ((playerTeam == TEAM_UNASSIGNED) || (playerTeam == TEAM_SPECTATOR)) ? (true) : (false);
-
-		if (playerTeam == 0) {
-			teamSelect = true;
-		}
-
-		if (teams.OpenTeamCount() > 0i && teamSelect) {
-			localcmd("showTeamSelectionMenu\n");
-		}
-
-		if (winMotd) {
-			winMotd.Hide();
-		}
+		CMD_ChooseTeam();
+		winMotd.Hide();
 	}
 
-	if (MOTD_GetLineCount() < 1i) {
-		VGUI_ShowMOTD_Close();
+	if (MOTD_GetLineCount() < 1i)
 		return;
-	}
 
 	if (!initialized) {
 		initialized = TRUE;
-		winMotd = spawn(vguiWindow);
+		winMotd = spawn(VGUIWindow);
 		winMotd.SetTitle("Message Of The Day");
-		winMotd.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
+		winMotd.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
 		winMotd.SetSize('424 312');
 
-		frmWindow = spawn(vguiFrame);
+		frmWindow = spawn(VGUIFrame);
 		frmWindow.SetPos('0 0');
 		frmWindow.SetSize('424 312');
 
-		winMotdClose = spawn(vguiButton);
+		winMotdClose = spawn(VGUIButton);
 		winMotdClose.SetTitle("OK");
 		winMotdClose.SetPos([16, 266]);
 		winMotdClose.SetSize([160, 30]);
 		winMotdClose.SetFunc(VGUI_ShowMOTD_Close);
 
-		winMotdHostname = spawn(vguiLabel);
+		winMotdHostname = spawn(VGUILabel);
 		winMotdHostname.SetTitle(serverkey("hostname"));
 		winMotdHostname.SetTextSize(19);
 		winMotdHostname.SetPos([16, 20]);
 
-		winMotdBody = spawn(vguiLabel);
+		winMotdBody = spawn(VGUILabel);
 		winMotdBody.SetTitle(MOTD_GetTextBody());
 		winMotdBody.SetPos([16, 48]);
 		winMotdBody.SetSize([392, 210]);
@@ -82,5 +68,5 @@ CSVGUI_ShowMOTD(void)
 	}
 
 	winMotd.Show();
-	winMotd.SetPos((g_vidsize / 2) - (winMotd.GetSize() / 2));
+	winMotd.SetPos((video_res / 2) - (winMotd.GetSize() / 2));
 }

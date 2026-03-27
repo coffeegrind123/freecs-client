@@ -14,14 +14,15 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "hud.h"
 #include "radio.h"
+#include "../../../valve/src/client/obituary.h"
 
 var int autocvar_cl_autoweaponswitch = TRUE;
 
 vector g_hud_color;
 vector g_hudmins;
 vector g_hudres;
-var string g_laser_spr;
 
 var string g_hud1_spr;
 var string g_hud2_spr;
@@ -80,17 +81,13 @@ struct
 	int m_iNightvision;
 } g_seatslocal[4], *pSeatLocal;
 
-font_s FONT_SCOREBOARD;
-font_s FONT_SCORES_NORMAL;
-font_s FONT_SCORES_BOLD;
+void HUD_DrawAmmo1(void);
+void HUD_DrawAmmo2(void);
+void HUD_DrawAmmo3(void);
+void HUD_WeaponPickupNotify(int);
+void HUD_DrawAmmoBar(vector pos, float val, float max, float a);
 
-
+void Cstrike_DrawCrosshair(void);
 void Cstrike_DrawSimpleCrosshair(void);
 void Cstrike_DrawScope(void);
 void Textmenu_Call(string);
-
-float
-GetGameTime(void)
-{
-	return max(0.0f, serverkeyfloat("cs_gametime") - time);
-}

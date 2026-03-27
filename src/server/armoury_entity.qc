@@ -53,26 +53,26 @@ List of available items:
 
 var int autocvar_fcs_nopickups = FALSE;
 
-string g_cstrike_armouryitems[19] = {
-	"weapon_mp5navy",
-	"weapon_tmp",
-	"weapon_p90",
-	"weapon_max10",
-	"weapon_ak47",
-	"weapon_sg552",
-	"weapon_m4a1",
-	"weapon_aug",
-	"weapon_scout",
-	"weapon_g3sg1",
-	"weapon_awp",
-	"weapon_m3",
-	"weapon_xm1014",
-	"weapon_m249",
-	"weapon_flashbang",
-	"weapon_hegrenade",
-	"equipment_kevlar",
-	"equipment_helmet",
-	"weapon_smokegrenade"
+int g_cstrike_armouryitems[19] = {
+	WEAPON_MP5,
+	WEAPON_TMP,
+	WEAPON_P90,
+	WEAPON_MAC10,
+	WEAPON_AK47,
+	WEAPON_SG552,
+	WEAPON_M4A1,
+	WEAPON_AUG,
+	WEAPON_SCOUT,
+	WEAPON_G3SG1,
+	WEAPON_AWP,
+	WEAPON_M3,
+	WEAPON_XM1014,
+	WEAPON_PARA,
+	WEAPON_FLASHBANG,
+	WEAPON_HEGRENADE,
+	0,/*EQUIPMENT_KEVLAR,*/
+	0,/*EQUIPMENT_HELMET,*/
+	WEAPON_SMOKEGRENADE
 };
 
 string g_cstrike_armourymodels[19] = {
@@ -97,7 +97,7 @@ string g_cstrike_armourymodels[19] = {
 	"models/w_smokegrenade.mdl"
 };
 
-class armoury_entity:ncRenderableEntity
+class armoury_entity:NSRenderableEntity
 {
 	int m_iCount;
 	int m_iLeft;
@@ -165,12 +165,12 @@ armoury_entity::Restore(string strKey, string strValue)
 void
 armoury_entity::Touch(entity eToucher)
 {
-	csPlayer pl;
+	player pl;
 	if (eToucher.classname != "player") {
 		return;
 	}
 
-	pl = (csPlayer)eToucher;
+	pl = (player)eToucher;
 
 	/* armor is separate from weapons */
 	if (m_iID == 17 || m_iID == 16) {
@@ -183,8 +183,8 @@ armoury_entity::Touch(entity eToucher)
 		}
 
 		/* we may need a helmet though */
-		if (pl.HasItem("item_kevlar_helmet") == false && m_iID == 17) {
-			pl.GiveNamedItem("item_kevlar_helmet");
+		if (!(pl.g_items & ITEM_HELMET) && m_iID == 17) {
+			pl.g_items |= ITEM_HELMET;
 			picked_up = true;
 		}
 
@@ -194,13 +194,13 @@ armoury_entity::Touch(entity eToucher)
 
 		sound(pl, CHAN_ITEM, "items/tr_kevlar.wav", 1, ATTN_NORM);
 	} else { /* weapon pickup code */
-		if (pl.GiveNamedItem(g_cstrike_armouryitems[m_iID]) == FALSE)
+		if (Weapons_AddItem(pl, g_cstrike_armouryitems[m_iID], -1) == FALSE)
 			return;
 
 		sound(pl, CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
 	}
 
-	ncStats::PickupItem(this, pl);
+	Logging_Pickup(pl, this, __NULL__);
 	m_iLeft--;
 
 	if (m_iLeft <= 0) {
@@ -211,7 +211,7 @@ armoury_entity::Touch(entity eToucher)
 void
 armoury_entity::Respawn(void)
 {
-	super::Respawn();
+	SetOrigin(GetSpawnOrigin());
 	SetSolid(SOLID_TRIGGER);
 	SetModel(g_cstrike_armourymodels[m_iID]);
 	SetSize([-16,-16,0], [16,16,16]);
@@ -231,7 +231,7 @@ armoury_entity::SpawnKey(string strKey, string strValue)
 		m_iID = stoi(strValue);
 
 		if (m_iID < 0 || m_iID >= 19) {
-			EntError("^1armoury_entity with invalid item %i. ignoring\n", m_iID);
+			NSLog("^1armoury_entity with invalid item %i. ignoring\n", m_iID);
 			Destroy();
 		}
 		break;

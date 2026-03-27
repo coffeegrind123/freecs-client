@@ -23,10 +23,10 @@ jobs:
             build-essential libgl-dev libasound2-dev libxss-dev libxrandr-dev \
             libxcursor-dev libxi-dev libpulse-dev megatools p7zip-full
 
-      - name: Clone Nuclide SDK and valve base game
+      - name: Clone Nuclide SDK and valve base game (pinned to matching versions)
         run: |
-          git clone --depth 1 -b current https://code.idtech.space/vera/nuclide.git build/nuclide
-          git clone --depth 1 -b current https://code.idtech.space/fn/valve.git build/nuclide/valve
+          git clone https://code.idtech.space/vera/nuclide.git build/nuclide && cd build/nuclide && git checkout a9ededfd && cd -
+          git clone https://code.idtech.space/fn/valve.git build/nuclide/valve && cd build/nuclide/valve && git checkout 9272244 && cd -
 
       - name: Clone and patch FTEQW
         run: |
@@ -36,11 +36,16 @@ jobs:
       - name: Build FTEQCC and compile FreeCS
         run: |
           cd build/fteqw/engine && make qcc-rel -j$(nproc)
-          cd $GITHUB_WORKSPACE
+          FTEQCC="$(readlink -f $(find build/fteqw/engine/release -name 'fteqcc*' -executable ! -name '*.db' | head -1))"
           mkdir -p build/nuclide/cstrike
           rsync -a --exclude=build/ --exclude=.git/ . build/nuclide/cstrike/
-          cd build/nuclide && make game GAME=cstrike
-          cp -f build/nuclide/cstrike/progs.dat build/nuclide/cstrike/csprogs.dat build/nuclide/cstrike/hud.dat $GITHUB_WORKSPACE/ 2>/dev/null || true
+          cd build/nuclide/cstrike/src/server && "$FTEQCC" -I../../../src/xr/ progs.src
+          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/client && "$FTEQCC" -I../../../src/xr/ progs.src
+          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" counterstrike.src || true
+          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" deathmatch.src || true
+          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" gungame.src || true
+          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" zombie.src || true
+          cp -f build/nuclide/cstrike/progs.dat build/nuclide/cstrike/csprogs.dat $GITHUB_WORKSPACE/ 2>/dev/null || true
           cp -af build/nuclide/cstrike/progs/ $GITHUB_WORKSPACE/ 2>/dev/null || true
 
       - name: Build FTEQW libraries (win64)

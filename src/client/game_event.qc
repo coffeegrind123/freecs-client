@@ -18,6 +18,23 @@ int
 ClientGame_EventParse(float fHeader)
 {
 switch (fHeader) {
+	case EV_OBITUARY:
+		Obituary_Parse();
+		break;
+	case EV_BLOOD:
+		vector vBloodPos;
+		vector vBloodColor;
+
+		vBloodPos[0] = readcoord();
+		vBloodPos[1] = readcoord();
+		vBloodPos[2] = readcoord();
+
+		vBloodColor[0] = readbyte() / 255;
+		vBloodColor[1] = readbyte() / 255;
+		vBloodColor[2] = readbyte() / 255;
+
+		FX_Blood(vBloodPos, vBloodColor);
+		break;
 	case EV_SMOKE:
 		vector vSmokePos;
 		vSmokePos[0] = readcoord();
@@ -41,6 +58,15 @@ switch (fHeader) {
 		break;
 	case EV_VIEWMODEL:
 		View_PlayAnimation(readbyte());
+		break;
+	case EV_WEAPON_PICKUP:
+		int w = readbyte();
+
+		if (autocvar_cl_autoweaponswitch == 1) {
+			sendevent("PlayerSwitchWeapon", "i", w);
+		}
+
+		HUD_WeaponPickupNotify(w);
 		break;
 	case EV_RADIOMSG:
 		Radio_PlayMessage(readbyte());

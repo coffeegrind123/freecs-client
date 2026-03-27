@@ -14,10 +14,10 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-static vguiWindow winChooseTeam;
+static VGUIWindow winChooseTeam;
 
 string
-CSVGUI_ChooseTeam_MapInfo(void)
+VGUI_ChooseTeam_MapInfo(void)
 {
 	static string mapinfo = __NULL__;
 
@@ -40,7 +40,7 @@ CSVGUI_ChooseTeam_MapInfo(void)
 
 /* returns true if you should join CT, else T */
 bool
-CSVGUI_ChooseTeam_AutoQuery(void)
+VGUI_ChooseTeam_AutoQuery(void)
 {
 	int teamT = 0;
 	int teamCT = 0;
@@ -60,36 +60,37 @@ CSVGUI_ChooseTeam_AutoQuery(void)
 }
 
 void
-CSVGUI_ChooseTeam(void)
+VGUI_ChooseTeam(void)
 {
 	static int initialized;
-	static vguiButton btnJoinT;
-	static vguiButton btnJoinCT;
-	static vguiButton btnAutoAssign;
-	static vguiButton btnGoSpectator;
-	static vguiFrame frmMapInfo;
-	static vguiLabel lblSelectTeam;
-	static vguiLabel lblMapName;
-	static vguiLabel lblMapInfo;
+	static VGUIButton btnJoinT;
+	static VGUIButton btnJoinCT;
+	static VGUIButton btnAutoAssign;
+	static VGUIButton btnGoSpectator;
+	static VGUIFrame frmMapInfo;
+	static VGUILabel lblSelectTeam;
+	static VGUILabel lblMapName;
+	static VGUILabel lblMapInfo;
 
 	static void VGUI_ChooseTeam_CT(void) {
-		localcmd("cmd joinTeam 2\n");
-		CSVGUI_ChooseClassCT();
+		VGUI_ChooseClassCT();
 		winChooseTeam.Hide();
 	}
 
 	static void VGUI_ChooseTeam_T(void) {
-		localcmd("cmd joinTeam 1\n");
-		CSVGUI_ChooseClassT();
+		VGUI_ChooseClassT();
 		winChooseTeam.Hide();
 	}
 
 	static void VGUI_ChooseTeam_Auto(void) {
-		localcmd("cmd joinTeam 9\n");
+		if (VGUI_ChooseTeam_AutoQuery())
+			VGUI_ChooseTeam_CT();
+		else
+			VGUI_ChooseTeam_T();
 	}
 
 	static void VGUI_ChooseTeam_Spec(void) {
-		localcmd("cmd joinTeam 1002\n");
+		sendevent("JoinSpectator", "");
 		winChooseTeam.Hide();
 	}
 
@@ -97,53 +98,53 @@ CSVGUI_ChooseTeam(void)
 		vector btnpos = [40,80];
 
 		initialized = TRUE;
-		winChooseTeam = spawn(vguiWindow);
+		winChooseTeam = spawn(VGUIWindow);
 		winChooseTeam.SetSize('640 480');
-		winChooseTeam.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
+		winChooseTeam.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
 
-		lblSelectTeam = spawn(vguiLabel);
+		lblSelectTeam = spawn(VGUILabel);
 		lblSelectTeam.SetTitle("Select Your Team");
 		lblSelectTeam.SetTextSize(19);
 		lblSelectTeam.SetPos([40, 38]);
 		lblSelectTeam.SetSize('400 24');
 
-		frmMapInfo = spawn(vguiFrame);
+		frmMapInfo = spawn(VGUIFrame);
 		frmMapInfo.SetPos('176 80');
 		frmMapInfo.SetSize('424 312');
 
-		lblMapName = spawn(vguiLabel);
+		lblMapName = spawn(VGUILabel);
 		lblMapName.SetTitle(mapname);
 		lblMapName.SetTextSize(19);
 		lblMapName.SetPos('194 105');
 		lblMapName.SetSize('250 312');
 
-		lblMapInfo = spawn(vguiLabel);
+		lblMapInfo = spawn(VGUILabel);
 		lblMapInfo.SetTitle(VGUI_ChooseTeam_MapInfo());
 		lblMapInfo.SetPos('194 129');
 		lblMapInfo.SetSize('375 250');
 
-		btnJoinT = spawn(vguiButton);
+		btnJoinT = spawn(VGUIButton);
 		btnJoinT.SetTitle("Terrorist Forces");
 		btnJoinT.SetPos('40 80');
 		btnJoinT.SetSize('124 24');
 		btnJoinT.SetKeyEquivalent("1");
 		btnJoinT.SetFunc(VGUI_ChooseTeam_T);
 
-		btnJoinCT = spawn(vguiButton);
+		btnJoinCT = spawn(VGUIButton);
 		btnJoinCT.SetTitle("CT Forces");
 		btnJoinCT.SetPos('40 112');
 		btnJoinCT.SetSize('124 24');
 		btnJoinCT.SetKeyEquivalent("2");
 		btnJoinCT.SetFunc(VGUI_ChooseTeam_CT);
 
-		btnAutoAssign = spawn(vguiButton);
+		btnAutoAssign = spawn(VGUIButton);
 		btnAutoAssign.SetTitle("Auto Assign");
 		btnAutoAssign.SetPos('40 208');
 		btnAutoAssign.SetSize('124 24');
 		btnAutoAssign.SetKeyEquivalent("5");
 		btnAutoAssign.SetFunc(VGUI_ChooseTeam_Auto);
 
-		btnGoSpectator = spawn(vguiButton);
+		btnGoSpectator = spawn(VGUIButton);
 		btnGoSpectator.SetTitle("Spectate");
 		btnGoSpectator.SetPos('40 272');
 		btnGoSpectator.SetSize('124 24');
@@ -162,5 +163,5 @@ CSVGUI_ChooseTeam(void)
 	}
 
 	winChooseTeam.Show();
-	winChooseTeam.SetPos((g_vidsize / 2) - (winChooseTeam.GetSize() / 2));
+	winChooseTeam.SetPos((video_res / 2) - (winChooseTeam.GetSize() / 2));
 }

@@ -26,7 +26,7 @@ VIP safety zone.
 Used in the assassination mode (as_* maps).
 */
 
-class func_vip_safetyzone:ncBrushTrigger
+class func_vip_safetyzone:NSBrushTrigger
 {
 	void func_vip_safetyzone(void);
 
@@ -38,6 +38,7 @@ class func_vip_safetyzone:ncBrushTrigger
 void
 func_vip_safetyzone::func_vip_safetyzone(void)
 {
+	g_cs_vipzones++;
 }
 
 void
@@ -49,11 +50,12 @@ func_vip_safetyzone::Respawn(void)
 void
 func_vip_safetyzone::Touch(entity eToucher)
 {
-	csPlayer pl = (csPlayer)eToucher;
+	CSMultiplayerRules rule = (CSMultiplayerRules)g_grMode;
+
+	player pl = (player)eToucher;
 
 	if (pl.classname != "player")
 		return;
-#if 0
 	if (pl.team != TEAM_VIP)
 		return;
 
@@ -65,5 +67,4 @@ func_vip_safetyzone::Touch(entity eToucher)
 	/* mark player as spectator for the end of this 'round' */
 	pl.MakeTempSpectator();
 	pl.gflags &= ~GF_FLASHLIGHT;
-#endif
 }

@@ -41,7 +41,7 @@ Choices for 'team' include:
 */
 
 class
-func_buyzone:ncBrushTrigger
+func_buyzone:NSBrushTrigger
 {
 	void(void) func_buyzone;
 
@@ -76,7 +76,7 @@ func_buyzone::SpawnKey(string strKey, string strValue)
 void
 func_buyzone::Touch(entity eToucher)
 {
-	csPlayer pl = (csPlayer)eToucher;
+	player pl = (player)eToucher;
 
 	if (!(eToucher.flags & FL_CLIENT))
 		return;
@@ -84,7 +84,7 @@ func_buyzone::Touch(entity eToucher)
 	if (team == 0 || team == pl.team)
 		pl.gflags |= GF_BUYZONE;
 
-	if (serverinfo.GetBool("cs_hints")  == true)
+	if (g_csMode.ShowHints() == true)
 	if (pl.m_buyMessage == false) {
 		env_message_single(pl, "Hint_press_buy_to_purchase");
 		pl.m_buyMessage = true;

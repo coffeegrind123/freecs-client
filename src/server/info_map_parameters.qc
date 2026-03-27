@@ -41,7 +41,7 @@ typedef enum
 } imp_buyrules_t;
 
 class
-info_map_parameters:ncEntity
+info_map_parameters:NSEntity
 {
 	float m_flBombRadius;
 	imp_buyrules_t m_buyRules;

@@ -17,32 +17,30 @@
 void
 Nightvision_Toggle(void)
 {
-	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
+	player pl = (player)pSeat->m_ePlayer;
 
-	if (pl.HasItem("item_nightvision") == false) {
+	if (!(pl.g_items & ITEM_NIGHTVISION)) {
 		pSeatLocal->m_iNightvision = 0;
 		return;
 	}
 
 	pSeatLocal->m_iNightvision = 1 - pSeatLocal->m_iNightvision;
 
-	if (pSeatLocal->m_iNightvision) {
-		SoundDef_Play(self, CHAN_AUTO, "nvg.on");
-	} else {
-		SoundDef_Play(self, CHAN_AUTO, "nvg.off");
-	}
+	if (pSeatLocal->m_iNightvision)
+		Sound_Play(self, CHAN_AUTO, "nvg.on");
+	else
+		Sound_Play(self, CHAN_AUTO, "nvg.off");
 }
 
 void
 Nightvision_PreFrame(void)
 {
-	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
+	player pl = (player)pSeat->m_ePlayer;
 
-	if (!pSeatLocal->m_iNightvision) {
+	if (!pSeatLocal->m_iNightvision)
 		return;
-	}
 
-	if (pl.HasItem("item_nightvision") == false) {
+	if (!(pl.g_items & ITEM_NIGHTVISION)) {
 		pSeatLocal->m_iNightvision = 0;
 		return;
 	}
@@ -53,13 +51,12 @@ Nightvision_PreFrame(void)
 void
 Nightvision_PostFrame(void)
 {
-	csPlayer pl = (csPlayer)pSeat->m_ePlayer;
+	player pl = (player)pSeat->m_ePlayer;
 
-	if (!pSeatLocal->m_iNightvision) {
+	if (!pSeatLocal->m_iNightvision)
 		return;
-	}
 
-	if (pl.HasItem("item_nightvision") == false) {
+	if (!(pl.g_items & ITEM_NIGHTVISION)) {
 		pSeatLocal->m_iNightvision = 0;
 		return;
 	}

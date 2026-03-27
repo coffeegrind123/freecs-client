@@ -1,4 +1,4 @@
-QCC=fteqcc
+CC=fteqcc
 
 all:
-	$(QCC) $(CFLAGS) -I../../../src/platform/ -I../../../valve/src/shared/ progs.src 
+	$(CC) progs.src

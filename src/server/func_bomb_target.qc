@@ -28,24 +28,32 @@ Once the bomb explodes inside this volume, it'll trigger its targets.
 */
 
 class
-func_bomb_target:ncBrushTrigger
+func_bomb_target:NSBrushTrigger
 {
 	void(void) func_bomb_target;
 
+	virtual void(void) Respawn;
 	virtual void(entity) Touch;
 };
 
 void
 func_bomb_target::func_bomb_target(void)
 {
+	g_cs_bombzones++;
+}
+
+void
+func_bomb_target::Respawn(void)
+{
+	InitBrushTrigger();
 }
 
 void
 func_bomb_target::Touch(entity eToucher)
 {
-	csPlayer pl = (csPlayer)eToucher;
+	player pl = (player)eToucher;
 
-	if (is.Player(pl) == false) {
+	if (!(eToucher.flags & FL_CLIENT)) {
 		return;
 	}
 
@@ -53,10 +61,9 @@ func_bomb_target::Touch(entity eToucher)
 		return;
 	}
 
-	if (serverinfo.GetBool("cs_hints") && pl.m_seenBombSite == false) {
+	if (g_csMode.ShowHints() && pl.m_seenBombSite == false) {
 		env_message_single(pl, "Hint_you_are_in_targetzone");
 		pl.m_seenBombSite = true;
 	}
-
 	pl.gflags |= GF_BOMBZONE;
 }

@@ -29,7 +29,7 @@ zones will be placed in Counter-Terrorist player spawn nodes automatically.
 */
 
 class
-func_hostage_rescue:ncBrushTrigger
+func_hostage_rescue:NSBrushTrigger
 {
 	void(void) func_hostage_rescue;
 
@@ -51,8 +51,8 @@ func_hostage_rescue::Respawn(void)
 void
 func_hostage_rescue::Touch(entity eToucher)
 {
-	if (is.Player(eToucher)) {
-		csPlayer pl = (csPlayer)eToucher;
+	if (eToucher.flags & FL_CLIENT) {
+		player pl = (player)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}
@@ -61,17 +61,24 @@ func_hostage_rescue::Touch(entity eToucher)
 		return;
 	}
 
-	CSHostage hosty = (CSHostage)eToucher;
+	hostage_entity hosty = (hostage_entity)eToucher;
 
 	if (hosty.GetSolid() == SOLID_NOT) {
 		return;
 	}
 
-	#warning Needs API
-	if (!(hosty.m_useFollowChain))
+	if (!(hosty.m_eFollowing))
 		return;
 
-	g_grMode.Input(hosty.m_useFollowChain, "HostageRescued", "");
+	Radio_BroadcastMessage(RADIO_RESCUED);
+	g_cs_hostagesrescued++;
+
+	Money_AddMoney((player)hosty.m_eFollowing, 1000);
+	CSBot_HostageRescueNotify();
+
+	/* In Hostage Rescue, all Counter-Terrorists receive an $850
+	 * bonus for every hostage that was rescued, even if they lose the round. */
+	Money_QueTeamReward(TEAM_CT, 850);
 
 	hosty.Disappear();
 }

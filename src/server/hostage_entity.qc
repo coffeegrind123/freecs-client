@@ -14,7 +14,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*!QUAKED CSHostage (0 1 0) (-16 -16 0) (16 16 72)
+/*!QUAKED hostage_entity (0 1 0) (-16 -16 0) (16 16 72)
 # OVERVIEW
 Hostage NPC.
 Used in the Hostage Rescue mode (cs_* maps).
@@ -79,33 +79,25 @@ enum
 	HOSA_DEADTABLE3
 };
 
-class CSHostage:ncTalkMonster
+class hostage_entity:NSTalkMonster
 {
-	bool m_bUsedOnce;
+	int m_iUsedOnce;
 
-	void CSHostage(void);
+	void(void) hostage_entity;
 
-	virtual void OnPlayerUse(void);
-	virtual void Pain(entity, entity, int, vector, vector, int);
-	virtual void Death(entity, entity, int, vector, vector, int);
-
+	virtual void(void) Respawn;
+	virtual void(void) OnPlayerUse;
+	virtual void(void) Pain;
+	virtual void(void) Death;
 };
 
 void
-CSHostage::CSHostage(void)
-{
-	SoundDef_Precache("hostage_entity.follow");
-	m_bUsedOnce = false;
-}
-
-
-void
-CSHostage::OnPlayerUse(void)
+hostage_entity::OnPlayerUse(void)
 {
 	if (eActivator.team == TEAM_T) {
-		csPlayer pl = (csPlayer)eActivator;
+		player pl = (player)eActivator;
 
-		if (serverinfo.GetBool("cs_hints") == true)
+		if (g_csMode.ShowHints() == true)
 		if (pl.m_hostMessageT == false) {
 			env_message_single(pl, "Only_CT_Can_Move_Hostages");
 			pl.m_hostMessageT = true;
@@ -113,30 +105,25 @@ CSHostage::OnPlayerUse(void)
 		return;
 	}
 
-	#warning Needs API
-	if (m_useFollowChain == world) {
-		SoundDef_Speak(this, "hostage_entity.follow");
-	}
+	if (m_eFollowing == world)
+		Sound_Speak(this, "hostage_entity.follow");
 
 	/* CT reward, first time only */
-	if (m_bUsedOnce == false) {
-		g_grMode.Input(eActivator, "HostageContacted", "");
-		m_bUsedOnce = true;
+	if (m_iUsedOnce == FALSE) {
+		Money_AddMoney((player)eActivator, 150);
+		m_iUsedOnce = TRUE;
 	}
 
-	ncTalkMonster::OnPlayerUse();
+	NSTalkMonster::OnPlayerUse();
 }
 
 void
-CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, vector absImpactPos, int hitBody)
+hostage_entity::Pain(void)
 {
-	super::Pain(inflictor, attacker, damageDealt, dir, absImpactPos, hitBody);
-
-	if (IsAlive() == false) {
+	if (IsAlive() == false)
 		return;
-	}
 
-	switch (hitBody) {
+	switch (g_dmg_iHitBody) {
 	case BODY_HEAD:
 	case BODY_DEFAULT:
 	case BODY_CHEST:
@@ -158,20 +145,19 @@ CSHostage::Pain(entity inflictor, entity attacker, int damageDealt, vector dir, 
 	}
 
 	/* penalties */
-	if (is.Player(attacker) == false) {
+	if (g_dmg_eAttacker.classname != "player")
 		return;
-	}
 
-	g_grMode.Input(attacker, "HostageInjured",  itos(damageDealt));
+	Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -(g_dmg_iDamage * 25));
 }
 
 void
-CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir, vector absImpactPos, int hitBody)
+hostage_entity::Death(void)
 {
 	WarnAllies();
 
 	if (IsAlive() == true) {
-		switch (hitBody) {
+		switch (g_dmg_iHitBody) {
 		case BODY_HEAD:
 			SetFrame(HOSA_DIE_HEADSHOT);
 			break;
@@ -183,8 +169,13 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 			break;
 		}
 
-		if (is.Player(attacker) == true) {
-			g_grMode.Input(attacker, "HostageKilled", itos(damageDealt));
+		if (g_dmg_eAttacker.classname == "player") {
+			if (g_dmg_iDamage >= 100)
+				Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -2500);
+			else
+				Money_AddMoney((NSClientPlayer)g_dmg_eAttacker, -500);
+
+			Radio_BroadcastMessage(RADIO_HOSDOWN);
 		}
 	}
 
@@ -192,6 +183,52 @@ CSHostage::Death(entity inflictor, entity attacker, int damageDealt, vector dir,
 	SetHealth(0);
 
 	/* now mark our state as 'dead' */
-	super::Death(inflictor, attacker, damageDealt, dir, absImpactPos, hitBody);
+	super::Death();
 	SetSolid(SOLID_NOT);
+}
+
+void
+hostage_entity::Respawn(void)
+{
+	spawnflags |= MSF_MULTIPLAYER;
+	model = "models/hostage.mdl";
+	netname = "Hostage";
+	base_health = 100;
+	base_mins = [-16,-16,0];
+	base_maxs = [16,16,72];
+
+	super::Respawn();
+
+	m_iFlags |= MONSTER_CANFOLLOW;
+	m_iUsedOnce = FALSE;
+	PlayerUse = OnPlayerUse;
+}
+
+void
+hostage_entity::hostage_entity(void)
+{
+	Sound_Precache("hostage_entity.follow");
+
+	m_talkAnswer = "";
+	m_talkAsk = "";
+	m_talkAllyShot = "";
+	m_talkGreet = "";
+	m_talkIdle = "";
+	m_talkHearing = "";
+	m_talkSmelling = "";
+	m_talkStare = "";
+	m_talkSurvived = "";
+	m_talkWounded = "";
+
+	m_talkPlayerAsk = "";
+	m_talkPlayerGreet = "";
+	m_talkPlayerIdle = "";
+	m_talkPlayerWounded1 = "";
+	m_talkPlayerWounded2 = "";
+	m_talkPlayerWounded3 = "";
+	m_talkUnfollow = "";
+	m_talkFollow = "";
+	m_talkStopFollow = "";
+
+	g_cs_hostagestotal++;
 }

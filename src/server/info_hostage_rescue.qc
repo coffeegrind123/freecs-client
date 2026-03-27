@@ -29,7 +29,7 @@ If neither a info_hostage_rescue or a func_hostage_rescue is placed,
 zones will be placed in Counter-Terrorist player spawn nodes automatically.
 */
 
-class info_hostage_rescue:ncPointTrigger
+class info_hostage_rescue:NSPointTrigger
 {
 	void(void) info_hostage_rescue;
 
@@ -45,15 +45,16 @@ info_hostage_rescue::info_hostage_rescue(void)
 void
 info_hostage_rescue::Respawn(void)
 {
-	super::Respawn();
+	SetSolid(SOLID_TRIGGER);
 	SetSize([-128,-128,-128], [128,128,128]);
+	SetOrigin(GetSpawnOrigin());
 }
 
 void
 info_hostage_rescue::Touch(entity eToucher)
 {
-	if (is.Player(eToucher)) {
-		csPlayer pl = (csPlayer)eToucher;
+	if (eToucher.flags & FL_CLIENT) {
+		player pl = (player)eToucher;
 		pl.gflags |= GF_RESCUEZONE;
 		return;
 	}
@@ -62,16 +63,24 @@ info_hostage_rescue::Touch(entity eToucher)
 		return;
 	}
 
-	ncTalkMonster hosty = (ncTalkMonster)other;
+	NSTalkMonster hosty = (NSTalkMonster)other;
 
 	if (hosty.GetSolid() == SOLID_NOT) {
 		return;
 	}
 
 	/* some custom maps are very smart... */
-	if (!((csPlayer)hosty.m_useFollowChain))
+	if (!((player)hosty.m_eFollowing))
 		return;
 
-	g_grMode.Input(hosty.m_useFollowChain, "HostageRescued", "");
+	Radio_BroadcastMessage(RADIO_RESCUED);
+	CSBot_HostageRescueNotify();
+	g_cs_hostagesrescued++;
+
+	Money_AddMoney((player)hosty.m_eFollowing, 1000);
+
+	/* In Hostage Rescue, all Counter-Terrorists receive an $850
+	 * bonus for every hostage they rescue, even if they lose the round. */
+	Money_QueTeamReward(TEAM_CT, 850);
 	hosty.Disappear();
 }

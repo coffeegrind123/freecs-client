@@ -14,10 +14,10 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-static vguiWindow winBuyMenu;
-static vguiLabel lblCategoryDescr;
+static VGUIWindow winBuyMenu;
+static VGUILabel lblCategoryDescr;
 
-class CSBuyMenuButton:vguiButton
+class CSBuyMenuButton:VGUIButton
 {
 	void CSBuyMenuButton(void);
 
@@ -37,28 +37,28 @@ CSBuyMenuButton::OnMouseUp(void)
 
 	switch (categorySelection) {
 		case 1:
-			CSVGUI_BuyMenu_Page(BUYPAGE_PISTOLS);
+			VGUI_BuyMenu_Page(BUYPAGE_PISTOLS);
 			break;
 		case 2:
-			CSVGUI_BuyMenu_Page(BUYPAGE_SHOTGUNS);
+			VGUI_BuyMenu_Page(BUYPAGE_SHOTGUNS);
 			break;
 		case 3:
-			CSVGUI_BuyMenu_Page(BUYPAGE_SMGS);
+			VGUI_BuyMenu_Page(BUYPAGE_SMGS);
 			break;
 		case 4:
-			CSVGUI_BuyMenu_Page(BUYPAGE_RIFLES);
+			VGUI_BuyMenu_Page(BUYPAGE_RIFLES);
 			break;
 		case 5:
-			CSVGUI_BuyMenu_Page(BUYPAGE_MGS);
+			VGUI_BuyMenu_Page(BUYPAGE_MGS);
 			break;
 		case 6:
-			localcmd("cmd buyammo 0\n");
+			sendevent("AmmoBuyPrimary", "");
 			break;
 		case 7:
-			localcmd("cmd buyammo 1\n");
+			sendevent("AmmoBuySecondary", "");
 			break;
 		case 8:
-			CSVGUI_BuyMenu_Page(BUYPAGE_EQUIPMENT);
+			VGUI_BuyMenu_Page(BUYPAGE_EQUIPMENT);
 			break;
 	}
 
@@ -99,7 +99,7 @@ CSBuyMenuButton::OnMouseEntered(void)
 }
 
 void
-CSVGUI_BuyMenu(void)
+VGUI_BuyMenu(void)
 {
 	static int initialized;
 	static CSBuyMenuButton btnPistols;
@@ -110,9 +110,9 @@ CSVGUI_BuyMenu(void)
 	static CSBuyMenuButton btnPrimAmmo;
 	static CSBuyMenuButton btnSecAmmo;
 	static CSBuyMenuButton btnEquipment;
-	static vguiButton btnCancel;
-	static vguiLabel lblSelectTeam;
-	static vguiFrame frmBuyInfo;
+	static VGUIButton btnCancel;
+	static VGUILabel lblSelectTeam;
+	static VGUIFrame frmBuyInfo;
 
 	static void VGUI_BuyMenu_Cancel(void) {
 		winBuyMenu.Hide();
@@ -122,21 +122,21 @@ CSVGUI_BuyMenu(void)
 		vector btnpos = [40,80];
 
 		initialized = TRUE;
-		winBuyMenu = spawn(vguiWindow);
+		winBuyMenu = spawn(VGUIWindow);
 		winBuyMenu.SetSize('640 480');
-		winBuyMenu.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
+		winBuyMenu.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
 
-		lblSelectTeam = spawn(vguiLabel);
+		lblSelectTeam = spawn(VGUILabel);
 		lblSelectTeam.SetTitle(Titles_GetTextBody("Title_select_category_of_purchase"));
 		lblSelectTeam.SetTextSize(19);
 		lblSelectTeam.SetPos([40, 38]);
 		lblSelectTeam.SetSize('400 24');
 
-		frmBuyInfo = spawn(vguiFrame);
+		frmBuyInfo = spawn(VGUIFrame);
 		frmBuyInfo.SetPos('176 80');
 		frmBuyInfo.SetSize('200 100');
 
-		lblCategoryDescr = spawn(vguiLabel);
+		lblCategoryDescr = spawn(VGUILabel);
 		lblCategoryDescr.SetTitle("");
 		lblCategoryDescr.SetPos('185 90');
 		lblCategoryDescr.SetSize('375 250');
@@ -220,5 +220,5 @@ CSVGUI_BuyMenu(void)
 	}
 
 	winBuyMenu.Show();
-	winBuyMenu.SetPos((g_vidsize / 2) - (winBuyMenu.GetSize() / 2));
+	winBuyMenu.SetPos((video_res / 2) - (winBuyMenu.GetSize() / 2));
 }

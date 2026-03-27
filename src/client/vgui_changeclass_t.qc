@@ -32,13 +32,13 @@ CSClassT_Init(void)
 		g_classDescrAuto = textfile_to_string("classes/autoselect.txt");
 }
 
-static vguiWindow winClassSelection;
-static vguiPic imgClassPreview;
-static vguiLabel lblClassTitle;
-static vguiLabel lblClassDescription;
-static vguiLabel lblClassCounter;
+static VGUIWindow winClassSelection;
+static VGUIPic imgClassPreview;
+static VGUILabel lblClassTitle;
+static VGUILabel lblClassDescription;
+static VGUILabel lblClassCounter;
 
-class CSClassButtonT:vguiButton
+class CSClassButtonT:VGUIButton
 {
 	void CSClassButtonT(void);
 
@@ -60,21 +60,7 @@ CSClassButtonT::OnMouseUp(void)
 	if (classSelection == 5)
 		classSelection = floor(random(1, 5));
 
-	switch (classSelection) {
-	case 1:
-		localcmd("cmd terror\n");
-		break;
-	case 2:
-		localcmd("cmd leet\n");
-		break;
-	case 3:
-		localcmd("cmd arctic\n");
-		break;
-	case 4:
-		localcmd("cmd guerilla\n");
-		break;
-	}
-
+	sendevent("JoinTeam", "f", (float)classSelection);
 	winClassSelection.Hide();
 }
 
@@ -85,27 +71,27 @@ CSClassButtonT::OnMouseEntered(void)
 
 	switch (classSelection) {
 		case 1:
-			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Phoenix_Connexion")));
+			lblClassTitle.SetTitle(Titles_GetTextBody("Phoenix_Connexion"));
 			imgClassPreview.SetImage("gfx/vgui/640_terror");
 			lblClassDescription.SetTitle(g_classDescrPhoenix);
 			break;
 		case 2:
-			lblClassTitle.SetTitle(localize(Titles_GetTextBody("L337_Krew")));
+			lblClassTitle.SetTitle(Titles_GetTextBody("L337_Krew"));
 			imgClassPreview.SetImage("gfx/vgui/640_leet");
 			lblClassDescription.SetTitle(g_classDescrLeet);
 			break;
 		case 3:
-			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Arctic_Avengers")));
+			lblClassTitle.SetTitle(Titles_GetTextBody("Arctic_Avengers"));
 			imgClassPreview.SetImage("gfx/vgui/640_arctic");
 			lblClassDescription.SetTitle(g_classDescrArctic);
 			break;
 		case 4:
-			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Guerilla_Warfare")));
+			lblClassTitle.SetTitle(Titles_GetTextBody("Guerilla_Warfare"));
 			imgClassPreview.SetImage("gfx/vgui/640_guerilla");
 			lblClassDescription.SetTitle(g_classDescrGuerilla);
 			break;
 		case 5:
-			lblClassTitle.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
+			lblClassTitle.SetTitle(Titles_GetTextBody("Auto_Select"));
 			imgClassPreview.SetImage("gfx/vgui/640_t_random");
 			lblClassDescription.SetTitle(g_classDescrAuto);
 			break;
@@ -113,11 +99,11 @@ CSClassButtonT::OnMouseEntered(void)
 }
 
 void
-CSVGUI_ChooseClassT(void)
+VGUI_ChooseClassT(void)
 {
 	static int initialized;
-	static vguiLabel lblSelectClass;
-	static vguiFrame frmClassInfo;
+	static VGUILabel lblSelectClass;
+	static VGUIFrame frmClassInfo;
 	static CSClassButtonT btnPhoenix;
 	static CSClassButtonT btnLeet;
 	static CSClassButtonT btnArctic;
@@ -130,33 +116,33 @@ CSVGUI_ChooseClassT(void)
 
 		CSClassT_Init();
 
-		winClassSelection = spawn(vguiWindow);
+		winClassSelection = spawn(VGUIWindow);
 		winClassSelection.SetSize([640, 480]);
-		winClassSelection.SetStyleMask(vguiWindowBorderless | vguiWindowFullscreen);
+		winClassSelection.SetStyleMask(VGUIWindowBorderless | VGUIWindowFullscreen);
 
-		lblSelectClass = spawn(vguiLabel);
-		lblSelectClass.SetTitle(localize(Titles_GetTextBody("Title_terrorist_model_selection")));
+		lblSelectClass = spawn(VGUILabel);
+		lblSelectClass.SetTitle(Titles_GetTextBody("Title_terrorist_model_selection"));
 		lblSelectClass.SetTextSize(19);
 		lblSelectClass.SetPos([40, 38]);
 		lblSelectClass.SetSize([400, 24]);
 
-		frmClassInfo = spawn(vguiFrame);
+		frmClassInfo = spawn(VGUIFrame);
 		frmClassInfo.SetPos([176, 80]);
 		frmClassInfo.SetSize([424, 312]);
 
-		imgClassPreview = spawn(vguiPic);
+		imgClassPreview = spawn(VGUIPic);
 		imgClassPreview.SetPos([190, 90]);
 
-		lblClassTitle = spawn(vguiLabel);
+		lblClassTitle = spawn(VGUILabel);
 		lblClassTitle.SetPos([338, 90]);
 		lblClassTitle.SetTextSize(19);
 		lblClassTitle.SetSize([320, 24]);
 
-		lblClassCounter = spawn(vguiLabel);
+		lblClassCounter = spawn(VGUILabel);
 		lblClassCounter.SetPos([338, 90 + 32]);
 		lblClassCounter.SetSize([320, 18]);
 
-		lblClassDescription = spawn(vguiLabel);
+		lblClassDescription = spawn(VGUILabel);
 		lblClassDescription.SetPos([338, 90 + 32 + 32]);
 		lblClassDescription.SetSize([250, 240]);
 
@@ -169,31 +155,31 @@ CSVGUI_ChooseClassT(void)
 		winClassSelection.Add(lblClassDescription);
 
 		btnPhoenix = spawn(CSClassButtonT);
-			btnPhoenix.SetTitle(localize(Titles_GetTextBody("Phoenix_Connexion")));
+			btnPhoenix.SetTitle(Titles_GetTextBody("Phoenix_Connexion"));
 			btnPhoenix.SetSize([124, 24]);
 			btnPhoenix.SetPos([40, 80]);
 			btnPhoenix.SetTag(1);
 			btnPhoenix.SetKeyEquivalent("1");
 		btnLeet = spawn(CSClassButtonT);
-			btnLeet.SetTitle(localize(Titles_GetTextBody("L337_Krew")));
+			btnLeet.SetTitle(Titles_GetTextBody("L337_Krew"));
 			btnLeet.SetSize([124, 24]);
 			btnLeet.SetPos([40, 112]);
 			btnLeet.SetTag(2);
 			btnLeet.SetKeyEquivalent("2");
 		btnArctic = spawn(CSClassButtonT);
-			btnArctic.SetTitle(localize(Titles_GetTextBody("Arctic_Avengers")));
+			btnArctic.SetTitle(Titles_GetTextBody("Arctic_Avengers"));
 			btnArctic.SetSize([124, 24]);
 			btnArctic.SetPos([40, 144]);
 			btnArctic.SetTag(3);
 			btnArctic.SetKeyEquivalent("3");
 		btnGuerilla = spawn(CSClassButtonT);
-			btnGuerilla.SetTitle(localize(Titles_GetTextBody("Guerilla_Warfare")));
+			btnGuerilla.SetTitle(Titles_GetTextBody("Guerilla_Warfare"));
 			btnGuerilla.SetSize([124, 24]);
 			btnGuerilla.SetPos([40, 176]);
 			btnGuerilla.SetTag(4);
 			btnGuerilla.SetKeyEquivalent("4");
 		btnAuto = spawn(CSClassButtonT);
-			btnAuto.SetTitle(localize(Titles_GetTextBody("Auto_Select")));
+			btnAuto.SetTitle(Titles_GetTextBody("Auto_Select"));
 			btnAuto.SetSize([124, 24]);
 			btnAuto.SetPos([40, 240]);
 			btnAuto.SetTag(5);
@@ -207,5 +193,5 @@ CSVGUI_ChooseClassT(void)
 	}
 
 	winClassSelection.Show();
-	winClassSelection.SetPos((g_vidsize / 2) - (winClassSelection.GetSize() / 2));
+	winClassSelection.SetPos((video_res / 2) - (winClassSelection.GetSize() / 2));
 }

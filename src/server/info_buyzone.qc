@@ -26,7 +26,7 @@ See func_buyzone for more information.
 */
 
 class
-info_buyzone:ncPointTrigger
+info_buyzone:NSPointTrigger
 {
 	void info_buyzone(void);
 
@@ -42,24 +42,19 @@ info_buyzone::info_buyzone(void)
 void
 info_buyzone::Respawn(void)
 {
-	super::Respawn();
+	SetSolid(SOLID_TRIGGER);
 	SetSize([-128,-128,-128], [128,128,128]);
+	SetOrigin(GetSpawnOrigin());
 }
 
 void
 info_buyzone::Touch(entity eToucher)
 {
-	csPlayer pl = (csPlayer)eToucher;
+	player pl = (player)eToucher;
 
 	if (!(eToucher.flags & FL_CLIENT))
 		return;
 
 	if (team == 0 || team == pl.team)
 		pl.gflags |= GF_BUYZONE;
-
-	if (serverinfo.GetBool("cs_hints")  == true)
-	if (pl.m_buyMessage == false) {
-		env_message_single(pl, "Hint_press_buy_to_purchase");
-		pl.m_buyMessage = true;
-	}
 }

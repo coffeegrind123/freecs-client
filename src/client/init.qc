@@ -36,42 +36,139 @@ ClientGame_Init(float apilevel, string enginename, float engineversion)
 	registercommand("drop");
 	registercommand("nightvision");
 
-	/* hud */
-	registercommand("lastinv");
-	registercommand("invnext");
-	registercommand("invprev");
+	/* pistols */
+	registercommand("glock");
+	registercommand("usp");
+	registercommand("p228");
+	registercommand("deagle");
+	registercommand("fn57");
+	registercommand("elites");
 
-	SoundDef_Precache("nvg.on");
-	SoundDef_Precache("nvg.off");
+	/* shotties */
+	registercommand("m3");
+	registercommand("xm1014");
+
+	/* smg */
+	registercommand("tmp");
+	registercommand("mac10");
+	registercommand("mp5");
+	registercommand("ump45");
+
+	/* rifles */
+	registercommand("p90");
+	registercommand("ak47");
+	registercommand("m4a1");
+	registercommand("sg552");
+	registercommand("aug");
+	registercommand("scout");
+	registercommand("sg550");
+	registercommand("awp");
+	registercommand("g3sg1");
+
+	/* lonely */
+	registercommand("m249");
+
+	/* ammo */
+	registercommand("primammo");
+	registercommand("buyammo1");
+	registercommand("secammo");
+	registercommand("buyammo2");
+
+	/* equipment */
+	registercommand("vest");
+	registercommand("vesthelm");
+	registercommand("flash");
+	registercommand("hegren");
+	registercommand("vsgren");
+	registercommand("defuser");
+	registercommand("nvg");
+
+	/* radio */
+	registercommand("coverme");
+	registercommand("takepoint");
+	registercommand("holdpos");
+	registercommand("regroup");
+	registercommand("followme");
+	registercommand("takingfire");
+	registercommand("go");
+	registercommand("fallback");
+	registercommand("sticktog");
+	registercommand("getinpos");
+	registercommand("stormfront");
+	registercommand("report");
+	registercommand("roger");
+	registercommand("enemyspot");
+	registercommand("needbackup");
+	registercommand("sectorclear");
+	registercommand("inposition");
+	registercommand("reportingin");
+	registercommand("getout");
+	registercommand("negative");
+	registercommand("enemydown");
+
+	Obituary_Init();
+
+	Sound_Precache("nvg.on");
+	Sound_Precache("nvg.off");
 }
 
 bool
 ClientGame_IsUsingVGUI(void)
 {
-//#if defined(CZERO) || defined(CSSOURCE)
-#if 1
-	return true;
-#else
-	if (getplayerkeyvalue(player_localnum, "vgui_menus") == "0")
+	/* FTE has a bug with _ infokeys, so we'll accept both formats in case
+	   that gets fixed in the future :/ */
+	if (getplayerkeyfloat(player_localnum, "vgui_menus") == 1)
 		return true;
-	if (getplayerkeyvalue(player_localnum, "_vgui_menus") == "0")
+	if (getplayerkeyfloat(player_localnum, "_vgui_menus") == 1)
 		return true;
 
 	return false;
-#endif
 }
 
+void VGUI_ShowMOTD(void);
+void CMD_ChooseTeam(void);
 void
 ClientGame_InitDone(void)
 {
+	if (serverkey("mode") == "Counter-Strike")
+	if (serverkeyfloat("sv_playerslots") > 1)
+		VGUI_ShowMOTD();
 }
 
+void HLSprite_Init(void);
 void
 ClientGame_RendererRestart(string rstr)
 {
+	g_cs_cross = spriteframe("sprites/crosshairs.spr", 0, 0.0f);
+	g_cs_scope0 = spriteframe("sprites/sniper_scope.spr", 0, 0.0f);
+	g_cs_scope1 = spriteframe("sprites/top_left.spr", 0, 0.0f);
+	g_cs_scope2 = spriteframe("sprites/top.spr", 0, 0.0f);
+	g_cs_scope3 = spriteframe("sprites/top_right.spr", 0, 0.0f);
+	g_cs_scope4 = spriteframe("sprites/left.spr", 0, 0.0f);
+	g_cs_scope5 = spriteframe("sprites/right.spr", 0, 0.0f);
+	g_cs_scope6 = spriteframe("sprites/bottom_left.spr", 0, 0.0f);
+	g_cs_scope7 = spriteframe("sprites/bottom.spr", 0, 0.0f);
+	g_cs_scope8 = spriteframe("sprites/bottom_right.spr", 0, 0.0f);
+
+	precache_model("models/pshell.mdl");
+	precache_model("models/rshell.mdl");
+	precache_model("models/rshell_big.mdl");
+	precache_model("models/shotgunshell.mdl");
+
+	/* there's also muzzleflash.spr, but that's just MUZZLE_SMALL again */
+	precache_model("sprites/muzzleflash1.spr");
+	precache_model("sprites/muzzleflash2.spr");
+	precache_model("sprites/muzzleflash3.spr");
+	MUZZLE_RIFLE = (int)getmodelindex("sprites/muzzleflash1.spr");
+	MUZZLE_SMALL = (int)getmodelindex("sprites/muzzleflash2.spr");
+	MUZZLE_WEIRD = (int)getmodelindex("sprites/muzzleflash3.spr");
+
+	Obituary_Precache();
+	Damage_Precache();
+
+	FX_Blood_Init();
 	FX_Smokenade_Init();
+	HLSprite_Init();
+
 	Radar_Init();
-	font.Load("fonts/scoreboard.font", FONT_SCOREBOARD);
-	font.Load("fonts/scores_norm.font", FONT_SCORES_NORMAL);
-	font.Load("fonts/scores_bold.font", FONT_SCORES_BOLD);
 }

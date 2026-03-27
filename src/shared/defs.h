@@ -16,14 +16,16 @@
 
 #include "animations.h"
 #include "radio.h"
-#include "buying.h"
+#include "weapons.h"
+#include "items.h"
 #include "entities.h"
 #include "events.h"
-#include "Projectile.h"
-#include "../../../valve/src/shared/Weapon.h"
+#include "pmove.h"
 
+#define TEAM_SPECTATOR	0
 #define TEAM_T		1
 #define TEAM_CT		2
+#define TEAM_VIP	3
 
 enum
 {

@@ -14,12 +14,18 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-class CSBombEntity:ncRenderableEntity
+class item_c4:NSRenderableEntity
 {
-public:
-	void CSBombEntity(void);
+#ifdef SERVER
+	entity m_eUser;
+	float m_flBeepTime;
+	float m_flExplodeTime;
+	float m_flDefusalState;
+#endif
 
 #ifdef SERVER
+	void item_c4(void);
+
 	virtual void Spawned(void);
 	virtual float SendEntity(entity, float);
 	virtual void ClearProgress(void);
@@ -29,21 +35,14 @@ public:
 #endif
 
 #ifdef CLIENT
+	void item_c4(void);
 	virtual void DrawLED(void);
 	virtual float predraw(void);
-#endif
-
-#ifdef SERVER
-private:
-	entity m_eUser;
-	float m_flBeepTime;
-	float m_flExplodeTime;
-	float m_flDefusalState;
 #endif
 };
 
 void
-CSBombEntity::CSBombEntity(void)
+item_c4::item_c4(void)
 {
 #ifdef SERVER
 	m_eUser = __NULL__;
@@ -55,7 +54,7 @@ CSBombEntity::CSBombEntity(void)
 
 #ifdef SERVER
 float
-CSBombEntity::SendEntity(entity pvsent, float flags)
+item_c4::SendEntity(entity pvsent, float flags)
 {
 	WriteByte(MSG_ENTITY, ENT_C4BOMB);
 	WriteCoord(MSG_ENTITY, origin[0]);
@@ -69,19 +68,19 @@ CSBombEntity::SendEntity(entity pvsent, float flags)
 }
 
 void
-CSBombEntity::ClearProgress(void)
+item_c4::ClearProgress(void)
 {
 	if (m_eUser != world) {
-		csPlayer pl = (csPlayer)m_eUser;
+		player pl = (player)m_eUser;
 		pl.progress = 0.0f;
-		pl.RemoveVFlags(VFL_FROZEN);
+		pl.flags &= ~FL_FROZEN;
 	}
 }
 
 void
-CSBombEntity::OnPlayerUse(void)
+item_c4::OnPlayerUse(void)
 {
-	csPlayer pl = (csPlayer)eActivator;
+	player pl = (player)eActivator;
 
 	/* obvious check */
 	if (pl.team != TEAM_CT) {
@@ -96,11 +95,13 @@ CSBombEntity::OnPlayerUse(void)
 }
 
 void
-CSBombEntity::Logic(void)
+item_c4::Logic(void)
 {
+	CSMultiplayerRules rules = (CSMultiplayerRules)g_grMode;
+
 	/* check if we're being used */
 	if (m_eUser != world) {
-		csPlayer pl = (csPlayer)m_eUser;
+		player pl = (player)m_eUser;
 
 		/* we need to check if the user has changed every frame. */
 		if (!m_eUser.button5) {
@@ -109,25 +110,27 @@ CSBombEntity::Logic(void)
 			/* clear user */
 			m_eUser = world;
 			m_flDefusalState = 0.0f;
-			serverinfo.SetBool("cs_bombbeingdefused", false);
+			g_cs_bombbeingdefused = FALSE;
 		} else {
 
 			/* defusal kit always cuts the time in half */
-			if (pl.HasItem("item_defuse"))
+			if (pl.g_items & ITEM_DEFUSAL)
 				m_flDefusalState += (frametime * 2);
 			else
 				m_flDefusalState += frametime;
 
 			/* tracked stat */
 			pl.progress = m_flDefusalState;
-			pl.AddVFlags(VFL_FROZEN);
-			serverinfo.SetBool("cs_bombbeingdefused", true);
+			pl.flags |= FL_FROZEN;
+
+			g_cs_bombbeingdefused = TRUE;
 		}
 	}
 
 	if (m_flDefusalState > 10.0f) {
 		StartSoundDef("weapon_c4bomb.disarmed", CHAN_VOICE, true);
-		g_grMode.Input(m_eUser, "BombDisarmed", "");
+		rules.RoundOver(TEAM_CT, 3600, TRUE);
+		Radio_BroadcastMessage(RADIO_BOMBDEF);
 		Destroy();
 		return;
 	}
@@ -135,13 +138,12 @@ CSBombEntity::Logic(void)
 	/* if our time has passed, explode */
 	if (m_flExplodeTime < time) {
 		float bestDist = 9999.0f;
-		ncEntity bestTarget = __NULL__;
-		g_grMode.Input(m_eUser, "BombExploded", "");
+		NSEntity bestTarget = __NULL__;
 
-		combat.RadiusDamage(origin, -g_cstrike_bombradius, 0i, 500i, real_owner, "");
-		//Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
-
-
+		/* In Bomb Defusal, all Terrorists receive $3500
+		 * if they won by detonating the bomb. */
+		rules.RoundOver(TEAM_T, 3500, FALSE);
+		Damage_Radius(origin, this.real_owner, 500, g_cstrike_bombradius, false, WEAPON_C4BOMB);
 		StartSoundDef("weapon_c4bomb.explode", CHAN_VOICE, true);
 
 		for (entity e = world; (e = find(e, ::classname, "func_bomb_target"));) {
@@ -149,7 +151,7 @@ CSBombEntity::Logic(void)
 
 			if (dist < bestDist) {
 				bestDist = dist;
-				bestTarget = (ncEntity)e;
+				bestTarget = (NSEntity)e;
 			}
 		}
 
@@ -181,17 +183,17 @@ CSBombEntity::Logic(void)
 }
 
 void
-CSBombEntity::OnRemoveEntity(void)
+item_c4::OnRemoveEntity(void)
 {
 	ClearProgress();
 	m_flBeepTime = 0.0f;
 	m_flDefusalState = 0;
-	serverinfo.SetBool("cs_bombbeingdefused", false);
-	serverinfo.SetBool("cs_bombplanted", false);
+	g_cs_bombbeingdefused = FALSE;
+	g_cs_bombplanted = false;
 }
 
 void
-CSBombEntity::Spawned(void)
+item_c4::Spawned(void)
 {
 	super::Spawned();
 
@@ -206,14 +208,33 @@ CSBombEntity::Spawned(void)
 	customphysics = Logic;
 	PlayerUse = OnPlayerUse;
 	m_flExplodeTime = time + 45.0f;
-	StartSoundDef("c4.plant", CHAN_WEAPON, true);
-	serverinfo.SetBool("cs_bombplanted", true);
+	StartSoundDef("weapon_c4bomb.plant", CHAN_WEAPON, true);
+}
+
+void
+C4Bomb_Plant(NSClientPlayer planter)
+{
+	item_c4 bomb = spawn(item_c4);
+	bomb.Spawned();
+	bomb.real_owner = planter;
+
+	/* place directly below */
+	traceline(planter.origin, planter.origin + [0,0,-64], FALSE, planter);
+	setorigin(bomb, trace_endpos);
+	bomb.SendFlags = -1;
+
+	/* push the player out if we're on top */
+	setorigin_safe(planter, planter.origin);
+
+	Radio_BroadcastMessage(RADIO_BOMBPL);
+	CSBot_BombPlantedNotify();
+	g_cs_bombplanted = TRUE;
 }
 #endif
 
 #ifdef CLIENT
 void
-CSBombEntity::DrawLED(void)
+item_c4::DrawLED(void)
 {
 	vector cameraPos = g_view.GetCameraOrigin();
 	float ledAlpha = 1.0 - (time - floor(time));
@@ -245,7 +266,7 @@ CSBombEntity::DrawLED(void)
 }
 
 float
-CSBombEntity::predraw(void)
+item_c4::predraw(void)
 {
 	DrawLED();
 	addentity(this);
@@ -255,8 +276,8 @@ CSBombEntity::predraw(void)
 void
 w_c4bomb_parse(void)
 {
-	CSBombEntity tm = (CSBombEntity)self;
-	spawnfunc_CSBombEntity();
+	item_c4 tm = (item_c4)self;
+	spawnfunc_item_c4();
 
 	g_c4bombled_spr = spriteframe("sprites/ledglow.spr", 0, 0.0f);
 
