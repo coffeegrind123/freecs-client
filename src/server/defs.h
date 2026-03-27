@@ -54,6 +54,7 @@ var int g_cs_bonus_ct;
 var int g_cs_bonus_t;
 var int g_cs_gamestate;
 var float g_cs_gametime;
+var bool g_cs_mapChangeRequested;
 
 /* Counter-Strike's own cvars */
 var int autocvar_mp_winlimit = 0;

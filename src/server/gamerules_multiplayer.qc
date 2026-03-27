@@ -364,21 +364,29 @@ CSMultiplayerRules::TimerUpdate(void)
 	}
 
 	// This map has been played enough we think
-	if (g_cs_gamestate != GAME_OVER) {
+	if (g_cs_mapChangeRequested == false && g_cs_gamestate != GAME_OVER) {
 		if (cvar("mp_timelimit") > 0) {
 			if (time >= (cvar("mp_timelimit") * 60)) {
-				IntermissionStart();
-				g_cs_gamestate = GAME_OVER;
+				g_cs_mapChangeRequested = true;
 			}
 		}
 	}
 
 	// Okay, this means that timelimit is not the only deciding factor
-	if (autocvar_mp_winlimit > 0 && g_cs_gamestate != GAME_OVER) {
-		// It really doesn't matter who won. Do some logging perhaps?
+	if (autocvar_mp_winlimit > 0 && g_cs_mapChangeRequested == false && g_cs_gamestate != GAME_OVER) {
 		if (g_cs_roundswon_ct == autocvar_mp_winlimit ||
 			g_cs_roundswon_t == autocvar_mp_winlimit) {
+			g_cs_mapChangeRequested = true;
+		}
+	}
+
+	/* If map change requested but no round is active, change immediately */
+	if (g_cs_mapChangeRequested == true) {
+		if (g_cs_gamestate == GAME_INACTIVE || g_cs_gamestate == GAME_COMMENCING) {
 			IntermissionStart();
+			g_cs_gamestate = GAME_OVER;
+			g_cs_mapChangeRequested = false;
+			return;
 		}
 	}
 
@@ -393,6 +401,14 @@ CSMultiplayerRules::TimerUpdate(void)
 	/* if the round is over or the game is done with... */
 	if (g_cs_gamestate == GAME_COMMENCING || g_cs_gamestate == GAME_END) {
 		if (g_cs_gametime <= 0) {
+			/* map change requested — do it now that the round ended */
+			if (g_cs_mapChangeRequested == true) {
+				IntermissionStart();
+				g_cs_gamestate = GAME_OVER;
+				g_cs_mapChangeRequested = false;
+				return;
+			}
+
 			if (g_cs_roundswon_t == 0 && g_cs_roundswon_ct == 0) {
 				Money_ResetTeamReward();
 				Money_ResetRoundReward();
