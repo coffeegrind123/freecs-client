@@ -1,68 +1,83 @@
-# Tactical-Retreat
-[As seen on phoronix.com](https://phoronix.com/scan.php?page=news_item&px=FreeCS-Open-Counter-Strike)
+# FreeCS Client
 
-Allows you to play the original modification CS 1.5 with Rad-Therapy.
+Ready-to-play Counter-Strike 1.5 client builds for Windows and Linux. Based on [FreeCS](https://github.com/eukara/freecs) by Marco "eukara" Cawthorne — an open-source CS 1.5 reimplementation in QuakeC running on the [FTEQW](https://www.fteqw.org) engine.
+
+This fork adds a CI pipeline that cross-compiles a patched FTEQW engine, bundles all game data, and publishes ready-to-play client packages as GitHub releases.
 
 ![Preview 1](img/preview1.jpg)
 ![Preview 2](img/preview2.jpg)
-![Preview 3](img/preview3.jpg)
-![Preview 4](img/preview4.jpg)
 
-## Installing 
-To run it, all you need is [FTEQW](https://www.fteqw.org), [Rad-Therapy](https://www.frag-net.com/pkgs/package_valve.pk3), and [the latest release .pk3 file](https://www.frag-net.com/pkgs/package_cstrike.pk3), which you save into `Half-Life/valve/` and `Half-Life/cstrike/` respectively. That's about it. You can install updates through the **Configuration > Updates** menu from here on out.
+## Download
 
-### Disclaimer
-Please **do not** file bugs if you see missing/broken content **while not** using the original data. The version on Steam is not the same game as the mod (which was free)
+Grab the latest release from the [Releases page](https://github.com/coffeegrind123/freecs-client/releases/latest), or from the download page at [freecs.cs16.net](http://freecs.cs16.net:27500).
 
-## Building
-Here's the quick and dirty instructions:
+| Platform | File |
+|----------|------|
+| Windows 64-bit | `freecs-client-win64.zip` |
+| Linux 64-bit | `freecs-client-linux64.zip` |
 
+## Install
+
+1. Download and extract the zip
+2. Run `Play FreeCS.bat` (Windows) or `./play-freecs.sh` (Linux)
+3. Open the server browser to find servers, or press `~` and type `connect ip:port`
+
+Everything is included — no separate FTEQW download, no manual pk3 placement, no Steam required.
+
+## What's Included
+
+- **Patched FTEQW engine** — cross-compiled with bug fixes (see below)
+- **FreeCS game logic** — compiled QuakeC progs (bomb defusal, hostage rescue, assassination, deathmatch, gun game, zombie mode)
+- **Rad-Therapy** — open-source Half-Life base data
+- **CS 1.5 data** — all 26 original maps, player models, weapon models, sounds, sprites, textures
+- **HL1 valve data** — blood sprites, gib models, debris sounds, WAD textures (from GoldSrc Package)
+- **Nuclide SDK configs** — default key bindings (WASD, mouse), video settings
+- **Bot waypoints** — navigation data for 55+ maps
+- **Master server config** — pre-configured to query `ms.cs16.net:27950`
+
+## FTEQW Engine Patches
+
+The build applies four patches to the stock FTEQW engine ([`scripts/patch-fteqw.sh`](scripts/patch-fteqw.sh)):
+
+1. **Fix empty `infoResponse`** — `SVC_GetInfo` in `sv_main.c` didn't advance the response pointer after writing serverinfo, sending an empty 17-byte packet instead of full server data. Broke the dpmaster server browser for all clients.
+
+2. **Fix `getserversResponse` parsing** — bit-position calculation in `net_master.c` had wrong operator precedence (`(c+N-1)<<3` vs `c+((N-1)<<3)`), causing the parser to read past the end of small server list packets. Servers from masters with few entries were silently dropped.
+
+3. **Blank default QW masters** — `net_qwmasterextra4/5` are `CVAR_NOSAVE` (can't be overridden at runtime) and flooded the server browser probe queue with hundreds of unrelated QW servers, preventing dpmaster servers from being probed in time.
+
+4. **Suppress update dialog** — `pkg_autoupdate` default changed from `-1` (prompt on every launch about frag-net.com update sources) to `0` (off). Updates can still be enabled manually via the downloads menu.
+
+## Building from Source
+
+The CI workflow handles everything automatically. To build locally:
+
+```bash
+# Install dependencies
+sudo apt-get install gcc-mingw-w64-x86-64 build-essential libgl-dev \
+  libasound2-dev libxss-dev libxrandr-dev libxcursor-dev libxi-dev \
+  libpulse-dev megatools p7zip-full
+
+# Run the build script
+bash scripts/build-client.sh
 ```
-$ git clone https://code.idtech.space/vera/nuclide Nuclide-SDK && cd Nuclide-SDK
 
-# (only required if you don't have an up-to-date FTEQW & FTEQCC in your PATH)
-$ make update && make fteqw
+This clones FTEQW, applies patches, cross-compiles for Windows and Linux, downloads all game data (Rad-Therapy, FreeCS, CS 1.5 maps, HL1 valve assets), and packages ready-to-play zips.
 
-# build the menu (from valve/) then our own game-logic:
-$ git clone https://code.idtech.space/fn/valve valve && make game GAME=valve
-$ git clone https://code.idtech.space/fn/cstrike cstrike && make game GAME=cstrike
-```
+## Related
 
-You can also issue `make` inside `valve/src/` and `cstrike/src`, but it won't generate some additional helper files.
-
-** !! You need to also provide data-files !! **
-
-This should be self explanatory.
-Half-Life and Counter-Strike are owned by Valve and protected under copyright.
+- [coffeegrind123/freecs-server](https://github.com/coffeegrind123/freecs-server) — Dedicated server deployment scripts
+- [eukara/freecs](https://github.com/eukara/freecs) — Upstream FreeCS (game source)
+- [fte-team/fteqw](https://github.com/fte-team/fteqw) — FTEQW engine
+- [freecs.cs16.net](http://freecs.cs16.net:27500) — Download page with live server list
 
 ## Community
 
-### Matrix
-If you're a fellow Matrix user, join the Nuclide Space to see live-updates and more!
-https://matrix.to/#/#nuclide:matrix.org
-
-### IRC
-Join us on #freecs via irc.libera.chat and talk/lurk or discuss bugs, issues
-and other such things. It's bridged with the Matrix room of the same name!
-
-### Others
-We've had people ask in the oddest of places for help, please don't do that.
-
-## Special Thanks
-
-- Spike for FTEQW and for being the most helpful person all around!
-- Xylemon for the hundreds of test maps, verifying entity and game-logic behaviour
-- CYBERDEViL for his work on making Bots fascinated with Bomb Defusal
-- mikota for his work on refining the bullet spread code
-- To my supporters on Patreon, who are always eager to follow what I do.
-- Any and all people trying it, tinkering with it etc. :)
-
-## Acknowledgements
-
-**AssKicR** and **Romaaa** for their initial deathmatch spawn point information, originally provided to *BAILOPAN* their [CSDM](https://www.bailopan.net/csdm) mod.
+- Matrix: https://matrix.to/#/#nuclide:matrix.org
+- IRC: #freecs on irc.libera.chat
 
 ## License
-ISC License
+
+### FreeCS (ISC License)
 
 Copyright (c) 2016-2025 Marco "eukara" Cawthorne <marco@icculus.org>
 
@@ -77,4 +92,9 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
 IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
 OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- 
+
+### Other components
+
+- FTEQW engine patches and CI pipeline are provided as-is by coffeegrind123
+- CS 1.5 data and Half-Life base assets are copyrighted by Valve
+- Rad-Therapy is ISC licensed by Marco "eukara" Cawthorne
