@@ -101,5 +101,35 @@ private:
 	* - Check if the bot is in a Bomb Zone (gflags & GF_BOMBZONE)
 	* - Check if the bot is in a Buy Zone (gflags & GF_BUYZONE) */
 	int m_gflagsBackup;
+
+	/* YaPB enhanced bot AI */
+	int m_yapbPersonality;
+	int m_yapbDifficulty;
+	float m_yapbAggression;
+	float m_yapbFear;
+	float m_yapbReactionTime;
+	float m_yapbLastThink;
+	float m_yapbShootTime;
+	float m_yapbStuckTime;
+	vector m_yapbPrevOrigin;
+	int m_yapbStuckCount;
+	float m_yapbCampEnd;
+	float m_yapbHeardTime;
+	vector m_yapbHeardPos;
+	int m_yapbSenseStates;
+	int m_yapbAimFlags;
+	entity m_yapbLastEnemy;
+	vector m_yapbLastEnemyPos;
+	float m_yapbSeeEnemyTime;
+
+	nonvirtual void YaPB_Init(void);
+	nonvirtual void YaPB_EnhancedThink(void);
+	nonvirtual void YaPB_CombatEnhance(void);
+	nonvirtual void YaPB_AimEnhance(entity);
+	nonvirtual void YaPB_StuckDetect(void);
+	nonvirtual void YaPB_SoundAwareness(void);
+	nonvirtual bool YaPB_IsInFOV(entity, float);
+	nonvirtual bool YaPB_ShouldCamp(void);
+	nonvirtual bool YaPB_ShouldRetreat(void);
 #endif
 };
