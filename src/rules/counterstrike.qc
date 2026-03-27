@@ -42,6 +42,7 @@ string g_csGameStateName[] =
 var csGameState_t g_csGameState;
 var float g_cs_gametime;
 var float g_cs_gameOverTime;
+var bool g_cs_mapChangeRequested;
 var int g_csSwapTeamRoundCounter;
 var int g_iEscapedTerrorists;
 
@@ -449,22 +450,20 @@ Round_TimerUpdate(void)
 	}
 
 	/* This map has been played enough we think */
-	if (GameState() != STATE_OVER) {
+	if (g_cs_mapChangeRequested == false && GameState() != STATE_OVER) {
 		if (TimeLimit() > 0i) {
 			if (time >= TimeLimit()) {
-				GameState_Set(STATE_OVER);
-				g_cs_gameOverTime = time + 5.0f;
+				g_cs_mapChangeRequested = true;
 			}
 		}
 	}
 
 	/* Okay, this means that timelimit is not the only deciding factor */
-	if (WinLimit() > 0i && GameState() != STATE_OVER) {
+	if (WinLimit() > 0i && g_cs_mapChangeRequested == false && GameState() != STATE_OVER) {
 		/* if either win, go end this map.*/
 		if (teams.Score(TEAM_CT) >= WinLimit() ||
 			teams.Score(TEAM_T) >= WinLimit()) {
-			GameState_Set(STATE_OVER);
-			g_cs_gameOverTime = time + 5.0f;
+			g_cs_mapChangeRequested = true;
 		}
 	}
 
@@ -489,6 +488,14 @@ Round_TimerUpdate(void)
 	/* if the round is over or the game is done with... */
 	if (GameState() == STATE_COMMENCING || GameState() == STATE_END) {
 		if (GameTime() <= 0.0f) {
+			/* map change was requested — do it now that the round ended */
+			if (g_cs_mapChangeRequested == true) {
+				GameState_Set(STATE_OVER);
+				g_cs_gameOverTime = time + 5.0f;
+				g_cs_mapChangeRequested = false;
+				return;
+			}
+
 			if (teams.Score(TEAM_T) == 0i && teams.Score(TEAM_CT) == 0i) {
 				Money_ResetTeamReward();
 				Money_ResetRoundReward();
@@ -1029,6 +1036,21 @@ bool
 CodeCallback_ClientCommand(entity playerEntity, string command)
 {
 	float commandArgs = tokenize(command);
+
+	/* timeleft chat trigger */
+	if (argv(0) == "say" && argv(1) == "timeleft") {
+		float tl = TimeLimit() > 0 ? (TimeLimit() - time) : 0;
+		if (tl < 0) tl = 0;
+		int mins = (int)floor(tl / 60);
+		int secs = (int)floor(tl) % 60;
+		if (TimeLimit() <= 0)
+			bprint(PRINT_CHAT, "No time limit set.\n");
+		else if (g_cs_mapChangeRequested)
+			bprint(PRINT_CHAT, sprintf("Map will change after this round. (%d:%02d over limit)\n", mins, secs));
+		else
+			bprint(PRINT_CHAT, sprintf("Time remaining: %d:%02d\n", mins, secs));
+		return (true);
+	}
 
 	switch (argv(0)) {
 	/* class selection */
