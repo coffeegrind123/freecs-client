@@ -51,6 +51,11 @@ patch -p1 -d "$FTEQW_DIR" <<'PATCH'
  				CL_MasterListParse(NA_IP, SS_GETINFO, true);
  				continue;
  			}
+--- a/engine/client/m_download.c
++++ b/engine/client/m_download.c
+@@ -37 +37 @@
+-cvar_t	pkg_autoupdate = CVARFD("pkg_autoupdate", "-1", CVAR_NOTFROMSERVER|CVAR_NOSAVE|CVAR_NOSET|CVAR_NORESET, "Controls autoupdates, can only be changed via the downloads menu.\n0: off.\n1: enabled (stable only).\n2: enabled (unstable).\nNote that autoupdate will still prompt the user to actually apply the changes."); //read from the package list only.
++cvar_t	pkg_autoupdate = CVARFD("pkg_autoupdate", "0", CVAR_NOTFROMSERVER|CVAR_NOSAVE|CVAR_NOSET|CVAR_NORESET, "Controls autoupdates, can only be changed via the downloads menu.\n0: off.\n1: enabled (stable only).\n2: enabled (unstable).\nNote that autoupdate will still prompt the user to actually apply the changes."); //read from the package list only.
 PATCH
 
 echo "FTEQW patched successfully"
