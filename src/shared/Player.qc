@@ -661,6 +661,28 @@ csPlayer::Input(entity eAct, string strInput, string strData)
 }
 
 void
+csPlayer::Spawned(void)
+{
+	super::Spawned();
+
+	/* initialize YaPB AI for bots */
+	if (clienttype(this) != CLIENTTYPE_REAL) {
+		YaPB_Init();
+	}
+}
+
+void
+csPlayer::CreateObjective(void)
+{
+	/* use YaPB enhanced think for bots */
+	if (clienttype(this) != CLIENTTYPE_REAL) {
+		YaPB_EnhancedThink();
+		return;
+	}
+	super::CreateObjective();
+}
+
+void
 csPlayer::ServerInputFrame(void)
 {
 	super::ServerInputFrame();

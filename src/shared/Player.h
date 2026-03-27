@@ -45,6 +45,8 @@ public:
 	virtual void Input(entity, string, string);
 	virtual void ServerInputFrame(void);
 	virtual void EvaluateEntity(void);
+	virtual void CreateObjective(void);
+	virtual void Spawned(void);
 	virtual float SendEntity(entity, float);
 
 	nonvirtual void Bot_RunToConfront(void);
