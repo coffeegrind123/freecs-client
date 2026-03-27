@@ -118,9 +118,10 @@ jobs:
               [ -e "$item" ] && cp -a "$item" "$PKG/cstrike/"
             done
 
-            cp -f build/nuclide/base/default_controls.cfg "$PKG/cstrike/"
-            cp -f build/nuclide/base/default_video.cfg "$PKG/cstrike/"
-            cp -f build/nuclide/valve/default_valve.cfg "$PKG/cstrike/"
+            cp -f build/nuclide/base/default_controls.cfg "$PKG/cstrike/" 2>/dev/null || true
+            cp -f build/nuclide/base/default_video.cfg "$PKG/cstrike/" 2>/dev/null || true
+            cp -f build/nuclide/valve/default_valve.cfg "$PKG/cstrike/" 2>/dev/null || true
+            cp -f build/nuclide/valve/default.cfg "$PKG/cstrike/default_controls.cfg" 2>/dev/null || true
 
             cat > "$PKG/cstrike/autoexec.cfg" <<'CFG'
           set net_master1 "ms.cs16.net:27950"
