@@ -117,6 +117,19 @@ index 92a816d..b3845b1 100644
  	{"-gunman",	"gunman",	"Rad-Therapy",		{"rewolf/liblist.gam"},	HLCFG,	{"rewolf"},	"Gunman Chronicles",	"https://www.gunmanchronicles.com/packages.txt", "rewolf-patch-gunman;fteplug_ffmpeg"},
  	{"-halflife2",	"halflife2",	"Rad-Therapy-II",	{"hl2/gameinfo.txt"},	HL2CFG,	{"hl2", "hl2mp"},	"Rad-Therapy II",						"https://www.frag-net.com/pkgs/halflife2.txt", "hl2-patch-radtherapy2;fteplug_ffmpeg;fteplug_ode;fteplug_hl2"},
  	{"-gmod9",	"halflife2",	"Rad-Therapy-II",	{"gmod9/gameinfo.txt"},	HL2CFG,	{"css", "hl2", "hl2mp", "gmod9"},	"Free Will",		"https://www.frag-net.com/pkgs/halflife2.txt", "hl2mp-mod-gmod9;fteplug_ffmpeg;fteplug_ode;fteplug_hl2"},
+diff --git a/engine/common/net_wins.c b/engine/common/net_wins.c
+index 3af47a0..c4b0eb7 100644
+--- a/engine/common/net_wins.c
++++ b/engine/common/net_wins.c
+@@ -100,7 +100,7 @@ int UDP6_OpenSocket (int port);
+ #ifdef HAVE_IPX
+ void IPX_CloseSocket (int socket);
+ #endif
+-cvar_t	net_ice_broker			= CVARFD("net_ice_broker", "tls://master.frag-net.com:27950", CVAR_NOTFROMSERVER, "This is the default broker we attempt to connect through when using 'sv_public /foo' or 'connect /foo'.");
++cvar_t	net_ice_broker			= CVARFD("net_ice_broker", "", CVAR_NOTFROMSERVER, "This is the default broker we attempt to connect through when using 'sv_public /foo' or 'connect /foo'.");
+ cvar_t	timeout					= CVARD("timeout","65", "Connections will time out if no packets are received for this duration of time.");		// seconds without any message
+ cvar_t	net_hybriddualstack		= CVARD("net_hybriddualstack",		"1", "Uses hybrid ipv4+ipv6 sockets where possible. Not supported on xp or below.");
+ cvar_t	net_fakeloss			= CVARFD("net_fakeloss",			"0", CVAR_CHEAT, "Simulates packetloss in both receiving and sending, on a scale from 0 to 1.");
 diff --git a/engine/server/sv_main.c b/engine/server/sv_main.c
 index 8bc36e9..1a40734 100644
 --- a/engine/server/sv_main.c
