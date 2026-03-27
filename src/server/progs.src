@@ -33,6 +33,7 @@
 ../../../cstrike/src/server/info_map_parameters.qc
 ../../../valve/src/server/HLSuit.qc
 ../../../src/botlib/include.src
+../../../cstrike/src/server/yapb.qc
 ../../../cstrike/src/server/server.qc
 ../../../src/server/include.src
 ../../../src/shared/include.src

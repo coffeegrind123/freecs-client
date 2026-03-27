@@ -27,6 +27,8 @@ public:
 #ifdef CLIENT
 	virtual void AddedToInventory(void);
 	virtual void UpdateGUI(void);
+	string m_ammoIcon;
+	string m_crossHair;
 #endif
 
 	virtual bool CanFire(void);

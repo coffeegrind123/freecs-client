@@ -660,26 +660,25 @@ csPlayer::Input(entity eAct, string strInput, string strData)
 	}
 }
 
+void YaPB_InitBot(entity);
+void YaPB_BotThink(entity);
+
 void
 csPlayer::Spawned(void)
 {
 	super::Spawned();
-
-	/* initialize YaPB AI for bots */
-	if (clienttype(this) != CLIENTTYPE_REAL) {
-		YaPB_Init();
-	}
+	if (clienttype(this) != CLIENTTYPE_REAL)
+		YaPB_InitBot(this);
 }
 
 void
 csPlayer::CreateObjective(void)
 {
-	/* use YaPB enhanced think for bots */
 	if (clienttype(this) != CLIENTTYPE_REAL) {
-		YaPB_EnhancedThink();
-		return;
+		YaPB_BotThink(this);
 	}
-	super::CreateObjective();
+	/* always fall through to default objective */
+	Bot_CreateObjective();
 }
 
 void

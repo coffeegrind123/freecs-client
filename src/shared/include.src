@@ -5,8 +5,6 @@
 ../../../valve/src/shared/Player.qc
 ../../../cstrike/src/shared/Player.h
 ../../../cstrike/src/shared/Player.qc
-../../../cstrike/src/shared/yapb_constants.h
-../../../cstrike/src/shared/yapb_enhance.qc
 ../../../cstrike/src/shared/item_c4bomb.h
 ../../../cstrike/src/shared/fx_flashbang.qc
 ../../../cstrike/src/shared/fx_smokenade.qc

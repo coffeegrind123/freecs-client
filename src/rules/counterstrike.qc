@@ -839,6 +839,8 @@ CodeCallback_StartGameType(void)
 void
 CodeCallback_FrameStart(void)
 {
+	/* YaPB enhanced bot AI */
+
 	int totalPlayers = teams.NumPlayers(TEAM_T) + teams.NumPlayers(TEAM_CT);
 
 	/* if we suddenly have players, commence a new round. */
