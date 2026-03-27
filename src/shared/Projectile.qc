@@ -172,7 +172,7 @@ csProjectile::_FireSingle(vector vecPos, vector vecAngles, float flDamage, float
 			if (pl.HasItem("item_kevlar_helmet") == true) {
 				flDamage = 0;
 				SoundDef_Play(trace_ent, CHAN_BODY, "player.headshotarmor");
-				pl.RemoveItem(pl.GetItem("item_kevlar_helmet"));
+				pl.RemoveItem("item_kevlar_helmet");
 				return;
 			} else {
 				flDamage *= 4;

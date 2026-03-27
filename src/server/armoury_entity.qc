@@ -184,7 +184,7 @@ armoury_entity::Touch(entity eToucher)
 
 		/* we may need a helmet though */
 		if (pl.HasItem("item_kevlar_helmet") == false && m_iID == 17) {
-			pl.GiveNamedItem("item_kevlar_helmet");
+			pl.GiveItem("item_kevlar_helmet");
 			picked_up = true;
 		}
 
@@ -194,7 +194,7 @@ armoury_entity::Touch(entity eToucher)
 
 		sound(pl, CHAN_ITEM, "items/tr_kevlar.wav", 1, ATTN_NORM);
 	} else { /* weapon pickup code */
-		if (pl.GiveNamedItem(g_cstrike_armouryitems[m_iID]) == FALSE)
+		if (pl.GiveItem(g_cstrike_armouryitems[m_iID]) == FALSE)
 			return;
 
 		sound(pl, CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
