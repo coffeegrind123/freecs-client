@@ -475,6 +475,17 @@ Round_TimerUpdate(void)
 		}
 	}
 
+	/* If map change requested but no round is active (no players on teams),
+	   change map immediately — otherwise we'd be stuck forever */
+	if (g_cs_mapChangeRequested == true) {
+		if (GameState() == STATE_INACTIVE || GameState() == STATE_COMMENCING) {
+			GameState_Set(STATE_OVER);
+			g_cs_gameOverTime = time + 5.0f;
+			g_cs_mapChangeRequested = false;
+			return;
+		}
+	}
+
 	/* INACTIVE means no one is registered as a player */
 	if (GameState() == STATE_INACTIVE) {
 		return;
