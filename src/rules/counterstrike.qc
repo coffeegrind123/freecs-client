@@ -1037,8 +1037,9 @@ CodeCallback_ClientCommand(entity playerEntity, string command)
 {
 	float commandArgs = tokenize(command);
 
-	/* timeleft chat trigger */
-	if (argv(0) == "say" && argv(1) == "timeleft") {
+	switch (argv(0)) {
+	case "timeleft":
+	{
 		float tl = TimeLimit() > 0 ? (TimeLimit() - time) : 0;
 		if (tl < 0) tl = 0;
 		int mins = (int)floor(tl / 60);
@@ -1051,8 +1052,6 @@ CodeCallback_ClientCommand(entity playerEntity, string command)
 			bprint(PRINT_CHAT, sprintf("Time remaining: %d:%02d\n", mins, secs));
 		return (true);
 	}
-
-	switch (argv(0)) {
 	/* class selection */
 	case "terror":
 		SetTClass(playerEntity, 1);
