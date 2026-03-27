@@ -1049,20 +1049,6 @@ CodeCallback_ClientCommand(entity playerEntity, string command)
 	float commandArgs = tokenize(command);
 
 	switch (argv(0)) {
-	case "timeleft":
-	{
-		float tl = TimeLimit() > 0 ? (TimeLimit() - time) : 0;
-		if (tl < 0) tl = 0;
-		int mins = (int)floor(tl / 60);
-		int secs = (int)floor(tl) % 60;
-		if (TimeLimit() <= 0)
-			bprint(PRINT_CHAT, "No time limit set.\n");
-		else if (g_cs_mapChangeRequested)
-			bprint(PRINT_CHAT, sprintf("Map will change after this round. (%d:%02d over limit)\n", mins, secs));
-		else
-			bprint(PRINT_CHAT, sprintf("Time remaining: %d:%02d\n", mins, secs));
-		return (true);
-	}
 	/* class selection */
 	case "terror":
 		SetTClass(playerEntity, 1);
