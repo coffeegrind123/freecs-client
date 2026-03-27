@@ -35,18 +35,17 @@ jobs:
 
       - name: Build FTEQCC and compile FreeCS
         run: |
-          cd build/fteqw/engine && make qcc-rel -j$(nproc)
-          FTEQCC="$(readlink -f $(find build/fteqw/engine/release -name 'fteqcc*' -executable ! -name '*.db' | head -1))"
+          cd build/fteqw/engine && CFLAGS="-Wno-format-truncation -Wno-stringop-truncation" make qcc-rel -j$(nproc)
+          cd $GITHUB_WORKSPACE
+          FTEQCC="$(find build/fteqw/engine/release -name 'fteqcc*' -type f -executable ! -name '*.db' 2>/dev/null | head -1)"
+          if [ -z "$FTEQCC" ]; then echo "FTEQCC not found"; exit 1; fi
+          FTEQCC="$(readlink -f "$FTEQCC")"
+          echo "Using FTEQCC: $FTEQCC"
           mkdir -p build/nuclide/cstrike
           rsync -a --exclude=build/ --exclude=.git/ . build/nuclide/cstrike/
           cd build/nuclide/cstrike/src/server && "$FTEQCC" -I../../../src/xr/ progs.src
           cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/client && "$FTEQCC" -I../../../src/xr/ progs.src
-          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" counterstrike.src || true
-          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" deathmatch.src || true
-          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" gungame.src || true
-          cd $GITHUB_WORKSPACE/build/nuclide/cstrike/src/rules && "$FTEQCC" zombie.src || true
-          cp -f build/nuclide/cstrike/progs.dat build/nuclide/cstrike/csprogs.dat $GITHUB_WORKSPACE/ 2>/dev/null || true
-          cp -af build/nuclide/cstrike/progs/ $GITHUB_WORKSPACE/ 2>/dev/null || true
+          cp -f $GITHUB_WORKSPACE/build/nuclide/cstrike/progs.dat $GITHUB_WORKSPACE/build/nuclide/cstrike/csprogs.dat $GITHUB_WORKSPACE/ 2>/dev/null || true
 
       - name: Build FTEQW libraries (win64)
         run: cd build/fteqw/engine && make makelibs FTE_TARGET=win64
