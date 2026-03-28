@@ -166,8 +166,8 @@ void YaPB_TeamAvoidance(void) {
 
 void YaPB_Navigation_Init(void) {
 	YaPB_Graph_Init();
-	if (g_graphLoaded && g_graphNodeCount <= 1500)
-		Floyd_Build();
+	/* Floyd-Warshall disabled — N³ too expensive for QC VM.
+	 * A* pathfinding used instead (per-request, fast enough). */
 }
 
 void YaPB_Navigation_Shutdown(void) {

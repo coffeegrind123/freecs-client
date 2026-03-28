@@ -481,9 +481,8 @@ csbot::PostFrame(void)
 void
 csbot::YaPB_Init(void)
 {
-	/* YaPB graph loading disabled pending debug — crashes server */
-	/* if (!g_graphLoaded)
-		YaPB_Navigation_Init(); */
+	if (!g_graphLoaded)
+		YaPB_Navigation_Init();
 
 	m_yapbPersonality = (int)floor(random(0, 3));
 	m_yapbDifficulty = bound(0, (int)cvar("bot_skill"), 4);

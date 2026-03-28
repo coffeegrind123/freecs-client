@@ -194,27 +194,43 @@ void Graph_Load(string mname) {
 	Graph_Free();
 
 	string filename = sprintf("graphs/%s.yapb", mname);
-	filestream f = fopen(filename, FILE_READ);
+	filestream f = fopen(filename, FILE_MMAP_READ);
 
 	if (f < 0) {
 		dprint(sprintf("YaPB graph not found: %s\n", filename));
 		return;
 	}
 
-	/* read node count */
-	int nodeCount = 0;
-	fread(f, (void *)&nodeCount, 4);
+	/* FILE_MMAP_READ: fgets returns pointer to entire file in memory */
+	int fileSize = fsize(f);
+	int *data = (int *)fgets(f);
+
+	if (!data || fileSize < 8) {
+		dprint(sprintf("YaPB graph empty or invalid: %s\n", filename));
+		fclose(f);
+		return;
+	}
+
+	/* first 4 bytes = node count */
+	int nodeCount = data[0];
 
 	if (nodeCount <= 0 || nodeCount > YAPB_MAX_NODES) {
-		dprint(sprintf("Bad node count %f in %s\n", (float)nodeCount, filename));
+		dprint(sprintf("Bad node count in %s\n", filename));
+		fclose(f);
+		return;
+	}
+
+	/* validate file size: 4 + nodeCount * 220 */
+	int expectedSize = 4 + nodeCount * 220;
+	if (fileSize < expectedSize) {
+		dprint(sprintf("YaPB graph file too small: %s\n", filename));
 		fclose(f);
 		return;
 	}
 
 	g_graphNodeCount = nodeCount;
-
-	/* allocate arrays */
 	int n = nodeCount;
+
 	g_graphOriginX = (float *)memalloc(n * 4);
 	g_graphOriginY = (float *)memalloc(n * 4);
 	g_graphOriginZ = (float *)memalloc(n * 4);
@@ -230,50 +246,45 @@ void Graph_Load(string mname) {
 	g_graphLinkDist = (int *)memalloc(n * YAPB_MAX_LINKS * 4);
 	g_graphLinkFlags = (int *)memalloc(n * YAPB_MAX_LINKS * 4);
 
-	/* read each node (220 bytes per YaPB Path struct) */
+	/* parse nodes from mmap'd data.
+	 * Each Path struct is 220 bytes = 55 ints.
+	 * Layout per node (in int32 offsets from node start):
+	 *   [0] number, [1] flags
+	 *   [2-4] origin x,y,z (as float)
+	 *   [5-7] start x,y,z (as float)
+	 *   [8-10] end x,y,z (as float)
+	 *   [11] radius (float), [12] light (float), [13] display (float)
+	 *   [14-18] link0: vel_x,y,z(float), dist(int), flags|index(int)
+	 *   [19-23] link1, ... [49-53] link7
+	 *   [54] pathvis
+	 */
+	int *nodeBase = data + 1;
+
 	for (int i = 0; i < nodeCount; i++) {
-		int number, flags;
-		float ox, oy, oz;
-		float sx, sy, sz;
-		float ex, ey, ez;
-		float radius, light, display;
+		int *p = nodeBase + i * 55;
 
-		fread(f, (void *)&number, 4);
-		fread(f, (void *)&flags, 4);
-		fread(f, (void *)&ox, 4); fread(f, (void *)&oy, 4); fread(f, (void *)&oz, 4);
-		fread(f, (void *)&sx, 4); fread(f, (void *)&sy, 4); fread(f, (void *)&sz, 4);
-		fread(f, (void *)&ex, 4); fread(f, (void *)&ey, 4); fread(f, (void *)&ez, 4);
-		fread(f, (void *)&radius, 4);
-		fread(f, (void *)&light, 4);
-		fread(f, (void *)&display, 4);
+		g_graphFlags[i] = p[1];
 
-		g_graphOriginX[i] = ox;
-		g_graphOriginY[i] = oy;
-		g_graphOriginZ[i] = oz;
-		g_graphFlags[i] = flags;
-		g_graphRadius[i] = radius;
-		g_graphCampStartX[i] = sx;
-		g_graphCampStartY[i] = sy;
-		g_graphCampStartZ[i] = sz;
-		g_graphCampEndX[i] = ex;
-		g_graphCampEndY[i] = ey;
-		g_graphCampEndZ[i] = ez;
+		float *fp = (float *)p;
+		g_graphOriginX[i] = fp[2];
+		g_graphOriginY[i] = fp[3];
+		g_graphOriginZ[i] = fp[4];
+		g_graphCampStartX[i] = fp[5];
+		g_graphCampStartY[i] = fp[6];
+		g_graphCampStartZ[i] = fp[7];
+		g_graphCampEndX[i] = fp[8];
+		g_graphCampEndY[i] = fp[9];
+		g_graphCampEndZ[i] = fp[10];
+		g_graphRadius[i] = fp[11];
 
-		/* read 8 links (20 bytes each) */
+		/* parse 8 links (5 ints each, starting at offset 14) */
 		for (int j = 0; j < YAPB_MAX_LINKS; j++) {
-			float vx, vy, vz;
-			int dist;
-			int flagsAndIndex;
-
-			fread(f, (void *)&vx, 4);
-			fread(f, (void *)&vy, 4);
-			fread(f, (void *)&vz, 4);
-			fread(f, (void *)&dist, 4);
-			fread(f, (void *)&flagsAndIndex, 4);
+			int linkOff = 14 + j * 5;
+			int dist = p[linkOff + 3];
+			int flagsAndIndex = p[linkOff + 4];
 
 			int linkFlags = flagsAndIndex & 0xFFFF;
 			int linkIndex = (flagsAndIndex >> 16) & 0xFFFF;
-			if (linkIndex == 0xFFFF) linkIndex = -1;
 			if (linkIndex >= 0x8000) linkIndex -= 0x10000;
 
 			int slot = i * YAPB_MAX_LINKS + j;
@@ -281,15 +292,11 @@ void Graph_Load(string mname) {
 			g_graphLinkDist[slot] = dist;
 			g_graphLinkFlags[slot] = linkFlags;
 		}
-
-		/* skip PathVis (4 bytes) */
-		int vis;
-		fread(f, (void *)&vis, 4);
 	}
 
 	fclose(f);
 
 	Graph_BuildSpatialHash();
 	g_graphLoaded = YAPB_GRAPH_LOADED;
-	dprint(sprintf("YaPB graph loaded: %s (%f nodes)\n", filename, (float)nodeCount));
+	dprint(sprintf("YaPB graph loaded: %s (%i nodes)\n", filename, nodeCount));
 }
