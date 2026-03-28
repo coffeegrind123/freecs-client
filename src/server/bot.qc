@@ -23,6 +23,18 @@ vector getEntityCenterPos(entity e) {
 	return newVec;
 }
 
+/* YaPB personality types */
+#define YAPB_NORMAL   0
+#define YAPB_RUSHER   1
+#define YAPB_CAREFUL  2
+
+/* YaPB difficulty levels */
+#define YAPB_NOOB     0
+#define YAPB_EASY     1
+#define YAPB_NORMAL   2
+#define YAPB_HARD     3
+#define YAPB_EXPERT   4
+
 class csbot:NSBot
 {
 	void(void) csbot;
@@ -42,6 +54,8 @@ class csbot:NSBot
 	virtual void(void) CreateObjective;
 	virtual void(void) PostFrame;
 	virtual void(void) WeaponThink;
+	virtual void(void) SeeThink;
+	virtual void(void) RunAI;
 
 	/* helpers */
 	virtual entity(string, int) GetEntityByNameAndIndex;
@@ -49,6 +63,14 @@ class csbot:NSBot
 	virtual entity(int) GetEscapeZoneByIndex;
 	virtual entity(int) GetVIPSafetyZoneByIndex;
 	virtual void(vector, float) AimLerp;
+
+	/* YaPB enhanced combat */
+	nonvirtual void(void) YaPB_Init;
+	nonvirtual void(void) YaPB_CombatThink;
+	nonvirtual void(void) YaPB_AimThink;
+	nonvirtual void(void) YaPB_SoundAwareness;
+	nonvirtual void(void) YaPB_StuckCheck;
+	nonvirtual bool(entity, float) YaPB_IsInFOV;
 
 	int m_actionIsPlanting;
 	int m_actionIsDefusing;
@@ -60,6 +82,23 @@ class csbot:NSBot
 	* - Check if the bot is in a Bomb Zone (gflags & GF_BOMBZONE)
 	* - Check if the bot is in a Buy Zone (gflags & GF_BUYZONE) */
 	int m_gflagsBackup;
+
+	/* YaPB state — server-only, not serialized */
+	int m_yapbPersonality;
+	int m_yapbDifficulty;
+	float m_yapbAggression;
+	float m_yapbFear;
+	float m_yapbShootTime;
+	float m_yapbSeeTime;
+	float m_yapbHeardTime;
+	vector m_yapbHeardPos;
+	float m_yapbStuckTime;
+	vector m_yapbPrevOrigin;
+	int m_yapbStuckCount;
+	float m_yapbCampEnd;
+	float m_yapbLookYawVel;
+	float m_yapbLookPitchVel;
+	bool m_yapbInitialized;
 };
 
 void
@@ -448,6 +487,328 @@ csbot::csbot(void)
 	m_actionIsPlanting = FALSE;
 	m_actionIsDefusing = FALSE;
 	m_gflagsBackup = 0;
+}
+
+/* === YaPB ENHANCED BOT AI === */
+/* Based on YaPB by YaPB Project Developers (MIT License) */
+
+/* Difficulty presets: [noob, easy, normal, hard, expert] */
+var float g_yapbReactMin[] = {0.8, 0.4, 0.2, 0.1, 0.0};
+var float g_yapbReactMax[] = {1.5, 0.8, 0.5, 0.3, 0.1};
+var float g_yapbHeadshot[] = {0.00, 0.10, 0.30, 0.60, 0.90};
+var float g_yapbHearing[]  = {0.30, 0.50, 0.70, 0.90, 1.00};
+var float g_yapbAimErrMin[]= {50.0, 30.0, 15.0, 5.0, 0.0};
+var float g_yapbAimErrMax[]= {80.0, 50.0, 30.0, 15.0, 5.0};
+/* Spring-damper stiffness per difficulty */
+var float g_yapbStiffness[]= {13.0, 50.0, 120.0, 200.0, 300.0};
+var float g_yapbDamping[]  = {0.22, 5.0, 15.0, 25.0, 30.0};
+
+void
+csbot::YaPB_Init(void)
+{
+	m_yapbPersonality = (int)floor(random(0, 3));
+	m_yapbDifficulty = bound(0, (int)cvar("bot_skill"), 4);
+	switch (m_yapbPersonality) {
+	case YAPB_RUSHER:
+		m_yapbAggression = 0.7; m_yapbFear = 0.1; break;
+	case YAPB_CAREFUL:
+		m_yapbAggression = 0.2; m_yapbFear = 0.6; break;
+	default:
+		m_yapbAggression = 0.4; m_yapbFear = 0.3; break;
+	}
+	m_yapbShootTime = 0;
+	m_yapbSeeTime = 0;
+	m_yapbHeardTime = 0;
+	m_yapbStuckTime = 0;
+	m_yapbStuckCount = 0;
+	m_yapbCampEnd = 0;
+	m_yapbLookYawVel = 0;
+	m_yapbLookPitchVel = 0;
+	m_yapbInitialized = true;
+}
+
+/** YaPB FOV check **/
+bool
+csbot::YaPB_IsInFOV(entity ent, float fov)
+{
+	makevectors(v_angle);
+	vector dir = normalize(ent.origin - origin);
+	float dot = dir * v_forward;
+	return (dot >= cos((fov * 0.5) * (M_PI / 180.0)));
+}
+
+/** YaPB sound awareness — hear gunfire and footsteps **/
+void
+csbot::YaPB_SoundAwareness(void)
+{
+	int diff = m_yapbDifficulty;
+	if (random() > g_yapbHearing[diff])
+		return;
+
+	for (entity e = world; (e = find(e, ::classname, "player"));) {
+		if (e == this || e.team == this.team || e.health <= 0)
+			continue;
+		float dist = vlen(e.origin - origin);
+		if (e.button0 && dist < 900.0) {
+			m_yapbHeardPos = e.origin;
+			m_yapbHeardTime = time;
+			if (m_eTarget == __NULL__)
+				RouteToPosition(m_yapbHeardPos);
+			return;
+		}
+		if (vlen(e.velocity) > 150.0 && dist < 500.0) {
+			m_yapbHeardPos = e.origin;
+			m_yapbHeardTime = time;
+			return;
+		}
+	}
+}
+
+/** YaPB spring-damper aiming — replaces linear lerp **/
+void
+csbot::YaPB_AimThink(void)
+{
+	int diff = m_yapbDifficulty;
+	float dt = frametime;
+	if (dt <= 0) dt = 0.01;
+
+	vector aimTarget;
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
+		/* headshot chance */
+		if (random() < g_yapbHeadshot[diff])
+			aimTarget = m_eTarget.origin + m_eTarget.view_ofs;
+		else
+			aimTarget = m_eTarget.origin + m_eTarget.view_ofs * 0.4;
+
+		/* aim error */
+		float errScale = g_yapbAimErrMin[diff] + random() * (g_yapbAimErrMax[diff] - g_yapbAimErrMin[diff]);
+		aimTarget += [crandom() * errScale * 0.01, crandom() * errScale * 0.01, 0];
+	} else {
+		/* aim at navigation point */
+		if (m_iNodes && m_iCurNode >= 0)
+			aimTarget = m_pRoute[m_iCurNode].dest;
+		else
+			aimTarget = origin + v_forward * 128;
+	}
+
+	/* calculate desired angles */
+	vector desiredAngles = vectoangles(aimTarget - (origin + view_ofs));
+	if (desiredAngles[0] > 180) desiredAngles[0] -= 360;
+	if (desiredAngles[1] > 180) desiredAngles[1] -= 360;
+
+	vector curAngles = v_angle;
+	if (curAngles[0] > 180) curAngles[0] -= 360;
+	if (curAngles[1] > 180) curAngles[1] -= 360;
+
+	float stiffness = g_yapbStiffness[diff];
+	float damping = g_yapbDamping[diff];
+
+	/* yaw (left-right) */
+	float yawOff = desiredAngles[1] - curAngles[1];
+	while (yawOff > 180) yawOff -= 360;
+	while (yawOff < -180) yawOff += 360;
+
+	if (fabs(yawOff) < 1.0) {
+		m_yapbLookYawVel = 0;
+		curAngles[1] = desiredAngles[1];
+	} else {
+		float acc = bound(-3000, stiffness * yawOff - damping * m_yapbLookYawVel, 3000);
+		m_yapbLookYawVel += dt * acc;
+		curAngles[1] += dt * m_yapbLookYawVel;
+	}
+
+	/* pitch (up-down) — 2x stiffness for natural feel */
+	float pitchOff = desiredAngles[0] - curAngles[0];
+	while (pitchOff > 180) pitchOff -= 360;
+	while (pitchOff < -180) pitchOff += 360;
+
+	float accP = bound(-3000, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, 3000);
+	m_yapbLookPitchVel += dt * accP;
+	curAngles[0] += dt * m_yapbLookPitchVel;
+	curAngles[0] = bound(-89, curAngles[0], 89);
+
+	/* apply */
+	input_angles = v_angle = angles = curAngles;
+}
+
+/** YaPB enhanced combat — strafing, retreat, fire control **/
+void
+csbot::YaPB_CombatThink(void)
+{
+	if (m_eTarget == __NULL__ || m_eTarget.health <= 0)
+		return;
+
+	int diff = m_yapbDifficulty;
+	float dist = m_flEnemyDist;
+
+	/* fire control — dot product threshold + burst timing */
+	if (time >= m_yapbShootTime) {
+		makevectors(v_angle);
+		vector dir = normalize(m_eTarget.origin - origin);
+		float dot = dir * v_forward;
+
+		/* close range: lower threshold */
+		float threshold;
+		if (dist < 128)
+			threshold = 0.80;
+		else if (dist < 768)
+			threshold = 0.90;
+		else
+			threshold = 0.95;
+
+		if (dot >= threshold) {
+			input_buttons |= INPUT_BUTTON0;
+			/* burst timing based on difficulty */
+			float burstMin = 0.06 - diff * 0.01;
+			float burstMax = 0.15 - diff * 0.02;
+			if (burstMin < 0.02) burstMin = 0.02;
+			if (burstMax < 0.05) burstMax = 0.05;
+			m_yapbShootTime = time + burstMin + random() * burstMax;
+		}
+	}
+
+	/* strafe during combat */
+	if (diff >= YAPB_NORMAL && dist < 800 && dist > 90) {
+		/* check walls before strafing */
+		makevectors(v_angle);
+		float strafeDir;
+		traceline(origin, origin + v_right * 134, MOVE_NORMAL, this);
+		float rightClear = trace_fraction;
+		traceline(origin, origin - v_right * 134, MOVE_NORMAL, this);
+		float leftClear = trace_fraction;
+
+		if (leftClear > rightClear)
+			strafeDir = -1.0;
+		else if (rightClear > leftClear)
+			strafeDir = 1.0;
+		else
+			strafeDir = (random() < 0.5) ? -1.0 : 1.0;
+
+		input_movevalues[1] = strafeDir * GetRunSpeed() * 0.8;
+	}
+
+	/* approach based on aggression vs fear */
+	float approach = health * m_yapbAggression * 0.01;
+	if (approach > 50 && dist > 200)
+		input_movevalues[0] = GetRunSpeed();
+	else if (approach < 30 && dist < 400)
+		input_movevalues[0] = -GetRunSpeed() * 0.5;
+
+	/* crouch at range for accuracy */
+	if (dist > 400 && dist < 900 && diff >= YAPB_HARD)
+		input_buttons |= INPUT_BUTTON8;
+
+	/* retreat if low health */
+	if (health < 25 || (health < 40 && m_yapbPersonality == YAPB_CAREFUL)) {
+		input_movevalues[0] = -GetRunSpeed();
+		if (random() < 0.3)
+			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed() * 0.6;
+	}
+
+	/* jump occasionally in close combat */
+	if (dist < 300 && diff >= YAPB_NORMAL && (flags & FL_ONGROUND) && random() < 0.02)
+		input_buttons |= INPUT_BUTTON2;
+}
+
+/** YaPB stuck detection **/
+void
+csbot::YaPB_StuckCheck(void)
+{
+	if (time < m_yapbStuckTime) return;
+	m_yapbStuckTime = time + 0.5;
+
+	float speed = vlen(origin - m_yapbPrevOrigin);
+	m_yapbPrevOrigin = origin;
+
+	if (speed < 10.0 && vlen(input_movevalues) > 50.0) {
+		m_yapbStuckCount++;
+		if (m_yapbStuckCount > 4) input_buttons |= INPUT_BUTTON2;
+		if (m_yapbStuckCount > 8) input_buttons |= INPUT_BUTTON8;
+		if (m_yapbStuckCount > 12)
+			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
+		if (m_yapbStuckCount > 18) {
+			RouteClear();
+			m_yapbStuckCount = 0;
+		}
+	} else {
+		m_yapbStuckCount = 0;
+	}
+}
+
+/** YaPB-enhanced SeeThink — difficulty-based reaction time **/
+void
+csbot::SeeThink(void)
+{
+	if (!m_yapbInitialized) YaPB_Init();
+
+	int diff = m_yapbDifficulty;
+	float reactMin = g_yapbReactMin[diff];
+	float reactMax = g_yapbReactMax[diff];
+	float react = reactMin + random() * (reactMax - reactMin);
+	if (react < 0.05) react = 0.05;
+
+	if (m_yapbSeeTime > time)
+		return;
+	m_yapbSeeTime = time + react;
+
+	/* search for enemies in 75° FOV */
+	for (entity w = world; (w = findfloat(w, ::takedamage, DAMAGE_YES));) {
+		if (w.classname != "player")
+			continue;
+		if (w == this || w.health <= 0)
+			continue;
+		if (w.team == this.team)
+			continue;
+		if (!YaPB_IsInFOV(w, 75.0))
+			continue;
+
+		traceline(origin, w.origin, MOVE_NORMAL, this);
+		if (trace_ent == w) {
+			SetEnemy(w);
+			return;
+		}
+	}
+}
+
+/** YaPB-enhanced RunAI — replaces aim section + adds combat **/
+void
+csbot::RunAI(void)
+{
+	if (!m_yapbInitialized) YaPB_Init();
+
+	/* call parent RunAI for base behavior */
+	super::RunAI();
+
+	/* sound awareness (runs every frame, internally throttled) */
+	YaPB_SoundAwareness();
+
+	/* enhanced combat when enemy visible */
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
+		traceline(origin, m_eTarget.origin, MOVE_NORMAL, this);
+		if (trace_ent == m_eTarget || trace_fraction >= 0.98) {
+			YaPB_CombatThink();
+		}
+	}
+
+	/* override aim with spring-damper model */
+	YaPB_AimThink();
+
+	/* stuck detection */
+	YaPB_StuckCheck();
+
+	/* personality-based fear/aggression updates */
+	if (health < 40)
+		m_yapbFear = bound(0.0, m_yapbFear + frametime * 0.5, 1.0);
+	if (health > 80)
+		m_yapbAggression = bound(0.0, m_yapbAggression + frametime * 0.2, 1.0);
+
+	/* apply final inputs */
+	button0 = input_buttons & INPUT_BUTTON0;
+	button2 = input_buttons & INPUT_BUTTON2;
+	button5 = input_buttons & INPUT_BUTTON5;
+	button6 = input_buttons & INPUT_BUTTON6;
+	button8 = input_buttons & INPUT_BUTTON8;
+	movement = input_movevalues;
 }
 
 void
