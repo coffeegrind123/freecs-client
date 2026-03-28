@@ -424,8 +424,15 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 }
 
 void csbot::SmartRoute(vector dest) {
-	/* pure YaPB graph navigation — no Nuclide */
+	/* use YaPB A* to find path, then feed nodes to Nuclide's movement */
 	YaPB_Nav_FindPath(dest);
+	if (YaPB_Nav_HasPath()) {
+		/* route Nuclide to the first graph node */
+		vector firstNode = YaPB_GetNavTarget();
+		RouteToPosition(firstNode);
+	} else {
+		RouteToPosition(dest);
+	}
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
@@ -2058,12 +2065,8 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
-	/* call parent for engine housekeeping, then override everything */
+	/* call parent — it handles movement via Nuclide routes */
 	super::RunAI();
-
-	/* override all parent inputs — we control everything */
-	input_buttons = 0;
-	input_movevalues = [0, 0, 0];
 
 	/* clamp pitch */
 	if (v_angle[0] > 45) v_angle[0] = 45;
@@ -2101,14 +2104,13 @@ csbot::RunAI(void)
 	/* task execution (combat, plant, defuse, camp, etc.) */
 	YaPB_TaskExecute();
 
-	/* graph navigation movement — YaPB style: forward speed + aim steers */
-	float hasPath = YaPB_Nav_HasPath();
-	if (hasPath && curTask != YAPB_TASK_ATTACK) {
-		int navFlags = YaPB_GetNavFlags();
+	/* graph path following: feed next node to Nuclide's movement system */
+	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		vector nt = YaPB_GetNavTarget();
+		int navFlags = YaPB_GetNavFlags();
 
-		/* move forward — aim system points at next node, so bot walks toward it */
-		input_movevalues[0] = GetRunSpeed();
+		/* update Nuclide route target to current graph node */
+		RouteToPosition(nt);
 
 		/* node flags */
 		if (navFlags & YAPB_NF_CROUCH)
@@ -2120,9 +2122,6 @@ csbot::RunAI(void)
 		}
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
-	} else if (curTask != YAPB_TASK_ATTACK && vlen(input_movevalues) < 10) {
-		/* no path, no combat: walk forward */
-		input_movevalues[0] = GetRunSpeed() * 0.5;
 	}
 
 	/* teammate avoidance */
