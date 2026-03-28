@@ -724,21 +724,15 @@ csbot::YaPB_TaskNormal(void)
 			input_movevalues[0] = GetRunSpeed() * 0.5;
 	}
 
-	CreateObjective();
+	/* only request new objective when we have no active path */
+	if (!YaPB_Nav_HasPath()) {
+		CreateObjective();
 
-	/* if no route from either system, ensure movement + roam fallback */
-	int hasRoute = (m_iNodes > 0) || (g_graphLoaded && YaPB_Nav_HasPath());
-	if (!hasRoute && m_eTarget == __NULL__) {
-		/* ensure forward movement even without route */
-		if (vlen(input_movevalues) < 10)
-			input_movevalues[0] = GetRunSpeed() * 0.7;
-
-		/* occasionally try to find somewhere to go */
-		if (random() < 0.05)
-			Roam(origin, 800);
-
-		if (random() < 0.1)
-			YaPB_Radio(RADIO_CLEAR);
+		/* if STILL no path, walk forward */
+		if (!YaPB_Nav_HasPath() && m_eTarget == __NULL__) {
+			if (vlen(input_movevalues) < 10)
+				input_movevalues[0] = GetRunSpeed() * 0.5;
+		}
 	}
 }
 
