@@ -1223,7 +1223,10 @@ csbot::YaPB_SelectBestWeapon(void)
 			continue;
 		if (YaPB_IsWeaponBadAtDist(i, dist))
 			continue;
-		if (YaPB_GetWeaponAmmo(i) <= 0 && a_ammo1 <= 0)
+		/* skip weapons with no ammo at all (knife always has "ammo") */
+		if (YaPB_GetWeaponAmmo(i) <= 0 && i != activeweapon)
+			continue;
+		if (i == activeweapon && YaPB_GetWeaponAmmo(i) <= 0 && a_ammo1 <= 0)
 			continue;
 
 		int w = g_weapons[i].weight;
@@ -1257,18 +1260,22 @@ csbot::WeaponThink(void)
 	    curTask == YAPB_TASK_THROWSM)
 		return;
 
-	YaPB_SelectBestWeapon();
-
 	if (activeweapon == WEAPON_KNIFE)
 		return;
 
+	/* reload if clip empty and have reserve — don't switch weapons during reload */
 	if (a_ammo1 == 0) {
 		if (a_ammo2 != 0) {
 			input_buttons &= ~INPUT_BUTTON0;
 			input_buttons |= INPUT_BUTTON4;
+			return;
 		} else {
-			Weapons_SwitchBest(this);
+			/* truly out of ammo for this weapon — switch */
+			YaPB_SelectBestWeapon();
 		}
+	} else {
+		/* clip has ammo — can consider switching for better weapon */
+		YaPB_SelectBestWeapon();
 	}
 }
 
@@ -1912,9 +1919,17 @@ csbot::RunAI(void)
 
 	super::RunAI();
 
-	/* update enemy distance EVERY FRAME (was stale from SetEnemy) */
-	if (m_eTarget != __NULL__ && m_eTarget.health > 0)
+	/* validate enemy every frame: update distance + verify LOS */
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
 		m_flEnemyDist = vlen(m_eTarget.origin - origin);
+		/* clear stale enemy if no line of sight (YaPB trackEnemies) */
+		traceline(origin + view_ofs, m_eTarget.origin, MOVE_NORMAL, this);
+		if (trace_ent != m_eTarget && trace_fraction < 0.98) {
+			m_yapbLastEnemyOrigin = m_eTarget.origin;
+			m_yapbLastEnemySeen = time;
+			m_eTarget = __NULL__;
+		}
+	}
 
 	YaPB_SoundAwareness();
 	YaPB_TaskFilter();
