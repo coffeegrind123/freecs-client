@@ -385,9 +385,17 @@ CSMultiplayerRules::TimerUpdate(void)
 		}
 	}
 
-	/* If map change requested but no round is active, change immediately */
+	/* If map change requested, change as soon as possible */
 	if (g_cs_mapChangeRequested == true) {
 		if (g_cs_gamestate == GAME_INACTIVE || g_cs_gamestate == GAME_COMMENCING) {
+			IntermissionStart();
+			g_cs_gamestate = GAME_OVER;
+			g_cs_mapChangeRequested = false;
+			return;
+		}
+		/* force round end if stuck in active/freeze with timer expired */
+		if ((g_cs_gamestate == GAME_ACTIVE || g_cs_gamestate == GAME_FREEZE) &&
+		    g_cs_gametime <= 0) {
 			IntermissionStart();
 			g_cs_gamestate = GAME_OVER;
 			g_cs_mapChangeRequested = false;
