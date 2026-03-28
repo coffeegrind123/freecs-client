@@ -680,9 +680,10 @@ csbot::YaPB_TaskNormal(void)
 {
 	/* YaPB tasks.cpp:18-313 normal_() */
 
-	/* reload if clip below half and safe */
-	if (a_ammo1 < 10 && a_ammo2 > 0 && m_eTarget == __NULL__) {
-		input_buttons |= INPUT_BUTTON4;
+	/* preemptive reload: when safe (no enemy for 5s+) or clip below half */
+	if (a_ammo2 > 0 && m_eTarget == __NULL__) {
+		if (a_ammo1 < 15 || (m_yapbLastEnemySeen > 0 && (time - m_yapbLastEnemySeen) > 5.0 && a_ammo1 < 25))
+			input_buttons |= INPUT_BUTTON4;
 	}
 
 	/* knife swing while rushing (YaPB tasks.cpp:54-71) */
@@ -1420,6 +1421,22 @@ csbot::YaPB_StuckCheck(void)
 			YaPB_DoorThink();
 		}
 		if (m_yapbStuckCount > 4) input_buttons |= INPUT_BUTTON2;
+		if (m_yapbStuckCount > 6) {
+			/* corner detection (sandbot technique): trace 45° left + right */
+			makevectors(v_angle);
+			traceline(origin, origin + v_forward * 20 + v_right * 20, MOVE_NORMAL, this);
+			float rightBlocked = trace_fraction;
+			traceline(origin, origin + v_forward * 20 - v_right * 20, MOVE_NORMAL, this);
+			float leftBlocked = trace_fraction;
+			if (rightBlocked < 0.5 && leftBlocked < 0.5) {
+				/* stuck in corner — turn around */
+				v_angle[1] += 180;
+				input_angles = v_angle;
+				RouteClear();
+				m_yapbStuckCount = 0;
+				return;
+			}
+		}
 		if (m_yapbStuckCount > 8) input_buttons |= INPUT_BUTTON8;
 		if (m_yapbStuckCount > 12)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
@@ -1542,12 +1559,15 @@ csbot::YaPB_AimThink(void)
 			spot += comp;
 		}
 
-		/* aim error — recalculated every 0.5s, NOT every frame (fixes jitter) */
+		/* aim error — distance-proportional spread (sandbot technique)
+		 * Close range: spread=0.1 (tight). Long range: spread=1.0 (full error).
+		 * Recalculated every 0.5-1.0s, NOT every frame. */
 		if (time > m_yapbAimErrorTime) {
 			m_yapbAimErrorTime = time + 0.5 + random() * 0.5;
-			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff];
-			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff];
-			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff];
+			float spread = bound(0.1, dist / 1000.0, 1.0);
+			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff] * spread;
+			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff] * spread;
+			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff] * spread;
 		}
 		spot += m_yapbAimErrorVec;
 
