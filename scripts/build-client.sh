@@ -103,6 +103,9 @@ sed -i 's|http://www.frag-net.com/mods/%s.fmf||' "$NUCLIDE_DIR/src/platform/mods
 sed -i 's|http://www.frag-net.com/dl/packages_%s||' "$NUCLIDE_DIR/src/platform/updates.qc"
 sed -i 's|http://www.frag-net.com/dl/img/%s.jpg||' "$NUCLIDE_DIR/src/platform/updates.qc"
 sed -i 's|http://www.frag-net.com/dl/%s_packages||' "$NUCLIDE_DIR/src/menu-fn/entry.qc"
+sed -i 's|Logging on to Frag-Net|Fetching server list|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
+sed -i 's|Connected to Frag-Net|Connected|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
+sed -i 's|VISIT FRAG-NET|PLAY ONLINE|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
 
 # =============================================================================
 # 4. Compile FreeCS QuakeC
@@ -193,6 +196,7 @@ build_package() {
     cp -f "$DL_DIR/package_valve.pk3" "$PKG/valve/"
     cp -f "$DL_DIR/valve-data.pk3" "$PKG/valve/" 2>/dev/null || true
     cp -f "$NUCLIDE_DIR/platform/menu.dat" "$PKG/valve/menu.dat"
+    cp -f "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po" "$PKG/valve/menu.dat.default.po"
     cp -f "$DL_DIR/package_cstrike.pk3" "$PKG/cstrike/"
     cp -f "$DL_DIR/cs15data.zip" "$PKG/cstrike/pak0.pk3"
 
