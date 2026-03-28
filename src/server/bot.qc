@@ -229,6 +229,16 @@ class csbot:NSBot
 
 	/* blind tracking */
 	float m_yapbBlindEnd;
+
+	/* noob aiming (YaPB updateLookAnglesNewbie) */
+	float m_yapbAimSpeedX;
+	float m_yapbAimSpeedY;
+	float m_yapbRandomizeTime;
+	float m_yapbPlayerTargetTime;
+
+	/* combat strafe timer */
+	float m_yapbStrafeTime;
+	float m_yapbStrafeDir;
 };
 
 /* Difficulty presets from YaPB config.cpp:618-636
@@ -659,14 +669,21 @@ csbot::YaPB_TaskNormal(void)
 {
 	/* YaPB tasks.cpp:18-313 normal_() */
 
-	/* reload if clip low and not in combat */
-	if (a_ammo1 < 5 && a_ammo2 > 0 && m_eTarget == __NULL__) {
+	/* reload if clip below half and safe */
+	if (a_ammo1 < 10 && a_ammo2 > 0 && m_eTarget == __NULL__) {
 		input_buttons |= INPUT_BUTTON4;
 	}
 
 	/* walk if heard enemy recently (creep speed) */
 	if (m_yapbHeardTime > 0 && (time - m_yapbHeardTime) < 3.0) {
 		input_movevalues[0] = GetRunSpeed() * 0.4;
+	}
+
+	/* slow down near destination */
+	if (m_iNodes > 0 && m_iCurNode >= 0) {
+		float goalDist = vlen(m_pRoute[m_iCurNode].dest - origin);
+		if (goalDist < 200)
+			input_movevalues[0] = GetRunSpeed() * 0.5;
 	}
 
 	CreateObjective();
@@ -718,12 +735,15 @@ csbot::YaPB_TaskHunt(void)
 	float dist = vlen(huntPos - origin);
 
 	if (dist < 80) {
+		YaPB_Radio(RADIO_CLEAR);
 		YaPB_TaskPop();
 		return;
 	}
 
-	if (m_iNodes <= 0)
+	if (m_iNodes <= 0) {
+		YaPB_Radio(RADIO_COM_GO);
 		RouteToPosition(huntPos);
+	}
 
 	/* YaPB: creep speed at Normal+ in narrow areas */
 	if (m_yapbDifficulty >= YAPB_DIFF_NORMAL)
@@ -735,6 +755,8 @@ csbot::YaPB_TaskHunt(void)
 void
 csbot::YaPB_TaskSeekCover(void)
 {
+	YaPB_Radio(RADIO_CT_BACKUP);
+
 	/* YaPB tasks.cpp:419-505 — graph-based cover finding */
 	if (m_iNodes <= 0) {
 		/* find cover node: iterate waypoints for one with no LOS to enemy */
@@ -1291,6 +1313,10 @@ csbot::YaPB_RadioThink(void)
 			break;
 		}
 	}
+
+	/* report in when idle (no enemy seen for a while) */
+	if (m_yapbLastEnemySeen > 0 && (time - m_yapbLastEnemySeen) > 15.0 && random() < 0.05)
+		YaPB_Radio(RADIO_CT_REPORTINGIN);
 }
 
 /* ============================================================
@@ -1485,6 +1511,27 @@ csbot::YaPB_AimThink(void)
 		spot[1] += crandom() * g_yapbAimErrY[diff];
 		spot[2] += crandom() * g_yapbAimErrZ[diff];
 
+		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
+		if (diff >= YAPB_DIFF_EXPERT) {
+			float hOff = 0;
+			if (activeweapon == WEAPON_M3 || activeweapon == WEAPON_XM1014)
+				hOff = (dist > 700) ? 6.5 : (dist > 300) ? 6.0 : -2.0;
+			else if (isSniper)
+				hOff = (dist > 700) ? 0.5 : (dist > 300) ? -7.5 : -9.5;
+			else if (activeweapon == WEAPON_MP5 || activeweapon == WEAPON_P90 ||
+			         activeweapon == WEAPON_UMP45 || activeweapon == WEAPON_MAC10 ||
+			         activeweapon == WEAPON_TMP)
+				hOff = (dist > 700) ? 3.5 : (dist > 300) ? 1.5 : -1.0;
+			else if (activeweapon == WEAPON_AK47 || activeweapon == WEAPON_M4A1 ||
+			         activeweapon == WEAPON_AUG || activeweapon == WEAPON_SG552)
+				hOff = (dist > 700) ? 3.5 : (dist > 300) ? 1.5 : -1.0;
+			else if (activeweapon == WEAPON_USP45 || activeweapon == WEAPON_GLOCK18 ||
+			         activeweapon == WEAPON_DEAGLE || activeweapon == WEAPON_P228 ||
+			         activeweapon == WEAPON_ELITES || activeweapon == WEAPON_FIVESEVEN)
+				hOff = (dist > 700) ? 5.5 : (dist > 300) ? 3.5 : 0.5;
+			spot[2] += hOff;
+		}
+
 		aimTarget = spot;
 	} else {
 		m_yapbAimPart = 0;
@@ -1502,31 +1549,89 @@ csbot::YaPB_AimThink(void)
 	if (curAngles[0] > 180) curAngles[0] -= 360;
 	if (curAngles[1] > 180) curAngles[1] -= 360;
 
-	/* YaPB vision.cpp:157-214 — spring-damper with fixed stiffness/damping */
-	float stiffness = 200.0;
-	float damping = 25.0;
+	if (diff < YAPB_DIFF_NORMAL) {
+		/* YaPB vision.cpp:220-299 — updateLookAnglesNewbie
+		 * Noob/Easy: sluggish spring with randomization and cross-axis coupling */
+		float springK = 13.0;
+		float damperK = 0.22;
+		float offset = bound(1.0, (float)diff, 4.0) * 25.0;
+		float influenceX = 0.25 * (100.0 - offset) / 100.0;
+		float influenceY = 0.17 * (100.0 - offset) / 100.0;
 
-	float yawOff = desiredAngles[1] - curAngles[1];
-	while (yawOff > 180) yawOff -= 360;
-	while (yawOff < -180) yawOff += 360;
+		float yawOff = desiredAngles[1] - curAngles[1];
+		while (yawOff > 180) yawOff -= 360;
+		while (yawOff < -180) yawOff += 360;
+		float pitchOff = desiredAngles[0] - curAngles[0];
+		while (pitchOff > 180) pitchOff -= 360;
+		while (pitchOff < -180) pitchOff += 360;
 
-	if (fabs(yawOff) < 1.0) {
-		m_yapbLookYawVel = 0;
-		curAngles[1] = desiredAngles[1];
+		float stiffMul;
+		if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
+			m_yapbPlayerTargetTime = time;
+			stiffMul = 0.2 + offset / 125.0;
+		} else {
+			/* randomize aim when not targeting */
+			if (time > m_yapbRandomizeTime) {
+				float rndScale = 2.0 * (100.0 - offset) / 100.0;
+				yawOff += crandom() * rndScale;
+				pitchOff += crandom() * rndScale * 0.5;
+				m_yapbRandomizeTime = time + random(0.4, 1.2);
+			}
+			stiffMul = 0.35;
+			if ((time - m_yapbPlayerTargetTime) < 3.0)
+				stiffMul = 0.8;
+		}
+
+		float sX = springK * stiffMul;
+		float sY = springK * stiffMul;
+
+		m_yapbAimSpeedX = sX * pitchOff - damperK * m_yapbAimSpeedX;
+		m_yapbAimSpeedY = sY * yawOff - damperK * m_yapbAimSpeedY;
+
+		/* cross-axis coupling */
+		m_yapbAimSpeedX += bound(-50, m_yapbAimSpeedY * influenceY, 50);
+		m_yapbAimSpeedY += bound(-200, m_yapbAimSpeedX * influenceX, 200);
+
+		curAngles[0] += dt * m_yapbAimSpeedX;
+		curAngles[1] += dt * m_yapbAimSpeedY;
+		curAngles[0] = bound(-89, curAngles[0], 89);
 	} else {
-		float acc = bound(-3000, stiffness * yawOff - damping * m_yapbLookYawVel, 3000);
-		m_yapbLookYawVel += dt * acc;
-		curAngles[1] += dt * m_yapbLookYawVel;
+		/* YaPB vision.cpp:157-214 — Normal/Hard/Expert spring-damper */
+		float stiffness = 200.0;
+		float damping = 25.0;
+		float accelerate = 3000.0;
+
+		/* difficulty scaling (vision.cpp:160-166) */
+		bool importantAim = (m_eTarget != __NULL__ && m_eTarget.health > 0);
+		if (importantAim && diff > YAPB_DIFF_NORMAL) {
+			if (diff == YAPB_DIFF_EXPERT)
+				accelerate += 300;
+			stiffness += 100;
+			damping -= 5;
+		}
+
+		float yawOff = desiredAngles[1] - curAngles[1];
+		while (yawOff > 180) yawOff -= 360;
+		while (yawOff < -180) yawOff += 360;
+
+		if (fabs(yawOff) < 1.0) {
+			m_yapbLookYawVel = 0;
+			curAngles[1] = desiredAngles[1];
+		} else {
+			float acc = bound(-accelerate, stiffness * yawOff - damping * m_yapbLookYawVel, accelerate);
+			m_yapbLookYawVel += dt * acc;
+			curAngles[1] += dt * m_yapbLookYawVel;
+		}
+
+		float pitchOff = desiredAngles[0] - curAngles[0];
+		while (pitchOff > 180) pitchOff -= 360;
+		while (pitchOff < -180) pitchOff += 360;
+
+		float accP = bound(-accelerate, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, accelerate);
+		m_yapbLookPitchVel += dt * accP;
+		curAngles[0] += dt * m_yapbLookPitchVel;
+		curAngles[0] = bound(-89, curAngles[0], 89);
 	}
-
-	float pitchOff = desiredAngles[0] - curAngles[0];
-	while (pitchOff > 180) pitchOff -= 360;
-	while (pitchOff < -180) pitchOff += 360;
-
-	float accP = bound(-3000, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, 3000);
-	m_yapbLookPitchVel += dt * accP;
-	curAngles[0] += dt * m_yapbLookPitchVel;
-	curAngles[0] = bound(-89, curAngles[0], 89);
 
 	input_angles = v_angle = angles = curAngles;
 }
@@ -1573,21 +1678,23 @@ csbot::YaPB_CombatThink(void)
 	}
 
 	if (diff >= YAPB_DIFF_NORMAL && dist < 800 && dist > 90) {
-		makevectors(v_angle);
-		float strafeDir;
-		traceline(origin, origin + v_right * 134, MOVE_NORMAL, this);
-		float rightClear = trace_fraction;
-		traceline(origin, origin - v_right * 134, MOVE_NORMAL, this);
-		float leftClear = trace_fraction;
+		/* alternate strafe direction every 1-2 seconds */
+		if (time > m_yapbStrafeTime) {
+			m_yapbStrafeTime = time + random(1.0, 2.0);
+			makevectors(v_angle);
+			traceline(origin, origin + v_right * 134, MOVE_NORMAL, this);
+			float rightClear = trace_fraction;
+			traceline(origin, origin - v_right * 134, MOVE_NORMAL, this);
+			float leftClear = trace_fraction;
 
-		if (leftClear > rightClear)
-			strafeDir = -1.0;
-		else if (rightClear > leftClear)
-			strafeDir = 1.0;
-		else
-			strafeDir = (random() < 0.5) ? -1.0 : 1.0;
-
-		input_movevalues[1] = strafeDir * GetRunSpeed() * 0.8;
+			if (leftClear > rightClear)
+				m_yapbStrafeDir = -1.0;
+			else if (rightClear > leftClear)
+				m_yapbStrafeDir = 1.0;
+			else
+				m_yapbStrafeDir = (random() < 0.5) ? -1.0 : 1.0;
+		}
+		input_movevalues[1] = m_yapbStrafeDir * GetRunSpeed() * 0.8;
 	}
 
 	float approach = health * m_yapbAggression * 0.01;
