@@ -2106,32 +2106,20 @@ csbot::RunAI(void)
 	/* task execution (combat, plant, defuse, camp, etc.) */
 	YaPB_TaskExecute();
 
-	/* graph navigation movement (when not in combat) */
+	/* graph navigation movement — YaPB style: forward speed + aim steers */
 	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
-		/* 2D movement toward target node */
-		vector flatDir;
-		flatDir[0] = nt[0] - origin[0];
-		flatDir[1] = nt[1] - origin[1];
-		flatDir[2] = 0;
-		flatDir = normalize(flatDir);
-		makevectors(v_angle);
-		input_movevalues[0] = (flatDir * v_forward) * GetRunSpeed();
-		input_movevalues[1] = (flatDir * v_right) * GetRunSpeed();
-
-		/* wall avoidance */
-		traceline(origin, origin + v_forward * 80, MOVE_NORMAL, this);
-		if (trace_fraction < 0.5)
-			input_movevalues[0] *= 0.3;
+		/* move forward — aim system points at next node, so bot walks toward it */
+		input_movevalues[0] = GetRunSpeed();
 
 		/* node flags */
 		if (navFlags & YAPB_NF_CROUCH)
 			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
-			if (nt[2] > origin[2] + 16) v_angle[0] = -60;
-			else if (nt[2] < origin[2] - 16) v_angle[0] = 60;
+			if (nt[2] > origin[2] + 16) v_angle[0] = -45;
+			else if (nt[2] < origin[2] - 16) v_angle[0] = 45;
 			input_angles = v_angle;
 		}
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
