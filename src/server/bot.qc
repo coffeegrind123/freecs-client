@@ -424,12 +424,11 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 }
 
 void csbot::SmartRoute(vector dest) {
-	if (g_graphLoaded) {
+	/* always set Nuclide route (parent RunAI needs it to not re-call CreateObjective) */
+	RouteToPosition(dest);
+	/* also set graph path if available (overrides movement in RunAI) */
+	if (g_graphLoaded)
 		YaPB_Nav_FindPath(dest);
-		RouteClear();
-	} else {
-		RouteToPosition(dest);
-	}
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
