@@ -2080,7 +2080,10 @@ csbot::RunAI(void)
 	if (v_angle[0] < -45) v_angle[0] = -45;
 	input_angles = v_angle;
 
-	/* enemy validation: update distance + LOS with 0.5s grace */
+	/* enemy validation: team check + distance + LOS with 0.5s grace */
+	if (m_eTarget != __NULL__ && (m_eTarget.health <= 0 || m_eTarget.team == this.team)) {
+		m_eTarget = __NULL__;
+	}
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
 		m_flEnemyDist = vlen(m_eTarget.origin - origin);
 		traceline(origin + view_ofs, m_eTarget.origin, MOVE_NORMAL, this);
@@ -2093,8 +2096,7 @@ csbot::RunAI(void)
 		}
 	}
 
-	/* perception: enemy detection + sound */
-	SeeThink();
+	/* perception: parent already called SeeThink, we just add sound */
 	YaPB_SoundAwareness();
 
 	/* task brain */
