@@ -426,8 +426,9 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 void csbot::SmartRoute(vector dest) {
 	if (g_graphLoaded) {
 		YaPB_Nav_FindPath(dest);
+	} else {
+		RouteToPosition(dest);
 	}
-	RouteToPosition(dest);
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
@@ -1295,8 +1296,11 @@ csbot::WeaponThink(void)
 	    curTask == YAPB_TASK_THROWSM)
 		return;
 
-	if (activeweapon == WEAPON_KNIFE)
+	/* if holding knife but has other weapons, switch to best */
+	if (activeweapon == WEAPON_KNIFE) {
+		YaPB_SelectBestWeapon();
 		return;
+	}
 
 	/* reload if clip empty and have reserve — don't switch weapons during reload */
 	if (a_ammo1 == 0) {
@@ -1711,10 +1715,10 @@ csbot::YaPB_AimThink(void)
 		float accelerate;
 
 		if (importantAim) {
-			/* combat: scale with difficulty, critically damped */
-			stiffness = 40.0 + diff * 25.0;
+			/* combat: responsive aiming, critically damped */
+			stiffness = 150.0 + diff * 50.0;
 			damping = 2.0 * sqrt(stiffness);
-			accelerate = 800.0 + diff * 200.0;
+			accelerate = 2000.0 + diff * 300.0;
 		} else {
 			/* navigation: simple angle lerp, no spring (prevents spinning) */
 			float navLerp = bound(0.0, dt * 3.0, 1.0);
@@ -2063,13 +2067,19 @@ csbot::RunAI(void)
 	YaPB_AimThink();
 	YaPB_TaskExecute();
 
-	/* follow YaPB graph path if active */
+	/* follow YaPB graph path */
 	if (g_graphLoaded && YaPB_Nav_HasPath()) {
 		YaPB_Nav_Follow();
 		int navFlags = YaPB_GetNavFlags();
-		if (navFlags & YAPB_NF_CROUCH) input_buttons |= INPUT_BUTTON8;
+		vector nt = YaPB_GetNavTarget();
+
+		/* move toward target node */
+		input_movevalues[0] = GetRunSpeed();
+
+		/* node flags */
+		if (navFlags & YAPB_NF_CROUCH)
+			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
-			vector nt = YaPB_GetNavTarget();
 			if (nt[2] > origin[2] + 16) v_angle[0] = -60;
 			else if (nt[2] < origin[2] - 16) v_angle[0] = 60;
 			input_angles = v_angle;

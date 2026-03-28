@@ -177,6 +177,36 @@ mkdir -p "$NUCLIDE_DIR/platform"
 MENU_DAT="$NUCLIDE_DIR/platform/menu.dat"
 [ -f "$MENU_DAT" ] || err "menu.dat compilation failed"
 
+# =============================================================================
+# 4b. Convert YaPB graph files to .yapb format
+# =============================================================================
+GRAPH_SRC="$REPO_DIR/ext/yapb-graphs/graph"
+GRAPH_OUT="$REPO_DIR/data/graphs"
+
+if [ -d "$GRAPH_SRC" ]; then
+    CONVERTER="$BUILD_DIR/convert-graph"
+    if [ ! -f "$CONVERTER" ]; then
+        msg "Compiling graph converter..."
+        gcc -O2 -o "$CONVERTER" "$REPO_DIR/scripts/convert-graph.c"
+    fi
+
+    if [ -f "$CONVERTER" ]; then
+        mkdir -p "$GRAPH_OUT"
+        # only convert CS maps (de_, cs_, as_) that aren't already converted
+        msg "Converting YaPB graph files..."
+        converted=0
+        for f in "$GRAPH_SRC"/de_*.graph "$GRAPH_SRC"/cs_*.graph "$GRAPH_SRC"/as_*.graph; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .graph)
+            out="$GRAPH_OUT/$base.yapb"
+            [ -f "$out" ] && continue
+            "$CONVERTER" "$f" "$out" 2>/dev/null && converted=$((converted + 1))
+        done
+        total=$(ls "$GRAPH_OUT"/*.yapb 2>/dev/null | wc -l)
+        msg "Graphs: $converted new, $total total .yapb files"
+    fi
+fi
+
 if [ "$QC_ONLY" -eq 1 ]; then
     msg "QuakeC compile complete (--qc-only)."
     ls -lh "$REPO_DIR/progs.dat" "$REPO_DIR/csprogs.dat" 2>/dev/null

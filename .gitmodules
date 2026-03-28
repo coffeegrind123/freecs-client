@@ -1,0 +1,3 @@
+[submodule "ext/yapb-graphs"]
+	path = ext/yapb-graphs
+	url = https://github.com/yapb/graph.git
