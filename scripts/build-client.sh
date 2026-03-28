@@ -72,7 +72,9 @@ fi
 
 msg "Patching FTEQW..."
 bash "$SCRIPT_DIR/patch-fteqw.sh" "$FTEQW_DIR"
-sed -i 's|"halflife",\t"Rad-Therapy",|"halflife",\t"FTE-Quake",|' "$FTEQW_DIR/engine/common/fs.c"
+sed -i 's|"Rad-Therapy",\t{"valve/liblist.gam"}|"FTE-Quake",\t{"valve/liblist.gam"}|' "$FTEQW_DIR/engine/common/fs.c"
+grep -q "FTE-Quake" "$FTEQW_DIR/engine/common/fs.c" || { sed -i 's/"Rad-Therapy",\(.*\){"valve\/liblist.gam"}/"FTE-Quake",\1{"valve\/liblist.gam"}/' "$FTEQW_DIR/engine/common/fs.c"; }
+grep -q "FTE-Quake" "$FTEQW_DIR/engine/common/fs.c" && msg "Protocol patched to FTE-Quake" || err "Failed to patch protocol name"
 
 # =============================================================================
 # 2. Build FTEQCC
