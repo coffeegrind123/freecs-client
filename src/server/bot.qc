@@ -648,10 +648,12 @@ csbot::YaPB_TaskExecute(void)
 	case YAPB_TASK_FOLLOW:
 		if (m_yapbTaskCount > 0) {
 			entity leader = (team == TEAM_T) ? g_yapbLeaderT : g_yapbLeaderCT;
-			if (leader != world && leader.health > 0)
-				RouteToPosition(leader.origin);
-			else
+			if (leader != world && leader.health > 0 && vlen(leader.origin - origin) < 2000) {
+				if (m_iNodes <= 0)
+					RouteToPosition(leader.origin);
+			} else {
 				YaPB_TaskPop();
+			}
 		}
 		break;
 	default:
@@ -673,6 +675,10 @@ csbot::YaPB_TaskNormal(void)
 	if (a_ammo1 < 10 && a_ammo2 > 0 && m_eTarget == __NULL__) {
 		input_buttons |= INPUT_BUTTON4;
 	}
+
+	/* knife swing while rushing (YaPB tasks.cpp:54-71) */
+	if (m_eTarget == __NULL__ && activeweapon == WEAPON_KNIFE && random() < 0.005)
+		input_buttons |= INPUT_BUTTON0;
 
 	/* walk if heard enemy recently (creep speed) */
 	if (m_yapbHeardTime > 0 && (time - m_yapbHeardTime) < 3.0) {
@@ -759,12 +765,12 @@ csbot::YaPB_TaskSeekCover(void)
 
 	/* YaPB tasks.cpp:419-505 — graph-based cover finding */
 	if (m_iNodes <= 0) {
-		/* find cover node: iterate waypoints for one with no LOS to enemy */
 		float bestDist = COST_INFINITE;
 		int bestNode = -1;
 		vector enemyPos = m_yapbLastEnemyOrigin;
+		int checked = 0;
 
-		for (int i = 0; i < g_iNodes; i++) {
+		for (int i = 0; i < g_iNodes && checked < 50; i++) {
 			vector nodePos = g_pNodes[i].origin;
 			float nodeDist = vlen(nodePos - origin);
 			float enemyDist = vlen(nodePos - enemyPos);
@@ -772,7 +778,8 @@ csbot::YaPB_TaskSeekCover(void)
 			if (nodeDist > 1024 || enemyDist < 300)
 				continue;
 
-			/* check no LOS from node to enemy */
+			checked++;
+
 			traceline(nodePos + [0, 0, 36], enemyPos, MOVE_NORMAL, this);
 			if (trace_fraction < 0.98) {
 				if (nodeDist < bestDist) {
@@ -785,7 +792,6 @@ csbot::YaPB_TaskSeekCover(void)
 		if (bestNode >= 0)
 			RouteToPosition(g_pNodes[bestNode].origin);
 		else {
-			/* fallback: run away from enemy */
 			vector awayDir = normalize(origin - enemyPos);
 			Roam(origin + awayDir * 500, 300);
 		}
@@ -793,6 +799,10 @@ csbot::YaPB_TaskSeekCover(void)
 
 	if (m_iNodes <= 0) {
 		YaPB_TaskPop();
+		/* crouch + reload at cover position */
+		input_buttons |= INPUT_BUTTON8;
+		if (a_ammo1 < 10 && a_ammo2 > 0)
+			input_buttons |= INPUT_BUTTON4;
 		YaPB_TaskPush(YAPB_TASK_HIDE, origin, random(3, 12));
 		return;
 	}
@@ -1889,14 +1899,21 @@ csbot::RunAI(void)
 	YaPB_StuckCheck();
 	YaPB_RadioThink();
 
-	if (health < 40)
-		m_yapbFear = bound(0.0, m_yapbFear + frametime * 0.5, 1.0);
-	else
-		m_yapbFear = bound(0.0, m_yapbFear - frametime * 0.1, 1.0);
-	if (health > 80)
-		m_yapbAggression = bound(0.0, m_yapbAggression + frametime * 0.2, 1.0);
-	else
-		m_yapbAggression = bound(0.0, m_yapbAggression - frametime * 0.1, 1.0);
+	/* YaPB emotion system: time-based aggression/fear with smooth return to baseline */
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
+		/* seeing enemy: aggression up, fear down */
+		m_yapbAggression = bound(0.0, m_yapbAggression + frametime * 0.1, 1.0);
+		m_yapbFear = bound(0.0, m_yapbFear - frametime * 0.05, 1.0);
+	} else if (m_yapbLastEnemySeen > 0 && (time - m_yapbLastEnemySeen) > 5.0) {
+		/* no enemy for 5s+: smooth return to baseline */
+		float aggDiff = m_yapbBaseAggression - m_yapbAggression;
+		float fearDiff = m_yapbBaseFear - m_yapbFear;
+		m_yapbAggression += bound(-0.05, aggDiff, 0.05) * frametime * 2.0;
+		m_yapbFear += bound(-0.05, fearDiff, 0.05) * frametime * 2.0;
+	}
+	/* health modifiers on top */
+	if (health < 30)
+		m_yapbFear = bound(0.0, m_yapbFear + frametime * 0.3, 1.0);
 
 	if (g_cs_roundswon_t != g_yapbPrevRoundsWonT) {
 		g_yapbLastWinnerTeam = TEAM_T;
