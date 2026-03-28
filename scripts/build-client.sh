@@ -144,6 +144,7 @@ old = '''\tMaster_GetInternetList();
 \t\tg_connectstatus = CONNECT_INTERNET;
 \t\tg_connecttimer = 8.0f;'''
 new = '''\tMaster_GetInternetList();
+\t\tMaster_ResortCache();
 \t\tg_connected = TRUE;
 \t\tmp_btninet_start();
 \t\tinet_btnrefresh();'''
