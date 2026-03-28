@@ -2077,11 +2077,16 @@ csbot::RunAI(void)
 	/* validate enemy every frame: update distance + verify LOS */
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
 		m_flEnemyDist = vlen(m_eTarget.origin - origin);
-		/* clear stale enemy if no line of sight (YaPB trackEnemies) */
+		/* clear stale enemy if no LOS — but with 0.5s grace period
+		 * to prevent rapid oscillation when enemy ducks behind cover */
 		traceline(origin + view_ofs, m_eTarget.origin, MOVE_NORMAL, this);
-		if (trace_ent != m_eTarget && trace_fraction < 0.98) {
-			m_yapbLastEnemyOrigin = m_eTarget.origin;
+		if (trace_ent == m_eTarget || trace_fraction >= 0.98) {
+			/* enemy visible — update tracking */
 			m_yapbLastEnemySeen = time;
+			m_yapbLastEnemyOrigin = m_eTarget.origin;
+		} else if ((time - m_yapbLastEnemySeen) > 0.5) {
+			/* not visible for 0.5s — clear target */
+			m_yapbLastEnemyOrigin = m_eTarget.origin;
 			m_eTarget = __NULL__;
 		}
 	}
@@ -2096,14 +2101,15 @@ csbot::RunAI(void)
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
-		/* move TOWARD target node, not just "forward" */
-		if (vlen(input_movevalues) < 10) {
-			vector moveDir = normalize(nt - origin);
-			makevectors(v_angle);
-			/* project desired direction onto bot's local axes */
-			input_movevalues[0] = (moveDir * v_forward) * GetRunSpeed();
-			input_movevalues[1] = (moveDir * v_right) * GetRunSpeed();
-		}
+		/* move TOWARD target node (2D — ignore height for ramps) */
+		vector flatDir;
+		flatDir[0] = nt[0] - origin[0];
+		flatDir[1] = nt[1] - origin[1];
+		flatDir[2] = 0;
+		flatDir = normalize(flatDir);
+		makevectors(v_angle);
+		input_movevalues[0] = (flatDir * v_forward) * GetRunSpeed();
+		input_movevalues[1] = (flatDir * v_right) * GetRunSpeed();
 
 		/* wall avoidance: trace ahead, slow if wall close */
 		traceline(origin, origin + v_forward * 80, MOVE_NORMAL, this);
