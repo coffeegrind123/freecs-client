@@ -249,6 +249,9 @@ class csbot:NSBot
 	/* combat strafe timer */
 	float m_yapbStrafeTime;
 	float m_yapbStrafeDir;
+
+	/* navigation side preference (E-Bot: bots take different paths) */
+	float m_yapbSidePref;
 };
 
 /* Difficulty presets from YaPB config.cpp:618-636
@@ -499,6 +502,7 @@ csbot::YaPB_Init(void)
 	m_yapbDoorRetries = 0;
 	m_yapbDoorWaitTime = 0;
 	m_yapbLastEnemySeen = 0;
+	m_yapbSidePref = crandom();
 	m_yapbInitialized = true;
 }
 
@@ -1607,13 +1611,18 @@ csbot::YaPB_AimThink(void)
 		aimTarget = spot;
 	} else {
 		m_yapbAimPart = 0;
-		if (m_iNodes && m_iCurNode >= 0)
+		if (m_iNodes && m_iCurNode >= 0) {
 			aimTarget = m_pRoute[m_iCurNode].dest;
-		else
+			/* side preference: offset aim slightly so bots take different angles */
+			makevectors(vectoangles(aimTarget - origin));
+			aimTarget += v_right * m_yapbSidePref * 20;
+		} else
 			aimTarget = origin + v_forward * 128;
 	}
 
 	vector desiredAngles = vectoangles(aimTarget - (origin + view_ofs));
+	/* punchangle recoil compensation (E-Bot basecode.cpp:673) */
+	desiredAngles += punchangle;
 	if (desiredAngles[0] > 180) desiredAngles[0] -= 360;
 	if (desiredAngles[1] > 180) desiredAngles[1] -= 360;
 
@@ -1668,23 +1677,22 @@ csbot::YaPB_AimThink(void)
 		curAngles[1] += dt * m_yapbAimSpeedY;
 		curAngles[0] = bound(-89, curAngles[0], 89);
 	} else {
-		/* YaPB vision.cpp:157-214 — Normal/Hard/Expert spring-damper */
-		float stiffness = 200.0;
-		float damping = 25.0;
-		float accelerate = 3000.0;
-
-		/* difficulty scaling (vision.cpp:160-166) */
+		/* spring-damper with continuous skill scaling (E-Bot inspired) */
 		bool importantAim = (m_eTarget != __NULL__ && m_eTarget.health > 0);
-		if (importantAim && diff > YAPB_DIFF_NORMAL) {
-			if (diff == YAPB_DIFF_EXPERT)
-				accelerate += 300;
-			stiffness += 100;
-			damping -= 5;
-		}
-		/* softer spring when navigating (no enemy) — prevents oscillation/spinning */
-		if (!importantAim) {
-			stiffness = 100.0;
-			damping = 15.0;
+		float stiffness;
+		float damping;
+		float accelerate;
+
+		if (importantAim) {
+			/* combat: scale linearly with difficulty */
+			stiffness = 100.0 + diff * 80.0;
+			damping = 10.0 + diff * 5.0;
+			accelerate = 2500.0 + diff * 200.0;
+		} else {
+			/* navigation: softer spring prevents oscillation */
+			stiffness = 80.0;
+			damping = 12.0;
+			accelerate = 2000.0;
 		}
 
 		float yawOff = desiredAngles[1] - curAngles[1];
@@ -1756,14 +1764,15 @@ csbot::YaPB_CombatThink(void)
 			}
 
 			input_buttons |= INPUT_BUTTON0;
-			/* burst fire with pauses between bursts */
-			if (random() < 0.15) {
-				/* 15% chance per fire-frame: pause (release trigger) */
-				float pauseLen = 0.2 + random() * (0.5 - diff * 0.08);
-				if (pauseLen < 0.1) pauseLen = 0.1;
+			/* intelligent fire pause based on recoil (E-Bot technique)
+			 * pause when punchangle exceeds threshold (spray too wild) */
+			float recoilMag = vlen(punchangle);
+			float recoilThreshold = 2.0 + diff * 1.5;
+			if (recoilMag > recoilThreshold && dist > 300) {
+				/* recoil too high for this range — pause to reset */
+				float pauseLen = 0.15 + random() * 0.2;
 				m_yapbShootTime = time + pauseLen;
 			} else {
-				/* normal fire rate */
 				m_yapbShootTime = time + 0.08;
 			}
 		}
