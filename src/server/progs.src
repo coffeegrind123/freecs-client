@@ -37,6 +37,9 @@ item_suit.qc
 ../../../valve/src/server/items.qc
 
 ../../../src/botlib/include.src
+yapb_graph.qc
+yapb_pathfind.qc
+yapb_navigate.qc
 bot.qc
 
 game_money.qc
