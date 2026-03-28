@@ -2088,7 +2088,8 @@ csbot::RunAI(void)
 		}
 	}
 
-	/* perception */
+	/* perception: enemy detection + sound */
+	SeeThink();
 	YaPB_SoundAwareness();
 
 	/* task brain */
