@@ -424,11 +424,8 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 }
 
 void csbot::SmartRoute(vector dest) {
-	/* always set Nuclide route (parent RunAI needs it to not re-call CreateObjective) */
-	RouteToPosition(dest);
-	/* also set graph path if available (overrides movement in RunAI) */
-	if (g_graphLoaded)
-		YaPB_Nav_FindPath(dest);
+	/* pure YaPB graph navigation — no Nuclide */
+	YaPB_Nav_FindPath(dest);
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
@@ -2067,44 +2064,53 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
-	/* clear buttons each frame — tasks set what they need */
-	input_buttons = 0;
+	/* === PURE YaPB — no super::RunAI(), no Nuclide routing === */
 
-	/* clamp pitch to prevent looking at sky/ground */
-	if (v_angle[0] > 60) v_angle[0] = 60;
-	if (v_angle[0] < -60) v_angle[0] = -60;
+	/* reset inputs each frame */
+	input_buttons = 0;
+	input_movevalues = [0, 0, 0];
+
+	/* clamp pitch */
+	if (v_angle[0] > 45) v_angle[0] = 45;
+	if (v_angle[0] < -45) v_angle[0] = -45;
 	input_angles = v_angle;
 
-	super::RunAI();
-
-	/* validate enemy every frame: update distance + verify LOS */
+	/* enemy validation: update distance + LOS with 0.5s grace */
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
 		m_flEnemyDist = vlen(m_eTarget.origin - origin);
-		/* clear stale enemy if no LOS — but with 0.5s grace period
-		 * to prevent rapid oscillation when enemy ducks behind cover */
 		traceline(origin + view_ofs, m_eTarget.origin, MOVE_NORMAL, this);
 		if (trace_ent == m_eTarget || trace_fraction >= 0.98) {
-			/* enemy visible — update tracking */
 			m_yapbLastEnemySeen = time;
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
 		} else if ((time - m_yapbLastEnemySeen) > 0.5) {
-			/* not visible for 0.5s — clear target */
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
 			m_eTarget = __NULL__;
 		}
 	}
 
+	/* perception */
 	YaPB_SoundAwareness();
+
+	/* task brain */
 	YaPB_TaskFilter();
 
-	/* advance graph path BEFORE aim (prevents aim reading stale node) */
+	/* advance graph path BEFORE aim */
 	int curTask = YaPB_TaskGetType();
-	if (g_graphLoaded && YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
+	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK)
 		YaPB_Nav_Follow();
+
+	/* aiming (reads current graph node or enemy) */
+	YaPB_AimThink();
+
+	/* task execution (combat, plant, defuse, camp, etc.) */
+	YaPB_TaskExecute();
+
+	/* graph navigation movement (when not in combat) */
+	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
-		/* move TOWARD target node (2D — ignore height for ramps) */
+		/* 2D movement toward target node */
 		vector flatDir;
 		flatDir[0] = nt[0] - origin[0];
 		flatDir[1] = nt[1] - origin[1];
@@ -2114,13 +2120,13 @@ csbot::RunAI(void)
 		input_movevalues[0] = (flatDir * v_forward) * GetRunSpeed();
 		input_movevalues[1] = (flatDir * v_right) * GetRunSpeed();
 
-		/* wall avoidance: trace ahead, slow if wall close */
+		/* wall avoidance */
 		traceline(origin, origin + v_forward * 80, MOVE_NORMAL, this);
 		if (trace_fraction < 0.5)
 			input_movevalues[0] *= 0.3;
 
-		/* node flags — only apply when navigating, not fighting */
-		if ((navFlags & YAPB_NF_CROUCH) && curTask == YAPB_TASK_NORMAL)
+		/* node flags */
+		if (navFlags & YAPB_NF_CROUCH)
 			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
 			if (nt[2] > origin[2] + 16) v_angle[0] = -60;
@@ -2129,30 +2135,37 @@ csbot::RunAI(void)
 		}
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
+	} else if (curTask != YAPB_TASK_ATTACK && vlen(input_movevalues) < 10) {
+		/* no path, no combat: walk forward */
+		input_movevalues[0] = GetRunSpeed() * 0.5;
 	}
 
-	YaPB_AimThink();
-	YaPB_TaskExecute();
+	/* teammate avoidance */
 	YaPB_TeamAvoidance();
+
+	/* stuck detection */
 	YaPB_StuckCheck();
+
+	/* weapon management */
+	WeaponThink();
+
+	/* radio */
 	YaPB_RadioThink();
 
-	/* YaPB emotion system: time-based aggression/fear with smooth return to baseline */
+	/* emotion system */
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
-		/* seeing enemy: aggression up, fear down */
 		m_yapbAggression = bound(0.0, m_yapbAggression + frametime * 0.1, 1.0);
 		m_yapbFear = bound(0.0, m_yapbFear - frametime * 0.05, 1.0);
 	} else if (m_yapbLastEnemySeen > 0 && (time - m_yapbLastEnemySeen) > 5.0) {
-		/* no enemy for 5s+: smooth return to baseline */
 		float aggDiff = m_yapbBaseAggression - m_yapbAggression;
 		float fearDiff = m_yapbBaseFear - m_yapbFear;
 		m_yapbAggression += bound(-0.05, aggDiff, 0.05) * frametime * 2.0;
 		m_yapbFear += bound(-0.05, fearDiff, 0.05) * frametime * 2.0;
 	}
-	/* health modifiers on top */
 	if (health < 30)
 		m_yapbFear = bound(0.0, m_yapbFear + frametime * 0.3, 1.0);
 
+	/* round tracking */
 	if (g_cs_roundswon_t != g_yapbPrevRoundsWonT) {
 		g_yapbLastWinnerTeam = TEAM_T;
 		g_yapbPrevRoundsWonT = g_cs_roundswon_t;
@@ -2162,6 +2175,7 @@ csbot::RunAI(void)
 		g_yapbPrevRoundsWonCT = g_cs_roundswon_ct;
 	}
 
+	/* COMMIT all inputs */
 	button0 = input_buttons & INPUT_BUTTON0;
 	button2 = input_buttons & INPUT_BUTTON2;
 	button5 = input_buttons & INPUT_BUTTON5;
