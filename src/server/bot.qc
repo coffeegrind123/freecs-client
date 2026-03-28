@@ -714,10 +714,13 @@ void
 csbot::YaPB_TaskAttack(void)
 {
 	if (m_eTarget == __NULL__ || m_eTarget.health <= 0) {
-		/* enemy killed �� radio event */
-		if (random() < 0.4)
-			YaPB_Radio(RADIO_ENEMYDOWN);
 		YaPB_TaskPop();
+		/* enemy lost: hunt last position instead of freezing */
+		if (m_yapbLastEnemySeen > 0 && (time - m_yapbLastEnemySeen) < 3.0) {
+			YaPB_TaskPush(YAPB_TASK_HUNT, m_yapbLastEnemyOrigin, 8.0);
+		} else if (random() < 0.4) {
+			YaPB_Radio(RADIO_ENEMYDOWN);
+		}
 		return;
 	}
 
@@ -1506,17 +1509,22 @@ csbot::YaPB_AimThink(void)
 			parts &= ~1;
 
 		if ((parts & 3) == 3) {
-			/* head + body visible: use headshot chance */
-			if (m_yapbAimPart == 1 && m_yapbAimPartEnt == m_eTarget) {
-				/* sticky — keep aiming head */
-				spot = m_eTarget.origin + [0, 0, m_eTarget.size[2] * 0.81];
-			} else if (random() < hsChance) {
-				spot = m_eTarget.origin + [0, 0, m_eTarget.size[2] * 0.81];
-				m_yapbAimPart = 1;
-				m_yapbAimPartEnt = m_eTarget;
+			/* head + body visible: sticky aim part selection */
+			if (m_yapbAimPartEnt == m_eTarget && m_yapbAimPart > 0) {
+				/* keep current part — don't re-roll every frame */
+				if (m_yapbAimPart == 1)
+					spot = m_eTarget.origin + [0, 0, m_eTarget.size[2] * 0.81];
+				else
+					spot = m_eTarget.origin;
 			} else {
-				spot = m_eTarget.origin;
-				m_yapbAimPart = 2;
+				/* new enemy or first selection — roll once */
+				if (random() < hsChance) {
+					spot = m_eTarget.origin + [0, 0, m_eTarget.size[2] * 0.81];
+					m_yapbAimPart = 1;
+				} else {
+					spot = m_eTarget.origin;
+					m_yapbAimPart = 2;
+				}
 				m_yapbAimPartEnt = m_eTarget;
 			}
 		} else if (parts & 1) {
