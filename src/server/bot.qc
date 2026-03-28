@@ -1820,6 +1820,14 @@ csbot::YaPB_CombatThink(void)
 		input_movevalues[1] = m_yapbStrafeDir * GetRunSpeed() * 0.8;
 	}
 
+	/* knife rush: always charge at max speed */
+	if (activeweapon == WEAPON_KNIFE) {
+		input_movevalues[0] = GetRunSpeed();
+		if (dist < 80)
+			input_buttons |= INPUT_BUTTON0;
+		return;
+	}
+
 	float approach = health * m_yapbAggression * 0.01;
 	/* YaPB: sniper approach capped at 49 */
 	bool isSniper = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
