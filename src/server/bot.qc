@@ -1933,8 +1933,8 @@ csbot::RunAI(void)
 
 	YaPB_SoundAwareness();
 	YaPB_TaskFilter();
-	YaPB_TaskExecute();
 	YaPB_AimThink();
+	YaPB_TaskExecute();
 	YaPB_StuckCheck();
 	YaPB_RadioThink();
 
