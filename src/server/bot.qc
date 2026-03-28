@@ -160,6 +160,9 @@ class csbot:NSBot
 	nonvirtual void(void) YaPB_LadderThink;
 	nonvirtual void(void) YaPB_DoorThink;
 
+	/* smart routing: YaPB graph first, Nuclide fallback */
+	nonvirtual void(vector) SmartRoute;
+
 	int m_actionIsPlanting;
 	int m_actionIsDefusing;
 
@@ -310,7 +313,7 @@ csbot::RunToConfront(void)
 		t = Route_SelectRandom("info_player_deathmatch");
 
 	if (t)
-		RouteToPosition(t.origin);
+		SmartRoute(t.origin);
 }
 
 void
@@ -318,14 +321,14 @@ csbot::RunToBomb(void)
 {
 	entity e = find(world, ::model, "models/w_c4.mdl");
 	if (e)
-		RouteToPosition(e.origin);
+		SmartRoute(e.origin);
 }
 
 void
 csbot::RunToBombsite(int bombsiteIndex)
 {
 	entity e = GetBombsiteByIndex(bombsiteIndex);
-	RouteToPosition(getEntityCenterPos(e));
+	SmartRoute(getEntityCenterPos(e));
 }
 
 void
@@ -338,7 +341,7 @@ void
 csbot::RunToEscapeZone(int index)
 {
 	entity e = GetEscapeZoneByIndex(index);
-	RouteToPosition(getEntityCenterPos(e));
+	SmartRoute(getEntityCenterPos(e));
 }
 
 void
@@ -351,7 +354,7 @@ void
 csbot::RunToVIPSafetyZone(int index)
 {
 	entity e = GetVIPSafetyZoneByIndex(index);
-	RouteToPosition(getEntityCenterPos(e));
+	SmartRoute(getEntityCenterPos(e));
 }
 
 void
@@ -365,7 +368,7 @@ csbot::RunToHostages(void)
 {
 	entity e = find(world, ::classname, "hostage_entity");
 	if (e)
-		RouteToPosition(e.origin);
+		SmartRoute(e.origin);
 }
 
 void csbot::Roam(vector roamOrigin, int maxDistance) {
@@ -391,7 +394,7 @@ void csbot::Roam(vector roamOrigin, int maxDistance) {
 	if (iBestNodeIndex == -1)
 		return;
 
-	RouteToPosition(g_pNodes[iBestNodeIndex].origin);
+	SmartRoute(g_pNodes[iBestNodeIndex].origin);
 }
 
 /* ============================================================
@@ -418,6 +421,13 @@ entity csbot::GetEscapeZoneByIndex(int index) {
 }
 entity csbot::GetVIPSafetyZoneByIndex(int index) {
 	return GetEntityByNameAndIndex("func_vip_safetyzone", index);
+}
+
+void csbot::SmartRoute(vector dest) {
+	if (g_graphLoaded) {
+		YaPB_Nav_FindPath(dest);
+	}
+	RouteToPosition(dest);
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
@@ -471,6 +481,10 @@ csbot::PostFrame(void)
 void
 csbot::YaPB_Init(void)
 {
+	/* YaPB graph loading disabled pending debug — crashes server */
+	/* if (!g_graphLoaded)
+		YaPB_Navigation_Init(); */
+
 	m_yapbPersonality = (int)floor(random(0, 3));
 	m_yapbDifficulty = bound(0, (int)cvar("bot_skill"), 4);
 	switch (m_yapbPersonality) {
@@ -664,7 +678,7 @@ csbot::YaPB_TaskExecute(void)
 			entity leader = (team == TEAM_T) ? g_yapbLeaderT : g_yapbLeaderCT;
 			if (leader != world && leader.health > 0 && vlen(leader.origin - origin) < 2000) {
 				if (m_iNodes <= 0)
-					RouteToPosition(leader.origin);
+					SmartRoute(leader.origin);
 			} else {
 				YaPB_TaskPop();
 			}
@@ -772,7 +786,7 @@ csbot::YaPB_TaskHunt(void)
 
 	if (m_iNodes <= 0) {
 		YaPB_Radio(RADIO_COM_GO);
-		RouteToPosition(huntPos);
+		SmartRoute(huntPos);
 	}
 
 	/* YaPB: creep speed at Normal+ in narrow areas */
@@ -814,7 +828,7 @@ csbot::YaPB_TaskSeekCover(void)
 		}
 
 		if (bestNode >= 0)
-			RouteToPosition(g_pNodes[bestNode].origin);
+			SmartRoute(g_pNodes[bestNode].origin);
 		else {
 			vector awayDir = normalize(origin - enemyPos);
 			Roam(origin + awayDir * 500, 300);
@@ -1038,7 +1052,7 @@ csbot::YaPB_TaskBlind(void)
 			}
 		}
 		if (bestNode >= 0)
-			RouteToPosition(g_pNodes[bestNode].origin);
+			SmartRoute(g_pNodes[bestNode].origin);
 	}
 
 	if (random() < 0.2)
@@ -1510,7 +1524,7 @@ csbot::YaPB_SoundAwareness(void)
 			m_yapbHeardPos = e.origin;
 			m_yapbHeardTime = time;
 			if (m_eTarget == __NULL__)
-				RouteToPosition(m_yapbHeardPos);
+				SmartRoute(m_yapbHeardPos);
 			return;
 		}
 		if (vlen(e.velocity) > 150.0 && dist < 500.0) {
@@ -1622,9 +1636,12 @@ csbot::YaPB_AimThink(void)
 		aimTarget = spot;
 	} else {
 		m_yapbAimPart = 0;
-		if (m_iNodes && m_iCurNode >= 0) {
+		if (g_graphLoaded && YaPB_Nav_HasPath()) {
+			aimTarget = YaPB_GetNavTarget();
+			makevectors(vectoangles(aimTarget - origin));
+			aimTarget += v_right * m_yapbSidePref * 20;
+		} else if (m_iNodes && m_iCurNode >= 0) {
 			aimTarget = m_pRoute[m_iCurNode].dest;
-			/* side preference: offset aim slightly so bots take different angles */
 			makevectors(vectoangles(aimTarget - origin));
 			aimTarget += v_right * m_yapbSidePref * 20;
 		} else
@@ -1944,7 +1961,7 @@ csbot::CreateObjective(void)
 			}
 			entity e = find(world, ::model, "models/w_backpack.mdl");
 			if (e != world) {
-				RouteToPosition(getEntityCenterPos(e));
+				SmartRoute(getEntityCenterPos(e));
 				return;
 			}
 		}
@@ -2046,6 +2063,23 @@ csbot::RunAI(void)
 	YaPB_TaskFilter();
 	YaPB_AimThink();
 	YaPB_TaskExecute();
+
+	/* follow YaPB graph path if active */
+	if (g_graphLoaded && YaPB_Nav_HasPath()) {
+		YaPB_Nav_Follow();
+		int navFlags = YaPB_GetNavFlags();
+		if (navFlags & YAPB_NF_CROUCH) input_buttons |= INPUT_BUTTON8;
+		if (navFlags & YAPB_NF_LADDER) {
+			vector nt = YaPB_GetNavTarget();
+			if (nt[2] > origin[2] + 16) v_angle[0] = -60;
+			else if (nt[2] < origin[2] - 16) v_angle[0] = 60;
+			input_angles = v_angle;
+		}
+		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
+			input_buttons |= INPUT_BUTTON2;
+	}
+
+	YaPB_TeamAvoidance();
 	YaPB_StuckCheck();
 	YaPB_RadioThink();
 
