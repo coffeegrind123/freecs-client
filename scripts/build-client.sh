@@ -133,21 +133,34 @@ msg "Building FTEQW client (linux64)..."
 # =============================================================================
 # 6. Download game data
 # =============================================================================
-download "$VALVE_PK3_URL" "$DL_DIR/package_valve.pk3"
+download "$VALVE_PK3_URL" "$DL_DIR/package_valve_orig.pk3"
 download "$CSTRIKE_PK3_URL" "$DL_DIR/package_cstrike.pk3"
+
+if [ ! -f "$DL_DIR/package_valve.pk3" ] || [ "$DL_DIR/package_valve_orig.pk3" -nt "$DL_DIR/package_valve.pk3" ]; then
+    msg "Stripping frag-net menu.dat from valve pk3..."
+    TMPSTRIP="$BUILD_DIR/tmp/valve_strip"
+    mkdir -p "$TMPSTRIP"
+    (cd "$TMPSTRIP" && unzip -qo "$DL_DIR/package_valve_orig.pk3" && rm -f menu.dat && zip -qr "$DL_DIR/package_valve.pk3" .)
+    rm -rf "$TMPSTRIP"
+fi
 download "$CS15_URL" "$DL_DIR/cs15data.zip"
 
 if [ ! -f "$DL_DIR/valve-data.pk3" ]; then
-    msg "Downloading HL1 valve data (GoldSrc Package)..."
-    megadl "$GOLDSRC_URL" --path "$DL_DIR/"
     GSRC_7Z=$(find "$DL_DIR" -name "GoldSrc*" -print -quit)
-    [ -n "$GSRC_7Z" ] || err "GoldSrc download failed"
+    if [ -z "$GSRC_7Z" ]; then
+        msg "Downloading HL1 valve data (GoldSrc Package)..."
+        megadl "$GOLDSRC_URL" --path "$DL_DIR/"
+        GSRC_7Z=$(find "$DL_DIR" -name "GoldSrc*" -print -quit)
+        [ -n "$GSRC_7Z" ] || err "GoldSrc download failed"
+    else
+        msg "GoldSrc 7z already present, extracting..."
+    fi
     7z x -o"$BUILD_DIR/tmp/goldsrc" "$GSRC_7Z" \
         "Half-Life WON/valve/models/" "Half-Life WON/valve/sound/" \
         "Half-Life WON/valve/sprites/" "Half-Life WON/valve/*.wad" -y
     (cd "$BUILD_DIR/tmp/goldsrc/Half-Life WON/valve" && \
         zip -qr "$DL_DIR/valve-data.pk3" models/ sound/ sprites/ *.wad)
-    rm -rf "$BUILD_DIR/tmp/goldsrc" "$GSRC_7Z"
+    rm -rf "$BUILD_DIR/tmp/goldsrc"
 fi
 
 if [ "$NO_PACKAGE" -eq 1 ]; then
