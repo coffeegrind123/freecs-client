@@ -107,6 +107,50 @@ sed -i 's|Logging on to Frag-Net|Fetching server list|g' "$NUCLIDE_DIR/platform/
 sed -i 's|Connected to Frag-Net|Connected|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
 sed -i 's|VISIT FRAG-NET|PLAY ONLINE|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
 
+msg "Patching menu to skip login dialog and set our master..."
+
+# Uncomment Master_GetInternetList to set net_master1 to our server
+python3 -c "
+import sys
+f = '$NUCLIDE_DIR/src/platform/master.qc'
+t = open(f).read()
+old = '''Master_GetInternetList(void)
+{
+\t/*string url = sprintf(\"%s:%d\",MASTER_DNS,MASTER_PORT);
+\tcvar_set(\"net_master1\", url);'''
+new = '''Master_GetInternetList(void)
+{
+\tstring url = sprintf(\"%s:%d\",MASTER_DNS,MASTER_PORT);
+\tcvar_set(\"net_master1\", url);'''
+t = t.replace(old, new, 1)
+# close the uncommented block
+old2 = '''localcmd(\"net_masterextra8 \\\\\"\\\\\"\\\\n\");*/
+
+\tMaster_UpdateCache();'''
+new2 = '''localcmd(\"net_masterextra8 \\\\\"\\\\\"\\\\n\");
+
+\tMaster_UpdateCache();'''
+t = t.replace(old2, new2, 1)
+open(f, 'w').write(t)
+"
+
+# Skip the connect dialog — mark connected immediately in mp_btninet_start
+python3 -c "
+import sys
+f = '$NUCLIDE_DIR/src/menu-fn/m_multiplayer.qc'
+t = open(f).read()
+# Replace the else branch that shows the dialog with one that skips it
+old = '''\tMaster_GetInternetList();
+\t\tg_connectstatus = CONNECT_INTERNET;
+\t\tg_connecttimer = 8.0f;'''
+new = '''\tMaster_GetInternetList();
+\t\tg_connected = TRUE;
+\t\tmp_btninet_start();
+\t\tinet_btnrefresh();'''
+t = t.replace(old, new)
+open(f, 'w').write(t)
+"
+
 # =============================================================================
 # 4. Compile FreeCS QuakeC
 # =============================================================================
@@ -218,10 +262,10 @@ LIBLIST
         [ -e "$REPO_DIR/$item" ] && cp -a "$REPO_DIR/$item" "$PKG/cstrike/"
     done
 
-    cp -f "$NUCLIDE_DIR/base/default_controls.cfg" "$PKG/cstrike/" 2>/dev/null || true
-    cp -f "$NUCLIDE_DIR/base/default_video.cfg" "$PKG/cstrike/" 2>/dev/null || true
-    cp -f "$NUCLIDE_DIR/valve/default_valve.cfg" "$PKG/cstrike/" 2>/dev/null || true
-    cp -f "$NUCLIDE_DIR/valve/default.cfg" "$PKG/cstrike/default_controls.cfg" 2>/dev/null || true
+    for cfg in default_controls.cfg default_video.cfg default_valve.cfg default_cvar.cfg; do
+        cp -f "$NUCLIDE_DIR/cstrike/$cfg" "$PKG/cstrike/" 2>/dev/null || \
+        cp -f "$REPO_DIR/$cfg" "$PKG/cstrike/" 2>/dev/null || true
+    done
 
     cat > "$PKG/cstrike/autoexec.cfg" <<'CFG'
 set net_master1 "ms.cs16.net:27950"
