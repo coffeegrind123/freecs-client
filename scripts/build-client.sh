@@ -107,6 +107,9 @@ sed -i 's|Logging on to Frag-Net|Fetching server list|g' "$NUCLIDE_DIR/platform/
 sed -i 's|Connected to Frag-Net|Connected|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
 sed -i 's|VISIT FRAG-NET|PLAY ONLINE|g' "$NUCLIDE_DIR/platform/menu_fallback.pk3dir/menu.dat.default.po"
 
+msg "Fixing mapcycle to work with maps inside pk3s..."
+sed -i 's|if (FileExists(strcat("maps/", temp, ".bsp")) == false)|if (temp == "")|' "$NUCLIDE_DIR/src/server/mapcycle.qc"
+
 msg "Patching menu to skip login dialog and set our master..."
 
 # Uncomment Master_GetInternetList to set net_master1 to our server
