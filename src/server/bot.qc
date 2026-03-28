@@ -686,6 +686,12 @@ csbot::YaPB_TaskNormal(void)
 			input_buttons |= INPUT_BUTTON4;
 	}
 
+	/* random tactical pause during navigation (sandbot technique) */
+	if (m_eTarget == __NULL__ && random() < 0.003) {
+		input_movevalues = [0, 0, 0];
+		return;
+	}
+
 	/* knife swing while rushing (YaPB tasks.cpp:54-71) */
 	if (m_eTarget == __NULL__ && activeweapon == WEAPON_KNIFE && random() < 0.005)
 		input_buttons |= INPUT_BUTTON0;
@@ -1552,9 +1558,9 @@ csbot::YaPB_AimThink(void)
 			spot = m_eTarget.origin;
 		}
 
-		/* velocity compensation (YaPB combat.cpp:704-706) */
+		/* velocity compensation (YaPB combat.cpp:704-706) — smoothed */
 		if (!isSniper && activeweapon != WEAPON_KNIFE && dist > 272) {
-			vector comp = (m_eTarget.velocity - velocity) * dt * 2.8;
+			vector comp = (m_eTarget.velocity - velocity) * 0.05;
 			comp[2] = 0;
 			spot += comp;
 		}
@@ -1674,12 +1680,16 @@ csbot::YaPB_AimThink(void)
 		while (yawOff > 180) yawOff -= 360;
 		while (yawOff < -180) yawOff += 360;
 
+		/* max turn speed: scales with difficulty (prevents instant 180° snap) */
+		float maxTurnSpeed = 200.0 + diff * 80.0;
+
 		if (fabs(yawOff) < 1.0) {
 			m_yapbLookYawVel = 0;
 			curAngles[1] = desiredAngles[1];
 		} else {
 			float acc = bound(-accelerate, stiffness * yawOff - damping * m_yapbLookYawVel, accelerate);
 			m_yapbLookYawVel += dt * acc;
+			m_yapbLookYawVel = bound(-maxTurnSpeed, m_yapbLookYawVel, maxTurnSpeed);
 			curAngles[1] += dt * m_yapbLookYawVel;
 		}
 
@@ -1689,6 +1699,7 @@ csbot::YaPB_AimThink(void)
 
 		float accP = bound(-accelerate, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, accelerate);
 		m_yapbLookPitchVel += dt * accP;
+		m_yapbLookPitchVel = bound(-maxTurnSpeed, m_yapbLookPitchVel, maxTurnSpeed);
 		curAngles[0] += dt * m_yapbLookPitchVel;
 		curAngles[0] = bound(-89, curAngles[0], 89);
 	}
@@ -1734,11 +1745,16 @@ csbot::YaPB_CombatThink(void)
 			}
 
 			input_buttons |= INPUT_BUTTON0;
-			float burstMin = 0.06 - diff * 0.01;
-			float burstMax = 0.15 - diff * 0.02;
-			if (burstMin < 0.02) burstMin = 0.02;
-			if (burstMax < 0.05) burstMax = 0.05;
-			m_yapbShootTime = time + burstMin + random() * burstMax;
+			/* burst fire with pauses between bursts */
+			if (random() < 0.15) {
+				/* 15% chance per fire-frame: pause (release trigger) */
+				float pauseLen = 0.2 + random() * (0.5 - diff * 0.08);
+				if (pauseLen < 0.1) pauseLen = 0.1;
+				m_yapbShootTime = time + pauseLen;
+			} else {
+				/* normal fire rate */
+				m_yapbShootTime = time + 0.08;
+			}
 		}
 	}
 
@@ -1778,7 +1794,12 @@ csbot::YaPB_CombatThink(void)
 		input_buttons |= INPUT_BUTTON8;
 
 	if (health < 25 || (health < 40 && m_yapbPersonality == YAPB_PERS_CAREFUL)) {
-		input_movevalues[0] = -GetRunSpeed();
+		/* check wall behind before retreating (YaPB attackMovement:1477) */
+		makevectors(v_angle);
+		traceline(origin, origin - v_forward * 100, MOVE_NORMAL, this);
+		if (trace_fraction > 0.5) {
+			input_movevalues[0] = -GetRunSpeed();
+		}
 		if (random() < 0.3)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed() * 0.6;
 	}
@@ -1904,11 +1925,18 @@ csbot::CreateObjective(void)
 	}
 
 	if (m_iNodes <= 0) {
-		float campChance = 0.20;
+		/* reduced camp chance — only camp away from spawn */
+		float spawnDist = 99999;
+		entity sp = find(world, ::classname, (team == TEAM_T) ? "info_player_deathmatch" : "info_player_start");
+		if (sp) spawnDist = vlen(sp.origin - origin);
+
+		float campChance = 0.08;
 		switch (m_yapbPersonality) {
-		case YAPB_PERS_CAREFUL: campChance = 0.40; break;
-		case YAPB_PERS_RUSHER:  campChance = 0.05; break;
+		case YAPB_PERS_CAREFUL: campChance = 0.15; break;
+		case YAPB_PERS_RUSHER:  campChance = 0.02; break;
 		}
+		/* never camp near spawn */
+		if (spawnDist < 500) campChance = 0;
 
 		if (random() < campChance && activeweapon != WEAPON_KNIFE) {
 			bool canCamp = true;
