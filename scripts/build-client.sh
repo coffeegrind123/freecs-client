@@ -72,6 +72,7 @@ fi
 
 msg "Patching FTEQW..."
 bash "$SCRIPT_DIR/patch-fteqw.sh" "$FTEQW_DIR"
+sed -i 's|"halflife",\t"Rad-Therapy",|"halflife",\t"FTE-Quake",|' "$FTEQW_DIR/engine/common/fs.c"
 
 # =============================================================================
 # 2. Build FTEQCC
