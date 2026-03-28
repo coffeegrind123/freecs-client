@@ -393,14 +393,23 @@ CSMultiplayerRules::TimerUpdate(void)
 			g_cs_mapChangeRequested = false;
 			return;
 		}
-		/* force round end if stuck in active/freeze with timer expired */
-		if ((g_cs_gamestate == GAME_ACTIVE || g_cs_gamestate == GAME_FREEZE) &&
-		    g_cs_gametime <= 0) {
+
+		/* count human players */
+		int humanCount = 0;
+		for (entity e = world; (e = find(e, ::classname, "player"));)
+			if (clienttype(e) == CLIENTTYPE_REAL && e.team > 0)
+				humanCount++;
+
+		/* no humans alive in a team — change map immediately */
+		if (humanCount == 0) {
 			IntermissionStart();
 			g_cs_gamestate = GAME_OVER;
 			g_cs_mapChangeRequested = false;
 			return;
 		}
+
+		/* humans present but round timer expired — wait for round end
+		 * (GAME_END), which is handled below at line ~415 */
 	}
 
 	/* INACTIVE means no one is registered as a player */
