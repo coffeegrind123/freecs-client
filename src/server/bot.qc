@@ -1093,7 +1093,7 @@ csbot::YaPB_CheckGrenadeThrow(void)
 		return;
 
 	/* never throw grenades at close range */
-	if (m_flEnemyDist < 250)
+	if (m_flEnemyDist < 500)
 		return;
 
 	int curTask = YaPB_TaskGetType();
@@ -1147,7 +1147,7 @@ void
 csbot::YaPB_TaskThrowGrenade(void)
 {
 	/* abort grenade if enemy too close (they closed distance after task was pushed) */
-	if (m_eTarget != __NULL__ && m_flEnemyDist < 300) {
+	if (m_eTarget != __NULL__ && m_flEnemyDist < 500) {
 		m_yapbNadeType = 0;
 		YaPB_TaskPop();
 		YaPB_SelectBestWeapon();
@@ -1468,7 +1468,7 @@ csbot::YaPB_StuckCheck(void)
 			YaPB_LadderThink();
 			YaPB_DoorThink();
 		}
-		if (m_yapbStuckCount > 4) input_buttons |= INPUT_BUTTON2;
+		if (m_yapbStuckCount > 8) input_buttons |= INPUT_BUTTON2;
 		if (m_yapbStuckCount > 6) {
 			/* corner detection (sandbot technique): trace 45° left + right */
 			makevectors(v_angle);
@@ -1485,7 +1485,7 @@ csbot::YaPB_StuckCheck(void)
 				return;
 			}
 		}
-		if (m_yapbStuckCount > 8) input_buttons |= INPUT_BUTTON8;
+		if (m_yapbStuckCount > 14) input_buttons |= INPUT_BUTTON8;
 		if (m_yapbStuckCount > 12)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
 		if (m_yapbStuckCount > 18) {
@@ -1610,7 +1610,7 @@ csbot::YaPB_AimThink(void)
 		/* aim error — distance-proportional spread, smoothly interpolated.
 		 * New error target chosen every 0.5-1.0s, then lerped toward. */
 		if (time > m_yapbAimErrorTime) {
-			m_yapbAimErrorTime = time + 0.5 + random() * 0.5;
+			m_yapbAimErrorTime = time + 1.0 + random() * 1.0;
 			float spread = bound(0.1, dist / 1000.0, 1.0);
 			/* set NEW target error — will lerp toward it */
 			m_yapbAimErrorTarget[0] = crandom() * g_yapbAimErrX[diff] * spread;
@@ -1722,7 +1722,7 @@ csbot::YaPB_AimThink(void)
 
 		curAngles[0] += dt * m_yapbAimSpeedX;
 		curAngles[1] += dt * m_yapbAimSpeedY;
-		curAngles[0] = bound(-89, curAngles[0], 89);
+		curAngles[0] = bound(-45, curAngles[0], 45);
 	} else {
 		/* critically-damped spring for smooth aiming (no oscillation) */
 		bool importantAim = (m_eTarget != __NULL__ && m_eTarget.health > 0);
@@ -1746,7 +1746,7 @@ csbot::YaPB_AimThink(void)
 			while (pitchOff < -180) pitchOff += 360;
 			curAngles[1] += yawOff * navLerp;
 			curAngles[0] += pitchOff * navLerp;
-			curAngles[0] = bound(-89, curAngles[0], 89);
+			curAngles[0] = bound(-45, curAngles[0], 45);
 			m_yapbLookYawVel = 0;
 			m_yapbLookPitchVel = 0;
 			input_angles = v_angle = angles = curAngles;
@@ -1778,7 +1778,7 @@ csbot::YaPB_AimThink(void)
 		m_yapbLookPitchVel += dt * accP;
 		m_yapbLookPitchVel = bound(-maxTurnSpeed, m_yapbLookPitchVel, maxTurnSpeed);
 		curAngles[0] += dt * m_yapbLookPitchVel;
-		curAngles[0] = bound(-89, curAngles[0], 89);
+		curAngles[0] = bound(-45, curAngles[0], 45);
 	}
 
 	input_angles = v_angle = angles = curAngles;
@@ -2067,6 +2067,11 @@ csbot::RunAI(void)
 	/* clear buttons each frame — tasks set what they need */
 	input_buttons = 0;
 
+	/* clamp pitch to prevent looking at sky/ground */
+	if (v_angle[0] > 60) v_angle[0] = 60;
+	if (v_angle[0] < -60) v_angle[0] = -60;
+	input_angles = v_angle;
+
 	super::RunAI();
 
 	/* validate enemy every frame: update distance + verify LOS */
@@ -2083,10 +2088,8 @@ csbot::RunAI(void)
 
 	YaPB_SoundAwareness();
 	YaPB_TaskFilter();
-	YaPB_AimThink();
-	YaPB_TaskExecute();
 
-	/* follow YaPB graph path (only when not in combat) */
+	/* advance graph path BEFORE aim (prevents aim reading stale node) */
 	int curTask = YaPB_TaskGetType();
 	if (g_graphLoaded && YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		YaPB_Nav_Follow();
@@ -2119,6 +2122,8 @@ csbot::RunAI(void)
 			input_buttons |= INPUT_BUTTON2;
 	}
 
+	YaPB_AimThink();
+	YaPB_TaskExecute();
 	YaPB_TeamAvoidance();
 	YaPB_StuckCheck();
 	YaPB_RadioThink();
