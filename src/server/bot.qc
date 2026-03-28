@@ -2387,8 +2387,38 @@ YaPB_ElectLeaders(void)
  * ============================================================ */
 
 void
+CSBot_AutoCount(void)
+{
+	if (!cvar("bot_auto_count"))
+		return;
+
+	int ctSpawns = 0;
+	int tSpawns = 0;
+	int humanCount = 0;
+
+	for (entity e = world; (e = find(e, ::classname, "info_player_start"));)
+		ctSpawns++;
+	for (entity e = world; (e = find(e, ::classname, "info_player_deathmatch"));)
+		tSpawns++;
+	for (entity e = world; (e = find(e, ::classname, "player"));)
+		if (clienttype(e) == CLIENTTYPE_REAL)
+			humanCount++;
+
+	int maxPerTeam = min(ctSpawns, tSpawns);
+	int maxBotPerTeam = (int)cvar("bot_max_per_team");
+	if (maxBotPerTeam <= 0) maxBotPerTeam = 8;
+	if (maxPerTeam > maxBotPerTeam) maxPerTeam = maxBotPerTeam;
+
+	int targetBots = (maxPerTeam * 2) - humanCount;
+	if (targetBots < 0) targetBots = 0;
+
+	cvar_set("bot_minClients", itos(targetBots + humanCount));
+}
+
+void
 CSBot_RoundStart(void)
 {
+	CSBot_AutoCount();
 	YaPB_ElectLeaders();
 
 	for (entity a = world; (a = find(a, classname, "player"));) {
