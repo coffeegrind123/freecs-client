@@ -426,6 +426,7 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 void csbot::SmartRoute(vector dest) {
 	if (g_graphLoaded) {
 		YaPB_Nav_FindPath(dest);
+		RouteClear();
 	} else {
 		RouteToPosition(dest);
 	}
@@ -729,9 +730,18 @@ csbot::YaPB_TaskNormal(void)
 
 	CreateObjective();
 
-	/* if reached goal (no route), radio + camp chance */
-	if (m_iNodes <= 0 && m_eTarget == __NULL__) {
-		if (random() < 0.15)
+	/* if no route from either system, ensure movement + roam fallback */
+	int hasRoute = (m_iNodes > 0) || (g_graphLoaded && YaPB_Nav_HasPath());
+	if (!hasRoute && m_eTarget == __NULL__) {
+		/* ensure forward movement even without route */
+		if (vlen(input_movevalues) < 10)
+			input_movevalues[0] = GetRunSpeed() * 0.7;
+
+		/* occasionally try to find somewhere to go */
+		if (random() < 0.05)
+			Roam(origin, 800);
+
+		if (random() < 0.1)
 			YaPB_Radio(RADIO_CLEAR);
 	}
 }
@@ -1647,8 +1657,15 @@ csbot::YaPB_AimThink(void)
 			aimTarget = m_pRoute[m_iCurNode].dest;
 			makevectors(vectoangles(aimTarget - origin));
 			aimTarget += v_right * m_yapbSidePref * 20;
-		} else
-			aimTarget = origin + v_forward * 128;
+		} else {
+			/* no target, no route: hold angles, reset all velocity */
+			m_yapbLookYawVel = 0;
+			m_yapbLookPitchVel = 0;
+			m_yapbAimSpeedX = 0;
+			m_yapbAimSpeedY = 0;
+			input_angles = v_angle = angles;
+			return;
+		}
 	}
 
 	vector desiredAngles = vectoangles(aimTarget - (origin + view_ofs));
@@ -1721,7 +1738,7 @@ csbot::YaPB_AimThink(void)
 			accelerate = 2000.0 + diff * 300.0;
 		} else {
 			/* navigation: simple angle lerp, no spring (prevents spinning) */
-			float navLerp = bound(0.0, dt * 3.0, 1.0);
+			float navLerp = bound(0.0, dt * 5.0, 1.0);
 			float yawOff = desiredAngles[1] - curAngles[1];
 			while (yawOff > 180) yawOff -= 360;
 			while (yawOff < -180) yawOff += 360;
@@ -2048,6 +2065,9 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
+	/* clear buttons each frame — tasks set what they need */
+	input_buttons = 0;
+
 	super::RunAI();
 
 	/* validate enemy every frame: update distance + verify LOS */
@@ -2067,17 +2087,19 @@ csbot::RunAI(void)
 	YaPB_AimThink();
 	YaPB_TaskExecute();
 
-	/* follow YaPB graph path */
-	if (g_graphLoaded && YaPB_Nav_HasPath()) {
+	/* follow YaPB graph path (only when not in combat) */
+	int curTask = YaPB_TaskGetType();
+	if (g_graphLoaded && YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		YaPB_Nav_Follow();
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
 		/* move toward target node */
-		input_movevalues[0] = GetRunSpeed();
+		if (vlen(input_movevalues) < 10)
+			input_movevalues[0] = GetRunSpeed();
 
-		/* node flags */
-		if (navFlags & YAPB_NF_CROUCH)
+		/* node flags — only apply when navigating, not fighting */
+		if ((navFlags & YAPB_NF_CROUCH) && curTask == YAPB_TASK_NORMAL)
 			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
 			if (nt[2] > origin[2] + 16) v_angle[0] = -60;
