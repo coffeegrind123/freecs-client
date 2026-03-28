@@ -1123,6 +1123,13 @@ csbot::YaPB_CheckGrenadeThrow(void)
 void
 csbot::YaPB_TaskThrowGrenade(void)
 {
+	/* abort grenade if enemy too close (they closed distance after task was pushed) */
+	if (m_eTarget != __NULL__ && m_flEnemyDist < 300) {
+		m_yapbNadeType = 0;
+		YaPB_TaskPop();
+		YaPB_SelectBestWeapon();
+		return;
+	}
 	if (m_yapbNadeType == 0) {
 		YaPB_TaskPop();
 		return;
@@ -1285,11 +1292,15 @@ csbot::WeaponThink(void)
 			input_buttons |= INPUT_BUTTON4;
 			return;
 		} else {
-			/* truly out of ammo for this weapon — switch */
+			/* out of ammo for current weapon — try to switch */
 			YaPB_SelectBestWeapon();
+			/* if STILL same weapon (nothing better), knife as last resort */
+			if (a_ammo1 == 0 && a_ammo2 == 0) {
+				activeweapon = WEAPON_KNIFE;
+				Weapons_Draw((player)self);
+			}
 		}
 	} else {
-		/* clip has ammo — can consider switching for better weapon */
 		YaPB_SelectBestWeapon();
 	}
 }
@@ -1621,8 +1632,8 @@ csbot::YaPB_AimThink(void)
 	}
 
 	vector desiredAngles = vectoangles(aimTarget - (origin + view_ofs));
-	/* punchangle recoil compensation (E-Bot basecode.cpp:673) */
-	desiredAngles += punchangle;
+	/* Note: punchangle compensation removed — FTEQW handles it engine-side.
+	 * Adding it here double-compensates, making bots aim at the sky. */
 	if (desiredAngles[0] > 180) desiredAngles[0] -= 360;
 	if (desiredAngles[1] > 180) desiredAngles[1] -= 360;
 
@@ -1677,22 +1688,33 @@ csbot::YaPB_AimThink(void)
 		curAngles[1] += dt * m_yapbAimSpeedY;
 		curAngles[0] = bound(-89, curAngles[0], 89);
 	} else {
-		/* spring-damper with continuous skill scaling (E-Bot inspired) */
+		/* critically-damped spring for smooth aiming (no oscillation) */
 		bool importantAim = (m_eTarget != __NULL__ && m_eTarget.health > 0);
 		float stiffness;
 		float damping;
 		float accelerate;
 
 		if (importantAim) {
-			/* combat: scale linearly with difficulty */
-			stiffness = 100.0 + diff * 80.0;
-			damping = 10.0 + diff * 5.0;
-			accelerate = 2500.0 + diff * 200.0;
+			/* combat: scale with difficulty, critically damped */
+			stiffness = 40.0 + diff * 25.0;
+			damping = 2.0 * sqrt(stiffness);
+			accelerate = 800.0 + diff * 200.0;
 		} else {
-			/* navigation: softer spring prevents oscillation */
-			stiffness = 80.0;
-			damping = 12.0;
-			accelerate = 2000.0;
+			/* navigation: simple angle lerp, no spring (prevents spinning) */
+			float navLerp = bound(0.0, dt * 3.0, 1.0);
+			float yawOff = desiredAngles[1] - curAngles[1];
+			while (yawOff > 180) yawOff -= 360;
+			while (yawOff < -180) yawOff += 360;
+			float pitchOff = desiredAngles[0] - curAngles[0];
+			while (pitchOff > 180) pitchOff -= 360;
+			while (pitchOff < -180) pitchOff += 360;
+			curAngles[1] += yawOff * navLerp;
+			curAngles[0] += pitchOff * navLerp;
+			curAngles[0] = bound(-89, curAngles[0], 89);
+			m_yapbLookYawVel = 0;
+			m_yapbLookPitchVel = 0;
+			input_angles = v_angle = angles = curAngles;
+			return;
 		}
 
 		float yawOff = desiredAngles[1] - curAngles[1];
@@ -1810,8 +1832,11 @@ csbot::YaPB_CombatThink(void)
 	else if (approach < 30 && dist < 400)
 		input_movevalues[0] = -GetRunSpeed() * 0.5;
 
-	if (dist > 400 && dist < 900 && diff >= YAPB_DIFF_HARD)
-		input_buttons |= INPUT_BUTTON8;
+	/* crouch at medium range — only if already crouching or 5% chance to start */
+	if (dist > 400 && dist < 900 && diff >= YAPB_DIFF_HARD) {
+		if ((input_buttons & INPUT_BUTTON8) || random() < 0.005)
+			input_buttons |= INPUT_BUTTON8;
+	}
 
 	if (health < 25 || (health < 40 && m_yapbPersonality == YAPB_PERS_CAREFUL)) {
 		/* check wall behind before retreating (YaPB attackMovement:1477) */
