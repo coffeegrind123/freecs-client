@@ -1649,13 +1649,16 @@ csbot::YaPB_AimThink(void)
 	} else {
 		m_yapbAimPart = 0;
 		if (g_graphLoaded && YaPB_Nav_HasPath()) {
-			aimTarget = YaPB_GetNavTarget();
-			makevectors(vectoangles(aimTarget - origin));
-			aimTarget += v_right * m_yapbSidePref * 20;
+			/* look AHEAD along path, not at the immediate next node */
+			vector navTarget = YaPB_GetNavTarget();
+			vector lookDir = normalize(navTarget - origin);
+			lookDir[2] = 0;
+			aimTarget = origin + lookDir * 200;
 		} else if (m_iNodes && m_iCurNode >= 0) {
-			aimTarget = m_pRoute[m_iCurNode].dest;
-			makevectors(vectoangles(aimTarget - origin));
-			aimTarget += v_right * m_yapbSidePref * 20;
+			vector navTarget = m_pRoute[m_iCurNode].dest;
+			vector lookDir = normalize(navTarget - origin);
+			lookDir[2] = 0;
+			aimTarget = origin + lookDir * 200;
 		} else {
 			/* no target, no route: hold angles, reset all velocity */
 			m_yapbLookYawVel = 0;
