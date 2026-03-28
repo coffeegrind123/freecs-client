@@ -1309,7 +1309,11 @@ csbot::WeaponThink(void)
 		return;
 	}
 
-	/* reload if clip empty and have reserve — don't switch weapons during reload */
+	/* don't switch weapons if we just pressed reload */
+	if (input_buttons & INPUT_BUTTON4)
+		return;
+
+	/* reload if clip empty and have reserve */
 	if (a_ammo1 == 0) {
 		if (a_ammo2 != 0) {
 			input_buttons &= ~INPUT_BUTTON0;
@@ -1605,21 +1609,13 @@ csbot::YaPB_AimThink(void)
 			spot += comp;
 		}
 
-		/* aim error — distance-proportional spread, smoothly interpolated.
-		 * New error target chosen every 0.5-1.0s, then lerped toward. */
-		if (time > m_yapbAimErrorTime) {
-			m_yapbAimErrorTime = time + 1.0 + random() * 1.0;
+		/* aim error — fixed per enemy, only changes on new target (YaPB style) */
+		if (m_yapbAimPartEnt != m_eTarget) {
 			float spread = bound(0.1, dist / 1000.0, 1.0);
-			/* set NEW target error — will lerp toward it */
-			m_yapbAimErrorTarget[0] = crandom() * g_yapbAimErrX[diff] * spread;
-			m_yapbAimErrorTarget[1] = crandom() * g_yapbAimErrY[diff] * spread;
-			m_yapbAimErrorTarget[2] = crandom() * g_yapbAimErrZ[diff] * spread;
+			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff] * spread;
+			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff] * spread;
+			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff] * spread;
 		}
-		/* smoothly interpolate current error toward target (no snap) */
-		float errLerp = bound(0.0, frametime * 5.0, 1.0);
-		m_yapbAimErrorVec[0] += (m_yapbAimErrorTarget[0] - m_yapbAimErrorVec[0]) * errLerp;
-		m_yapbAimErrorVec[1] += (m_yapbAimErrorTarget[1] - m_yapbAimErrorVec[1]) * errLerp;
-		m_yapbAimErrorVec[2] += (m_yapbAimErrorTarget[2] - m_yapbAimErrorVec[2]) * errLerp;
 		spot += m_yapbAimErrorVec;
 
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
@@ -1732,10 +1728,16 @@ csbot::YaPB_AimThink(void)
 		float accelerate;
 
 		if (importantAim) {
-			/* combat: responsive aiming, critically damped */
-			stiffness = 150.0 + diff * 50.0;
-			damping = 2.0 * sqrt(stiffness);
-			accelerate = 2000.0 + diff * 300.0;
+			/* match YaPB vision.cpp:156-166 EXACTLY */
+			stiffness = 200.0;
+			damping = 25.0;
+			accelerate = 3000.0;
+			if (diff > YAPB_DIFF_NORMAL) {
+				stiffness += 100.0;
+				damping -= 5.0;
+				if (diff == YAPB_DIFF_EXPERT)
+					accelerate += 300.0;
+			}
 		} else {
 			/* navigation: simple angle lerp, no spring (prevents spinning) */
 			float navLerp = bound(0.0, dt * 5.0, 1.0);
@@ -1758,16 +1760,15 @@ csbot::YaPB_AimThink(void)
 		while (yawOff > 180) yawOff -= 360;
 		while (yawOff < -180) yawOff += 360;
 
-		/* max turn speed: scales with difficulty (prevents instant 180° snap) */
-		float maxTurnSpeed = 200.0 + diff * 80.0;
+		float maxTurnSpeed = 300.0 + diff * 100.0;
 
+		/* YaPB vision.cpp:197-205 — snap under 1 degree, spring otherwise */
 		if (fabs(yawOff) < 1.0) {
 			m_yapbLookYawVel = 0;
 			curAngles[1] = desiredAngles[1];
 		} else {
 			float acc = bound(-accelerate, stiffness * yawOff - damping * m_yapbLookYawVel, accelerate);
 			m_yapbLookYawVel += dt * acc;
-			m_yapbLookYawVel = bound(-maxTurnSpeed, m_yapbLookYawVel, maxTurnSpeed);
 			curAngles[1] += dt * m_yapbLookYawVel;
 		}
 
@@ -1857,11 +1858,17 @@ csbot::YaPB_CombatThink(void)
 		input_movevalues[1] = m_yapbStrafeDir * GetRunSpeed() * 0.8;
 	}
 
-	/* knife rush: always charge at max speed */
+	/* knife rush: charge + snap aim at enemy for guaranteed hits */
 	if (activeweapon == WEAPON_KNIFE) {
 		input_movevalues[0] = GetRunSpeed();
-		if (dist < 80)
+		if (dist < 100) {
 			input_buttons |= INPUT_BUTTON0;
+			/* snap directly at enemy — knife needs precision */
+			vector knifeAim = vectoangles(m_eTarget.origin - (origin + view_ofs));
+			if (knifeAim[0] > 180) knifeAim[0] -= 360;
+			v_angle = knifeAim;
+			input_angles = v_angle;
+		}
 		return;
 	}
 
