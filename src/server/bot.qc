@@ -1054,6 +1054,10 @@ csbot::YaPB_CheckGrenadeThrow(void)
 	if (m_eTarget == __NULL__ || m_eTarget.health <= 0)
 		return;
 
+	/* never throw grenades at close range */
+	if (m_flEnemyDist < 250)
+		return;
+
 	int curTask = YaPB_TaskGetType();
 	if (curTask == YAPB_TASK_THROWHE || curTask == YAPB_TASK_THROWFB ||
 	    curTask == YAPB_TASK_THROWSM || curTask == YAPB_TASK_PLANT ||
@@ -1907,6 +1911,10 @@ csbot::RunAI(void)
 	if (!m_yapbInitialized) YaPB_Init();
 
 	super::RunAI();
+
+	/* update enemy distance EVERY FRAME (was stale from SetEnemy) */
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0)
+		m_flEnemyDist = vlen(m_eTarget.origin - origin);
 
 	YaPB_SoundAwareness();
 	YaPB_TaskFilter();
