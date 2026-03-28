@@ -193,11 +193,17 @@ static void Graph_Free(void) {
 void Graph_Load(string mname) {
 	Graph_Free();
 
+	/* try multiple paths — FTEQW may look in different locations */
 	string filename = sprintf("graphs/%s.yapb", mname);
 	filestream f = fopen(filename, FILE_MMAP_READ);
 
 	if (f < 0) {
-		dprint(sprintf("YaPB graph not found: %s\n", filename));
+		filename = sprintf("data/graphs/%s.yapb", mname);
+		f = fopen(filename, FILE_MMAP_READ);
+	}
+
+	if (f < 0) {
+		print(sprintf("YaPB graph not found for map: %s\n", mname));
 		return;
 	}
 
@@ -298,5 +304,5 @@ void Graph_Load(string mname) {
 
 	Graph_BuildSpatialHash();
 	g_graphLoaded = YAPB_GRAPH_LOADED;
-	dprint(sprintf("YaPB graph loaded: %s (%i nodes)\n", filename, nodeCount));
+	print(sprintf("YaPB graph loaded: %s (%i nodes)\n", filename, nodeCount));
 }

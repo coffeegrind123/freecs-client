@@ -2094,9 +2094,19 @@ csbot::RunAI(void)
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
-		/* move toward target node */
-		if (vlen(input_movevalues) < 10)
-			input_movevalues[0] = GetRunSpeed();
+		/* move TOWARD target node, not just "forward" */
+		if (vlen(input_movevalues) < 10) {
+			vector moveDir = normalize(nt - origin);
+			makevectors(v_angle);
+			/* project desired direction onto bot's local axes */
+			input_movevalues[0] = (moveDir * v_forward) * GetRunSpeed();
+			input_movevalues[1] = (moveDir * v_right) * GetRunSpeed();
+		}
+
+		/* wall avoidance: trace ahead, slow if wall close */
+		traceline(origin, origin + v_forward * 80, MOVE_NORMAL, this);
+		if (trace_fraction < 0.5)
+			input_movevalues[0] *= 0.3;
 
 		/* node flags — only apply when navigating, not fighting */
 		if ((navFlags & YAPB_NF_CROUCH) && curTask == YAPB_TASK_NORMAL)
