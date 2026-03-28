@@ -236,9 +236,10 @@ class csbot:NSBot
 	float m_yapbRandomizeTime;
 	float m_yapbPlayerTargetTime;
 
-	/* stable aim error (recalculated every 0.5s, not every frame) */
+	/* stable aim error (recalculated every 0.5s, lerped smoothly) */
 	float m_yapbAimErrorTime;
 	vector m_yapbAimErrorVec;
+	vector m_yapbAimErrorTarget;
 
 	/* blind movement (stored once when blinded, not recalculated per frame) */
 	float m_yapbBlindMoveSpeed;
@@ -1565,16 +1566,21 @@ csbot::YaPB_AimThink(void)
 			spot += comp;
 		}
 
-		/* aim error — distance-proportional spread (sandbot technique)
-		 * Close range: spread=0.1 (tight). Long range: spread=1.0 (full error).
-		 * Recalculated every 0.5-1.0s, NOT every frame. */
+		/* aim error — distance-proportional spread, smoothly interpolated.
+		 * New error target chosen every 0.5-1.0s, then lerped toward. */
 		if (time > m_yapbAimErrorTime) {
 			m_yapbAimErrorTime = time + 0.5 + random() * 0.5;
 			float spread = bound(0.1, dist / 1000.0, 1.0);
-			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff] * spread;
-			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff] * spread;
-			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff] * spread;
+			/* set NEW target error — will lerp toward it */
+			m_yapbAimErrorTarget[0] = crandom() * g_yapbAimErrX[diff] * spread;
+			m_yapbAimErrorTarget[1] = crandom() * g_yapbAimErrY[diff] * spread;
+			m_yapbAimErrorTarget[2] = crandom() * g_yapbAimErrZ[diff] * spread;
 		}
+		/* smoothly interpolate current error toward target (no snap) */
+		float errLerp = bound(0.0, frametime * 5.0, 1.0);
+		m_yapbAimErrorVec[0] += (m_yapbAimErrorTarget[0] - m_yapbAimErrorVec[0]) * errLerp;
+		m_yapbAimErrorVec[1] += (m_yapbAimErrorTarget[1] - m_yapbAimErrorVec[1]) * errLerp;
+		m_yapbAimErrorVec[2] += (m_yapbAimErrorTarget[2] - m_yapbAimErrorVec[2]) * errLerp;
 		spot += m_yapbAimErrorVec;
 
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
@@ -1674,6 +1680,11 @@ csbot::YaPB_AimThink(void)
 				accelerate += 300;
 			stiffness += 100;
 			damping -= 5;
+		}
+		/* softer spring when navigating (no enemy) — prevents oscillation/spinning */
+		if (!importantAim) {
+			stiffness = 100.0;
+			damping = 15.0;
 		}
 
 		float yawOff = desiredAngles[1] - curAngles[1];
@@ -1804,7 +1815,9 @@ csbot::YaPB_CombatThink(void)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed() * 0.6;
 	}
 
-	if (dist < 300 && diff >= YAPB_DIFF_NORMAL && (flags & FL_ONGROUND) && random() < 0.02)
+	/* jump only if not crouching and not too frequent */
+	if (dist < 300 && diff >= YAPB_DIFF_NORMAL && (flags & FL_ONGROUND) &&
+	    !(input_buttons & INPUT_BUTTON8) && random() < 0.01)
 		input_buttons |= INPUT_BUTTON2;
 }
 
