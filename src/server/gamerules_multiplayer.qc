@@ -385,31 +385,18 @@ CSMultiplayerRules::TimerUpdate(void)
 		}
 	}
 
-	/* If map change requested, change as soon as possible */
-	if (g_cs_mapChangeRequested == true) {
-		if (g_cs_gamestate == GAME_INACTIVE || g_cs_gamestate == GAME_COMMENCING) {
+	/* If map change requested, change as soon as possible.
+	 * Don't act if already in GAME_OVER (IntermissionCycle handles that).
+	 * Don't act during GAME_ACTIVE/GAME_FREEZE — let the round finish
+	 * naturally via TimeOut→RoundOver→GAME_END, then change in GAME_END. */
+	if (g_cs_mapChangeRequested == true && g_cs_gamestate != GAME_OVER) {
+		if (g_cs_gamestate == GAME_INACTIVE || g_cs_gamestate == GAME_COMMENCING ||
+		    g_cs_gamestate == GAME_END) {
 			IntermissionStart();
 			g_cs_gamestate = GAME_OVER;
 			g_cs_mapChangeRequested = false;
 			return;
 		}
-
-		/* count human players */
-		int humanCount = 0;
-		for (entity e = world; (e = find(e, ::classname, "player"));)
-			if (clienttype(e) == CLIENTTYPE_REAL && e.team > 0)
-				humanCount++;
-
-		/* no humans alive in a team — change map immediately */
-		if (humanCount == 0) {
-			IntermissionStart();
-			g_cs_gamestate = GAME_OVER;
-			g_cs_mapChangeRequested = false;
-			return;
-		}
-
-		/* humans present but round timer expired — wait for round end
-		 * (GAME_END), which is handled below at line ~415 */
 	}
 
 	/* INACTIVE means no one is registered as a player */

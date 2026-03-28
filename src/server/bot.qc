@@ -1259,6 +1259,10 @@ csbot::YaPB_RadioThink(void)
 {
 	if (time < m_yapbRadioTime)
 		return;
+	if (health <= 0)
+		return;
+	if (g_cs_gamestate != GAME_ACTIVE)
+		return;
 
 	/* enemy spotted (once per round) */
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0 && !m_yapbRadioRoundSpot) {
