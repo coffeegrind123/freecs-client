@@ -95,6 +95,15 @@ if [ ! -d "$NUCLIDE_DIR/src" ]; then
     (cd "$NUCLIDE_DIR/valve" && git checkout "$VALVE_COMMIT")
 fi
 
+msg "Patching Nuclide menu (replace frag-net with our master)..."
+sed -i 's|"master.frag-net.com"|"ms.cs16.net"|' "$NUCLIDE_DIR/src/platform/master.h"
+sed -i 's|tcp://irc.frag-net.com:6667|//disabled|' "$NUCLIDE_DIR/src/menu-fn/m_chatrooms.qc"
+sed -i 's|http://www.frag-net.com/mods/_list.txt||' "$NUCLIDE_DIR/src/platform/modserver.qc"
+sed -i 's|http://www.frag-net.com/mods/%s.fmf||' "$NUCLIDE_DIR/src/platform/modserver.qc"
+sed -i 's|http://www.frag-net.com/dl/packages_%s||' "$NUCLIDE_DIR/src/platform/updates.qc"
+sed -i 's|http://www.frag-net.com/dl/img/%s.jpg||' "$NUCLIDE_DIR/src/platform/updates.qc"
+sed -i 's|http://www.frag-net.com/dl/%s_packages||' "$NUCLIDE_DIR/src/menu-fn/entry.qc"
+
 # =============================================================================
 # 4. Compile FreeCS QuakeC
 # =============================================================================
@@ -110,6 +119,12 @@ fi
 (cd "$NUCLIDE_DIR/cstrike/src/server" && "$FTEQCC" -I../../../src/xr/ progs.src)
 (cd "$NUCLIDE_DIR/cstrike/src/client" && "$FTEQCC" -I../../../src/xr/ progs.src)
 cp -f "$NUCLIDE_DIR/cstrike/progs.dat" "$NUCLIDE_DIR/cstrike/csprogs.dat" "$REPO_DIR/" 2>/dev/null || true
+
+msg "Compiling patched menu.dat..."
+mkdir -p "$NUCLIDE_DIR/platform"
+(cd "$NUCLIDE_DIR/src/menu-fn" && "$FTEQCC" -I../../src/xr/ progs.src)
+MENU_DAT="$NUCLIDE_DIR/platform/menu.dat"
+[ -f "$MENU_DAT" ] || err "menu.dat compilation failed"
 
 if [ "$QC_ONLY" -eq 1 ]; then
     msg "QuakeC compile complete (--qc-only)."
@@ -133,16 +148,8 @@ msg "Building FTEQW client (linux64)..."
 # =============================================================================
 # 6. Download game data
 # =============================================================================
-download "$VALVE_PK3_URL" "$DL_DIR/package_valve_orig.pk3"
+download "$VALVE_PK3_URL" "$DL_DIR/package_valve.pk3"
 download "$CSTRIKE_PK3_URL" "$DL_DIR/package_cstrike.pk3"
-
-if [ ! -f "$DL_DIR/package_valve.pk3" ] || [ "$DL_DIR/package_valve_orig.pk3" -nt "$DL_DIR/package_valve.pk3" ]; then
-    msg "Stripping frag-net menu.dat from valve pk3..."
-    TMPSTRIP="$BUILD_DIR/tmp/valve_strip"
-    mkdir -p "$TMPSTRIP"
-    (cd "$TMPSTRIP" && unzip -qo "$DL_DIR/package_valve_orig.pk3" && rm -f menu.dat && zip -qr "$DL_DIR/package_valve.pk3" .)
-    rm -rf "$TMPSTRIP"
-fi
 download "$CS15_URL" "$DL_DIR/cs15data.zip"
 
 if [ ! -f "$DL_DIR/valve-data.pk3" ]; then
@@ -183,6 +190,7 @@ build_package() {
 
     cp -f "$DL_DIR/package_valve.pk3" "$PKG/valve/"
     cp -f "$DL_DIR/valve-data.pk3" "$PKG/valve/" 2>/dev/null || true
+    cp -f "$NUCLIDE_DIR/platform/menu.dat" "$PKG/valve/menu.dat"
     cp -f "$DL_DIR/package_cstrike.pk3" "$PKG/cstrike/"
     cp -f "$DL_DIR/cs15data.zip" "$PKG/cstrike/pak0.pk3"
 
