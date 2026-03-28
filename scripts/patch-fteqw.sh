@@ -3,7 +3,7 @@ set -euo pipefail
 
 FTEQW_DIR="${1:?Usage: patch-fteqw.sh <fteqw-source-dir>}"
 
-patch -p1 -d "$FTEQW_DIR" <<'PATCH'
+patch -N -p1 -d "$FTEQW_DIR" <<'PATCH' || { echo "FTEQW patches already applied (or failed), continuing..."; true; }
 diff --git a/engine/client/m_download.c b/engine/client/m_download.c
 index 2d618c1..fb3ba43 100644
 --- a/engine/client/m_download.c

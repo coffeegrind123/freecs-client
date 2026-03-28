@@ -202,6 +202,11 @@ CSMultiplayerRules::PlayerPreFrame(NSClientPlayer pl)
 void
 CSMultiplayerRules::FrameStart(void)
 {
+	/* IntermissionCycle must run every frame to handle map changes after
+	 * IntermissionStart() has been called (GAME_OVER state).
+	 * Without this, the server hangs forever after timelimit/winlimit. */
+	IntermissionCycle();
+
 	if ((g_total_players > 0) && (g_cs_gamestate == GAME_INACTIVE)) {
 		TimerBegin(2, GAME_COMMENCING);
 	} else if (g_total_players == 0) {
@@ -211,7 +216,7 @@ CSMultiplayerRules::FrameStart(void)
 		g_cs_roundswon_ct = 0;
 		g_cs_roundsplayed = 0;
 	} else {
-		TimerUpdate(); // Timer that happens once players have started joining
+		TimerUpdate();
 	}
 }
 

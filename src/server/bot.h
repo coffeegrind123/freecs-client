@@ -12,9 +12,10 @@
  * WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
  * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */ 
+ */
 
 void CSBot_BombPlantedNotify(void);
 void CSBot_HostageRescueNotify(void);
 void CSBot_RoundStart(void);
 void CSBot_RestartRound(void);
+void YaPB_ElectLeaders(void);
