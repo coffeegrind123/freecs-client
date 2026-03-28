@@ -732,11 +732,12 @@ csbot::YaPB_TaskNormal(void)
 	}
 
 	/* only request new objective when we have no active path */
-	if (!YaPB_Nav_HasPath()) {
+	if (!YaPB_Nav_HasPath() && m_iNodes <= 0) {
 		CreateObjective();
 
-		/* if STILL no path, walk forward */
-		if (!YaPB_Nav_HasPath() && m_eTarget == __NULL__) {
+		/* if STILL no path, roam randomly */
+		if (!YaPB_Nav_HasPath() && m_iNodes <= 0 && m_eTarget == __NULL__) {
+			RunToConfront();
 			if (vlen(input_movevalues) < 10)
 				input_movevalues[0] = GetRunSpeed() * 0.5;
 		}
@@ -1492,6 +1493,7 @@ csbot::YaPB_StuckCheck(void)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
 		if (m_yapbStuckCount > 18) {
 			RouteClear();
+			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
 		}
@@ -1740,7 +1742,7 @@ csbot::YaPB_AimThink(void)
 			}
 		} else {
 			/* navigation: simple angle lerp, no spring (prevents spinning) */
-			float navLerp = bound(0.0, dt * 5.0, 1.0);
+			float navLerp = bound(0.0, dt * 3.0, 1.0);
 			float yawOff = desiredAngles[1] - curAngles[1];
 			while (yawOff > 180) yawOff -= 360;
 			while (yawOff < -180) yawOff += 360;
@@ -1760,7 +1762,7 @@ csbot::YaPB_AimThink(void)
 		while (yawOff > 180) yawOff -= 360;
 		while (yawOff < -180) yawOff += 360;
 
-		float maxTurnSpeed = 300.0 + diff * 100.0;
+		float maxTurnSpeed = 200.0 + diff * 60.0;
 
 		/* YaPB vision.cpp:197-205 — snap under 1 degree, spring otherwise */
 		if (fabs(yawOff) < 1.0) {
@@ -2090,7 +2092,7 @@ csbot::RunAI(void)
 		if (trace_ent == m_eTarget || trace_fraction >= 0.98) {
 			m_yapbLastEnemySeen = time;
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
-		} else if ((time - m_yapbLastEnemySeen) > 0.5) {
+		} else if ((time - m_yapbLastEnemySeen) > 0.2) {
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
 			m_eTarget = __NULL__;
 		}
@@ -2121,8 +2123,9 @@ csbot::RunAI(void)
 		/* update Nuclide route target to current graph node */
 		RouteToPosition(nt);
 
-		/* node flags */
-		if (navFlags & YAPB_NF_CROUCH)
+		/* crouch only at the actual crouch node, not while approaching it */
+		float nodeDist = vlen(nt - origin);
+		if ((navFlags & YAPB_NF_CROUCH) && nodeDist < 100)
 			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
 			if (nt[2] > origin[2] + 16) v_angle[0] = -45;
