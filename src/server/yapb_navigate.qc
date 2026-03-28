@@ -26,7 +26,7 @@ void YaPB_Nav_FindPath(vector dest) {
 
 	self.yapb_pathLen = pathLen;
 	self.yapb_pathCur = 0;
-	self.yapb_pathTimeout = time + 5.0;
+	self.yapb_pathTimeout = time + 30.0;
 
 	for (int i = 0; i < pathLen && i < ASTAR_MAX_PATH; i++)
 		self.yapb_path[i] = g_astarPath[i];
@@ -52,14 +52,14 @@ float YaPB_Nav_Follow(void) {
 	int nodeIdx = self.yapb_path[self.yapb_pathCur];
 	vector nodePos = Graph_NodeOrigin(nodeIdx);
 	float nodeRad = Graph_NodeRadius(nodeIdx);
-	if (nodeRad < 32) nodeRad = 32;
+	if (nodeRad < 64) nodeRad = 64;
 	int nodeFlags = Graph_NodeFlags(nodeIdx);
 
 	float dist = vlen(nodePos - self.origin);
 
 	if (dist < nodeRad) {
 		self.yapb_pathCur++;
-		self.yapb_pathTimeout = time + 5.0;
+		self.yapb_pathTimeout = time + 30.0;
 
 		if (self.yapb_pathCur >= self.yapb_pathLen) {
 			self.yapb_pathLen = 0;

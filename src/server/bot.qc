@@ -2101,7 +2101,8 @@ csbot::RunAI(void)
 	YaPB_TaskExecute();
 
 	/* graph navigation movement — YaPB style: forward speed + aim steers */
-	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
+	float hasPath = YaPB_Nav_HasPath();
+	if (hasPath && curTask != YAPB_TASK_ATTACK) {
 		int navFlags = YaPB_GetNavFlags();
 		vector nt = YaPB_GetNavTarget();
 
@@ -2159,6 +2160,8 @@ csbot::RunAI(void)
 	}
 
 	/* COMMIT all inputs */
+	input_angles = v_angle;
+	angles = v_angle;
 	button0 = input_buttons & INPUT_BUTTON0;
 	button2 = input_buttons & INPUT_BUTTON2;
 	button5 = input_buttons & INPUT_BUTTON5;
