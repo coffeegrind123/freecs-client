@@ -2058,9 +2058,10 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
-	/* === PURE YaPB — no super::RunAI(), no Nuclide routing === */
+	/* call parent for engine housekeeping, then override everything */
+	super::RunAI();
 
-	/* reset inputs each frame */
+	/* override all parent inputs — we control everything */
 	input_buttons = 0;
 	input_movevalues = [0, 0, 0];
 
