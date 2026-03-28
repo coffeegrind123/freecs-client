@@ -236,6 +236,15 @@ class csbot:NSBot
 	float m_yapbRandomizeTime;
 	float m_yapbPlayerTargetTime;
 
+	/* stable aim error (recalculated every 0.5s, not every frame) */
+	float m_yapbAimErrorTime;
+	vector m_yapbAimErrorVec;
+
+	/* blind movement (stored once when blinded, not recalculated per frame) */
+	float m_yapbBlindMoveSpeed;
+	float m_yapbBlindSideSpeed;
+	int m_yapbBlindButtons;
+
 	/* combat strafe timer */
 	float m_yapbStrafeTime;
 	float m_yapbStrafeDir;
@@ -987,18 +996,16 @@ csbot::YaPB_TaskBlind(void)
 		return;
 	}
 
-	input_movevalues[0] = GetRunSpeed() * 0.5 * (random() < 0.5 ? 1 : -1);
-	input_movevalues[1] = GetRunSpeed() * 0.3 * (random() < 0.5 ? 1 : -1);
+	/* use stored blind movement params (set once when blinded, not per frame) */
+	input_movevalues[0] = m_yapbBlindMoveSpeed;
+	input_movevalues[1] = m_yapbBlindSideSpeed;
+	input_buttons |= m_yapbBlindButtons;
 
-	/* fire at last enemy with error */
+	/* fire at last enemy with stored error */
 	if (m_yapbDifficulty >= YAPB_DIFF_NORMAL && m_yapbLastEnemySeen > 0) {
-		if (random() < 0.5) {
+		if (random() < 0.3) {
 			input_buttons |= INPUT_BUTTON0;
-			/* aim toward last enemy with large error */
-			float dist = vlen(m_yapbLastEnemyOrigin - origin);
-			float errScale = dist * 0.1;
-			vector blindAim = m_yapbLastEnemyOrigin;
-			blindAim += [crandom() * errScale, crandom() * errScale, 0];
+			vector blindAim = m_yapbLastEnemyOrigin + m_yapbAimErrorVec * 3.0;
 			vector blindAng = vectoangles(blindAim - origin);
 			input_angles = v_angle = angles = blindAng;
 		}
@@ -1516,10 +1523,14 @@ csbot::YaPB_AimThink(void)
 			spot += comp;
 		}
 
-		/* aim error (YaPB config.cpp: aimError x,y,z per difficulty) */
-		spot[0] += crandom() * g_yapbAimErrX[diff];
-		spot[1] += crandom() * g_yapbAimErrY[diff];
-		spot[2] += crandom() * g_yapbAimErrZ[diff];
+		/* aim error — recalculated every 0.5s, NOT every frame (fixes jitter) */
+		if (time > m_yapbAimErrorTime) {
+			m_yapbAimErrorTime = time + 0.5 + random() * 0.5;
+			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff];
+			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff];
+			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff];
+		}
+		spot += m_yapbAimErrorVec;
 
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
 		if (diff >= YAPB_DIFF_EXPERT) {
@@ -1669,13 +1680,18 @@ csbot::YaPB_CombatThink(void)
 			threshold = 0.95;
 
 		if (dot >= threshold) {
+			/* check ALL teammates in fire cone (YaPB isFriendInLineOfFire) */
+			makevectors(v_angle);
+			float enemyDist = vlen(m_eTarget.origin - origin);
 			for (entity e = world; (e = find(e, ::classname, "player"));) {
 				if (e == this || e.health <= 0 || e.team != this.team)
 					continue;
-				traceline(origin, m_eTarget.origin, MOVE_NORMAL, this);
-				if (trace_ent == e)
+				float mateDist = vlen(e.origin - origin);
+				if (mateDist > enemyDist)
+					continue;
+				vector mateDir = normalize(e.origin - origin);
+				if ((mateDir * v_forward) > 0.9)
 					return;
-				break;
 			}
 
 			input_buttons |= INPUT_BUTTON0;
