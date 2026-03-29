@@ -2254,19 +2254,19 @@ csbot::RunAI(void)
 		 * trace at knee height along movement direction — if blocked
 		 * but head height is clear, crouch-jump to get over it. */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
-			vector fwd = normalize([moveDir[0], moveDir[1], 0]);
+			vector obsFwd = normalize([moveDir[0], moveDir[1], 0]);
 			vector feetPos = origin + [0, 0, -24];
 			vector kneePos = origin + [0, 0, -8];
 			vector waistPos = origin;
 			vector headPos = origin + [0, 0, 36];
 
 			/* trace at knee height forward */
-			traceline(kneePos, kneePos + fwd * 40, MOVE_NORMAL, this);
+			traceline(kneePos, kneePos + obsFwd * 40, MOVE_NORMAL, this);
 			float kneeBlocked = trace_fraction;
 
 			if (kneeBlocked < 1.0) {
 				/* something at knee level — check if head is clear */
-				traceline(headPos, headPos + fwd * 40, MOVE_NORMAL, this);
+				traceline(headPos, headPos + obsFwd * 40, MOVE_NORMAL, this);
 				float headClear = trace_fraction;
 
 				if (headClear >= 1.0) {
@@ -2276,7 +2276,7 @@ csbot::RunAI(void)
 				} else {
 					/* head blocked too — check if it's a ramp/slope we can walk up.
 					 * trace from above the obstacle down to find the surface height */
-					vector aheadTop = headPos + fwd * 48;
+					vector aheadTop = headPos + obsFwd * 48;
 					traceline(aheadTop, aheadTop - [0, 0, 72], MOVE_NORMAL, this);
 					float surfaceZ = aheadTop[2] - 72 * trace_fraction;
 					float stepHeight = surfaceZ - feetPos[2];
@@ -2289,7 +2289,7 @@ csbot::RunAI(void)
 				}
 			} else {
 				/* knee clear but check for low obstacles at feet */
-				traceline(feetPos, feetPos + fwd * 40, MOVE_NORMAL, this);
+				traceline(feetPos, feetPos + obsFwd * 40, MOVE_NORMAL, this);
 				if (trace_fraction < 1.0) {
 					/* foot-level obstacle (ramp lip, small step) — crouch-jump */
 					input_buttons |= INPUT_BUTTON2;
