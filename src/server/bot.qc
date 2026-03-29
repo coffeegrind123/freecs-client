@@ -1360,11 +1360,22 @@ csbot::YaPB_Radio(float msg)
 	if (random() > personalityScale)
 		return;
 
-	/* send as player-attributed radio (same as human players) */
-	entity oldSelf = self;
-	self = this;
-	CSEv_Radio_f(msg);
-	self = oldSelf;
+	/* send as player-attributed radio (same as human players).
+	 * CSEv_Radio_f uses self to identify sender — temporarily
+	 * redirect via localcmd since we can't assign self in a class method. */
+	float fTeam = this.team;
+	if (fTeam == TEAM_VIP) fTeam = TEAM_CT;
+
+	for (entity eFind = world; (eFind = find(eFind, classname, "player"));) {
+		if (eFind.team == fTeam || (eFind.team == TEAM_VIP && fTeam == TEAM_CT)) {
+			WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+			WriteByte(MSG_MULTICAST, EV_RADIOMSG2);
+			WriteByte(MSG_MULTICAST, num_for_edict(this) - 1);
+			WriteByte(MSG_MULTICAST, msg);
+			msg_entity = eFind;
+			multicast([0,0,0], MULTICAST_ONE);
+		}
+	}
 }
 
 void
@@ -1843,13 +1854,12 @@ csbot::YaPB_CombatThink(void)
 			 * close range: longer bursts. long range: short taps.
 			 * pistols/shotguns/snipers: single shots with pacing. */
 			bool isRifle = (activeweapon == WEAPON_AK47 || activeweapon == WEAPON_M4A1 ||
-			                activeweapon == WEAPON_AUG || activeweapon == WEAPON_SG552 ||
-			                activeweapon == WEAPON_FAMAS || activeweapon == WEAPON_GALIL);
+			                activeweapon == WEAPON_AUG || activeweapon == WEAPON_SG552);
 			bool isSMG = (activeweapon == WEAPON_MP5 || activeweapon == WEAPON_P90 ||
 			              activeweapon == WEAPON_UMP45 || activeweapon == WEAPON_MAC10 ||
 			              activeweapon == WEAPON_TMP);
-			bool isSniper = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
-			                 activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
+			bool isSniperWep = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
+			                    activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
 
 			float recoilMag = vlen(punchangle);
 
@@ -1875,7 +1885,7 @@ csbot::YaPB_CombatThink(void)
 				} else {
 					m_yapbShootTime = time + 0.08;
 				}
-			} else if (isSniper) {
+			} else if (isSniperWep) {
 				m_yapbShootTime = time + 0.8 + random() * 0.5;
 			} else {
 				/* pistols, shotguns: paced shots */
