@@ -1665,8 +1665,12 @@ csbot::YaPB_AimThink(void)
 	} else {
 		m_yapbAimPart = 0;
 		if (g_graphLoaded && YaPB_Nav_HasPath()) {
-			/* look AHEAD along path, not at the immediate next node */
-			vector navTarget = YaPB_GetNavTarget();
+			/* look 2-3 nodes ahead for smooth aim along path */
+			int lookAhead = self.yapb_pathCur + 2;
+			if (lookAhead >= self.yapb_pathLen)
+				lookAhead = self.yapb_pathLen - 1;
+			int lookNode = self.yapb_path[lookAhead];
+			vector navTarget = Graph_NodeOrigin(lookNode);
 			vector lookDir = normalize(navTarget - origin);
 			lookDir[2] = 0;
 			aimTarget = origin + lookDir * 200;
@@ -2212,11 +2216,27 @@ csbot::RunAI(void)
 		vector nt = YaPB_GetNavTarget();
 		int navFlags = YaPB_GetNavFlags();
 
-		/* move directly toward graph node */
+		/* move toward graph node using aim-independent direction.
+		 * project world-space direction onto the bot's CURRENT facing
+		 * to get correct forward/strafe values regardless of aim state. */
 		vector moveDir = normalize(nt - origin);
-		makevectors(v_angle);
-		input_movevalues[0] = (moveDir * v_forward) * GetRunSpeed();
-		input_movevalues[1] = (moveDir * v_right) * GetRunSpeed();
+		vector flatAngle = v_angle;
+		flatAngle[0] = 0;
+		makevectors(flatAngle);
+		float fwd = moveDir * v_forward;
+		float side = moveDir * v_right;
+		float speed = GetRunSpeed();
+
+		/* always move primarily forward — don't let projection
+		 * produce pure strafe when aim hasn't converged yet */
+		if (fabs(fwd) < 0.3 && fabs(side) > 0.3) {
+			/* aim is roughly perpendicular to path — just run forward */
+			input_movevalues[0] = speed;
+			input_movevalues[1] = 0;
+		} else {
+			input_movevalues[0] = fwd * speed;
+			input_movevalues[1] = side * speed;
+		}
 
 		/* crouch only at the actual crouch node, not while approaching it */
 		float nodeDist = vlen(nt - origin);
