@@ -1366,7 +1366,7 @@ csbot::YaPB_Radio(float msg)
 	float fTeam = this.team;
 	if (fTeam == TEAM_VIP) fTeam = TEAM_CT;
 
-	for (entity eFind = world; (eFind = find(eFind, classname, "player"));) {
+	for (entity eFind = world; (eFind = find(eFind, ::classname, "player"));) {
 		if (eFind.team == fTeam || (eFind.team == TEAM_VIP && fTeam == TEAM_CT)) {
 			WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
 			WriteByte(MSG_MULTICAST, EV_RADIOMSG2);
