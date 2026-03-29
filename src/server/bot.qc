@@ -1306,6 +1306,15 @@ csbot::WeaponThink(void)
 	    curTask == YAPB_TASK_THROWSM)
 		return;
 
+	/* don't switch weapons during combat — only reload */
+	if (curTask == YAPB_TASK_ATTACK && activeweapon != WEAPON_KNIFE) {
+		if (a_ammo1 == 0 && a_ammo2 != 0) {
+			input_buttons &= ~INPUT_BUTTON0;
+			input_buttons |= INPUT_BUTTON4;
+		}
+		return;
+	}
+
 	/* don't touch weapons during draw cooldown */
 	if (time < m_yapbWeaponCheckTime)
 		return;
@@ -1484,19 +1493,42 @@ csbot::YaPB_StuckCheck(void)
 	float speed = vlen(origin - m_yapbPrevOrigin);
 	m_yapbPrevOrigin = origin;
 
-	if (speed < 10.0 && vlen(input_movevalues) > 50.0) {
+	/* check if we're on a slope/ramp — don't trigger stuck on ramps */
+	float verticalSpeed = fabs(origin[2] - m_yapbPrevOrigin[2]);
+	bool onRamp = (verticalSpeed > 2.0 && speed > 3.0);
+
+	if (speed < 10.0 && vlen(input_movevalues) > 50.0 && !onRamp) {
 		m_yapbStuckCount++;
 		if (m_yapbStuckCount > 1) {
 			YaPB_LadderThink();
 			YaPB_DoorThink();
 		}
 		if (m_yapbStuckCount > 2) {
-			/* first response: crouch-jump (handles most obstacles/ramps) */
-			input_buttons |= INPUT_BUTTON2;
-			input_buttons |= INPUT_BUTTON8;
+			/* check if the obstacle is actually passable before jumping */
+			makevectors(v_angle);
+			traceline(origin + [0,0,36], origin + [0,0,36] + v_forward * 64, MOVE_NORMAL, this);
+			if (trace_fraction >= 1.0) {
+				/* head height is clear — jump can get us over */
+				input_buttons |= INPUT_BUTTON2;
+				input_buttons |= INPUT_BUTTON8;
+			} else {
+				/* head blocked too — check how high the wall is */
+				traceline(origin + [0,0,72], origin + [0,0,72] + v_forward * 64, MOVE_NORMAL, this);
+				if (trace_fraction < 1.0) {
+					/* wall is taller than jump height — don't jump, repath */
+					if (m_yapbStuckCount > 4) {
+						YaPB_Nav_Clear();
+						m_yapbStuckCount = 0;
+						return;
+					}
+				} else {
+					input_buttons |= INPUT_BUTTON2;
+					input_buttons |= INPUT_BUTTON8;
+				}
+			}
 		}
 		if (m_yapbStuckCount > 5) {
-			/* corner detection: trace 45° left + right */
+			/* corner detection: trace 45 left + right */
 			makevectors(v_angle);
 			traceline(origin, origin + v_forward * 20 + v_right * 20, MOVE_NORMAL, this);
 			float rightBlocked = trace_fraction;
@@ -1512,7 +1544,7 @@ csbot::YaPB_StuckCheck(void)
 		}
 		if (m_yapbStuckCount > 8)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
-		if (m_yapbStuckCount > 12) {
+		if (m_yapbStuckCount > 10) {
 			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
@@ -1636,7 +1668,7 @@ csbot::YaPB_AimThink(void)
 			float spread = bound(0.1, dist / 1000.0, 1.0);
 			m_yapbAimErrorVec[0] = crandom() * g_yapbAimErrX[diff] * spread;
 			m_yapbAimErrorVec[1] = crandom() * g_yapbAimErrY[diff] * spread;
-			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff] * spread;
+			m_yapbAimErrorVec[2] = crandom() * g_yapbAimErrZ[diff] * spread * 0.3;
 		}
 		spot += m_yapbAimErrorVec;
 
@@ -1664,14 +1696,22 @@ csbot::YaPB_AimThink(void)
 		aimTarget = spot;
 	} else {
 		m_yapbAimPart = 0;
+		/* reset spring velocity when switching from combat to nav aim */
+		m_yapbLookYawVel *= 0.3;
+		m_yapbLookPitchVel *= 0.3;
+		m_yapbAimSpeedX *= 0.3;
+		m_yapbAimSpeedY *= 0.3;
 		if (g_graphLoaded && YaPB_Nav_HasPath()) {
-			/* look 2-3 nodes ahead for smooth aim along path */
-			int lookAhead = self.yapb_pathCur + 2;
+			/* blend look direction from current and ahead nodes for smooth aim */
+			vector curNode = YaPB_GetNavTarget();
+			int lookAhead = self.yapb_pathCur + 3;
 			if (lookAhead >= self.yapb_pathLen)
 				lookAhead = self.yapb_pathLen - 1;
-			int lookNode = self.yapb_path[lookAhead];
-			vector navTarget = Graph_NodeOrigin(lookNode);
-			vector lookDir = normalize(navTarget - origin);
+			vector aheadNode = Graph_NodeOrigin(self.yapb_path[lookAhead]);
+
+			/* weighted blend: 30% immediate target, 70% ahead */
+			vector blended = curNode * 0.3 + aheadNode * 0.7;
+			vector lookDir = normalize(blended - origin);
 			lookDir[2] = 0;
 			aimTarget = origin + lookDir * 200;
 		} else {
@@ -1760,8 +1800,8 @@ csbot::YaPB_AimThink(void)
 					accelerate += 300.0;
 			}
 		} else {
-			/* navigation: simple angle lerp, no spring (prevents spinning) */
-			float navLerp = bound(0.0, dt * 3.0, 1.0);
+			/* navigation: gentle angle lerp for smooth look-around */
+			float navLerp = bound(0.0, dt * 2.0, 0.5);
 			float yawOff = desiredAngles[1] - curAngles[1];
 			while (yawOff > 180) yawOff -= 360;
 			while (yawOff < -180) yawOff += 360;
@@ -1823,6 +1863,24 @@ csbot::YaPB_CombatThink(void)
 
 	int diff = m_yapbDifficulty;
 	float dist = m_flEnemyDist;
+
+	/* sniper scope: zoom in at medium+ range before shooting */
+	bool isSniperWep = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
+	                    activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
+	if (isSniperWep && dist > 300) {
+		player pl = (player)self;
+		if (pl.viewzoom >= 1.0) {
+			input_buttons |= INPUT_BUTTON5;
+			m_yapbShootTime = time + 0.4;
+			return;
+		}
+	} else if (isSniperWep && dist <= 300) {
+		player pl = (player)self;
+		if (pl.viewzoom < 1.0) {
+			input_buttons |= INPUT_BUTTON5;
+			return;
+		}
+	}
 
 	if (time >= m_yapbShootTime) {
 		makevectors(v_angle);
@@ -2248,51 +2306,20 @@ csbot::RunAI(void)
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
 
-		/* proactive obstacle detection: crouch-jump over barriers.
-		 * trace at knee height along movement direction — if blocked
-		 * but head height is clear, crouch-jump to get over it. */
+		/* proactive obstacle detection: only crouch-jump over
+		 * obstacles that are actually passable (< ~45 units high) */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
 			vector obsFwd = normalize([moveDir[0], moveDir[1], 0]);
-			vector feetPos = origin + [0, 0, -24];
-			vector kneePos = origin + [0, 0, -8];
-			vector waistPos = origin;
-			vector headPos = origin + [0, 0, 36];
 
-			/* trace at knee height forward */
-			traceline(kneePos, kneePos + obsFwd * 40, MOVE_NORMAL, this);
-			float kneeBlocked = trace_fraction;
-
-			if (kneeBlocked < 1.0) {
-				/* something at knee level — check if head is clear */
-				traceline(headPos, headPos + obsFwd * 40, MOVE_NORMAL, this);
-				float headClear = trace_fraction;
-
-				if (headClear >= 1.0) {
-					/* obstacle is low enough to jump over — crouch-jump */
-					input_buttons |= INPUT_BUTTON2;
-					input_buttons |= INPUT_BUTTON8;
-				} else {
-					/* head blocked too — check if it's a ramp/slope we can walk up.
-					 * trace from above the obstacle down to find the surface height */
-					vector aheadTop = headPos + obsFwd * 48;
-					traceline(aheadTop, aheadTop - [0, 0, 72], MOVE_NORMAL, this);
-					float surfaceZ = aheadTop[2] - 72 * trace_fraction;
-					float stepHeight = surfaceZ - feetPos[2];
-
-					if (stepHeight > 0 && stepHeight < 40) {
-						/* short step/ramp — crouch-jump */
-						input_buttons |= INPUT_BUTTON2;
-						input_buttons |= INPUT_BUTTON8;
-					}
-				}
-			} else {
-				/* knee clear but check for low obstacles at feet */
-				traceline(feetPos, feetPos + obsFwd * 40, MOVE_NORMAL, this);
-				if (trace_fraction < 1.0) {
-					/* foot-level obstacle (ramp lip, small step) — crouch-jump */
+			traceline(origin, origin + obsFwd * 40, MOVE_NORMAL, this);
+			if (trace_fraction < 1.0) {
+				/* obstacle ahead — check if jumpable (head+jump height clear) */
+				traceline(origin + [0,0,45], origin + [0,0,45] + obsFwd * 40, MOVE_NORMAL, this);
+				if (trace_fraction >= 1.0) {
 					input_buttons |= INPUT_BUTTON2;
 					input_buttons |= INPUT_BUTTON8;
 				}
+				/* else: wall too tall, don't waste time jumping */
 			}
 		}
 	}
