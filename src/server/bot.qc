@@ -1489,49 +1489,47 @@ csbot::YaPB_DoorThink(void)
 void
 csbot::YaPB_StuckCheck(void)
 {
+	/* if under fire, don't waste time with stuck recovery — fight back */
+	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
+		m_yapbStuckCount = 0;
+		return;
+	}
+
 	if (time < m_yapbStuckTime) return;
 	m_yapbStuckTime = time + 0.5;
 
 	float speed = vlen(origin - m_yapbPrevOrigin);
 	m_yapbPrevOrigin = origin;
 
-	/* check if we're on a slope/ramp — don't trigger stuck on ramps */
-	float verticalSpeed = fabs(origin[2] - m_yapbPrevOrigin[2]);
-	bool onRamp = (verticalSpeed > 2.0 && speed > 3.0);
-
-	if (speed < 10.0 && vlen(input_movevalues) > 50.0 && !onRamp) {
+	if (speed < 10.0 && vlen(input_movevalues) > 50.0) {
 		m_yapbStuckCount++;
 		if (m_yapbStuckCount > 1) {
 			YaPB_LadderThink();
 			YaPB_DoorThink();
 		}
-		if (m_yapbStuckCount > 2) {
-			/* check if the obstacle is jumpable (clear at jump apex) */
+		if (m_yapbStuckCount > 1) {
+			/* immediately check if obstacle is passable */
 			makevectors(v_angle);
 			traceline(origin + [0,0,45], origin + [0,0,45] + v_forward * 48, MOVE_NORMAL, this);
-			if (trace_fraction >= 1.0) {
+			if (trace_fraction < 1.0) {
+				/* impassable — strafe around like teammate avoidance */
+				traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
+				float rightClear = trace_fraction;
+				traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
+				float leftClear = trace_fraction;
+				if (rightClear > leftClear)
+					input_movevalues[1] = GetRunSpeed();
+				else
+					input_movevalues[1] = -GetRunSpeed();
+				input_movevalues[0] = GetRunSpeed() * 0.3;
+			} else {
+				/* jumpable — one crouch-jump attempt */
 				input_buttons |= INPUT_BUTTON2;
 				input_buttons |= INPUT_BUTTON8;
-			} else {
-				/* impassable wall — repath immediately, don't keep jumping */
-				YaPB_Nav_Clear();
-				m_yapbStuckCount = 0;
-				return;
 			}
 		}
-		if (m_yapbStuckCount > 4) {
-			/* try strafing around the obstacle */
-			makevectors(v_angle);
-			traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
-			float rightClear = trace_fraction;
-			traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
-			float leftClear = trace_fraction;
-			if (rightClear > leftClear)
-				input_movevalues[1] = GetRunSpeed();
-			else
-				input_movevalues[1] = -GetRunSpeed();
-		}
-		if (m_yapbStuckCount > 6) {
+		if (m_yapbStuckCount > 3) {
+			/* give up quickly — repath */
 			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
@@ -2309,20 +2307,32 @@ csbot::RunAI(void)
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
 
-		/* proactive obstacle detection: only crouch-jump over
-		 * obstacles that are actually passable (< ~45 units high) */
+		/* proactive obstacle avoidance: strafe around walls,
+		 * only crouch-jump if obstacle is actually jumpable */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
 			vector obsFwd = normalize([moveDir[0], moveDir[1], 0]);
 
 			traceline(origin, origin + obsFwd * 40, MOVE_NORMAL, this);
 			if (trace_fraction < 1.0) {
-				/* obstacle ahead — check if jumpable (head+jump height clear) */
 				traceline(origin + [0,0,45], origin + [0,0,45] + obsFwd * 40, MOVE_NORMAL, this);
 				if (trace_fraction >= 1.0) {
+					/* short obstacle — crouch-jump over */
 					input_buttons |= INPUT_BUTTON2;
 					input_buttons |= INPUT_BUTTON8;
+				} else {
+					/* wall — strafe around it */
+					vector flatAngle2 = v_angle;
+					flatAngle2[0] = 0;
+					makevectors(flatAngle2);
+					traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
+					float rClear = trace_fraction;
+					traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
+					float lClear = trace_fraction;
+					if (rClear > lClear)
+						input_movevalues[1] += GetRunSpeed() * 0.6;
+					else
+						input_movevalues[1] -= GetRunSpeed() * 0.6;
 				}
-				/* else: wall too tall, don't waste time jumping */
 			}
 		}
 	}
