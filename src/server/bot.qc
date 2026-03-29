@@ -1578,8 +1578,6 @@ csbot::YaPB_SoundAwareness(void)
 		if (e.button0 && dist < 900.0) {
 			m_yapbHeardPos = e.origin;
 			m_yapbHeardTime = time;
-			if (m_eTarget == __NULL__)
-				SmartRoute(m_yapbHeardPos);
 			return;
 		}
 		if (vlen(e.velocity) > 150.0 && dist < 500.0) {
@@ -1851,36 +1849,36 @@ csbot::YaPB_CombatThink(void)
 	int diff = m_yapbDifficulty;
 	float dist = m_flEnemyDist;
 
-	/* sniper scope: zoom in at medium+ range before shooting */
+	/* sniper scope: directly set zoom state on the player entity */
 	bool isSniperWep = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
 	                    activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
-	if (isSniperWep && dist > 300) {
+	if (isSniperWep) {
 		player pl = (player)self;
-		if (pl.viewzoom >= 1.0) {
-			input_buttons |= INPUT_BUTTON5;
-			m_yapbShootTime = time + 0.4;
+		if (dist > 300 && pl.mode_temp == 0) {
+			pl.mode_temp = 1;
+			pl.viewzoom = 0.45;
+			m_yapbShootTime = time + 0.3;
 			return;
-		}
-	} else if (isSniperWep && dist <= 300) {
-		player pl = (player)self;
-		if (pl.viewzoom < 1.0) {
-			input_buttons |= INPUT_BUTTON5;
-			return;
+		} else if (dist <= 300 && pl.mode_temp != 0) {
+			pl.mode_temp = 0;
+			pl.viewzoom = 1.0;
 		}
 	}
 
 	if (time >= m_yapbShootTime) {
+		/* check if we're roughly aimed at enemy (use center mass, not feet) */
 		makevectors(v_angle);
-		vector dir = normalize(m_eTarget.origin - origin);
+		vector enemyCenter = m_eTarget.origin + [0, 0, m_eTarget.size[2] * 0.4];
+		vector dir = normalize(enemyCenter - (origin + view_ofs));
 		float dot = dir * v_forward;
 
 		float threshold;
-		if (dist < 200)
-			threshold = 0.70;
+		if (dist < 300)
+			threshold = 0.65;
 		else if (dist < 800)
-			threshold = 0.80;
+			threshold = 0.75;
 		else
-			threshold = 0.85;
+			threshold = 0.80;
 
 		if (dot >= threshold) {
 			/* check ALL teammates in fire cone (YaPB isFriendInLineOfFire) */
@@ -2103,13 +2101,14 @@ csbot::SeeThink(void)
 void
 csbot::CreateObjective(void)
 {
+	/* BOMB MAPS: Ts go to bombsites, CTs defend/defuse */
 	if (g_cs_bombzones > 0) {
 		if (g_cs_bombplanted) {
 			if (team == TEAM_CT) {
 				RunToBomb();
 				return;
 			}
-			/* T: stay near bomb */
+			/* T: guard near planted bomb */
 			entity eBomb = find(world, ::model, "models/w_c4.mdl");
 			if (eBomb != world) {
 				Roam(eBomb.origin, 500);
@@ -2117,47 +2116,61 @@ csbot::CreateObjective(void)
 			}
 		}
 		if (team == TEAM_T) {
+			/* T with bomb: go plant */
 			if (g_items & ITEM_C4BOMB) {
 				RunToRandomBombsite();
 				return;
 			}
-			/* pick up dropped bomb */
+			/* T without bomb: follow the bomber OR go to a bombsite */
 			entity e = find(world, ::model, "models/w_backpack.mdl");
 			if (e != world) {
 				SmartRoute(getEntityCenterPos(e));
 				return;
 			}
+			/* no dropped bomb — another T has it. go to a bombsite to support */
+			RunToRandomBombsite();
+			return;
+		}
+		if (team == TEAM_CT) {
+			/* CT: go defend a bombsite */
+			RunToRandomBombsite();
+			return;
 		}
 	}
 
-	if (g_cs_escapezones && team == TEAM_T) {
-		RunToRandomEscapeZone();
-		return;
-	}
-
-	if (random() < 0.5 && g_cs_escapezones > 0 && team == TEAM_CT) {
-		RunToRandomEscapeZone();
-		return;
-	}
-
-	if (g_cs_vipzones > 0 && team == TEAM_CT) {
-		RunToRandomVIPSafetyZone();
-		return;
-	}
-
-	if (random() < 0.5 && g_cs_vipzones > 0 && team == TEAM_T) {
-		RunToRandomVIPSafetyZone();
-		return;
-	}
-
-	if (random() < 0.5) {
-		if (g_cs_hostagestotal > 0)
+	/* HOSTAGE MAPS: CTs rescue, Ts guard */
+	if (g_cs_hostagestotal > 0) {
+		if (team == TEAM_CT) {
 			RunToHostages();
-		if (g_cs_bombzones > 0)
-			RunToRandomBombsite();
-	} else {
-		RunToConfront();
+			return;
+		}
+		/* T: go near hostages to guard them */
+		RunToHostages();
+		return;
 	}
+
+	/* ESCAPE MAPS */
+	if (g_cs_escapezones > 0) {
+		if (team == TEAM_T) {
+			RunToRandomEscapeZone();
+			return;
+		}
+		RunToRandomEscapeZone();
+		return;
+	}
+
+	/* VIP MAPS */
+	if (g_cs_vipzones > 0) {
+		if (team == TEAM_CT) {
+			RunToRandomVIPSafetyZone();
+			return;
+		}
+		RunToRandomVIPSafetyZone();
+		return;
+	}
+
+	/* no specific objective — go confront the enemy */
+	RunToConfront();
 
 	if (!YaPB_Nav_HasPath()) {
 		/* reduced camp chance — only camp away from spawn */
@@ -2220,17 +2233,20 @@ csbot::RunAI(void)
 	if (v_angle[0] < -45) v_angle[0] = -45;
 	input_angles = v_angle;
 
-	/* enemy validation: team check + distance + LOS with 0.5s grace */
+	/* enemy validation: strict LOS — drop target immediately when not visible */
 	if (m_eTarget != __NULL__ && (m_eTarget.health <= 0 || m_eTarget.team == this.team)) {
 		m_eTarget = __NULL__;
 	}
 	if (m_eTarget != __NULL__ && m_eTarget.health > 0) {
 		m_flEnemyDist = vlen(m_eTarget.origin - origin);
 		traceline(origin + view_ofs, m_eTarget.origin, MOVE_NORMAL, this);
-		if (trace_ent == m_eTarget || trace_fraction >= 0.98) {
+		bool canSeeBody = (trace_ent == m_eTarget || trace_fraction >= 0.98);
+		traceline(origin + view_ofs, m_eTarget.origin + m_eTarget.view_ofs, MOVE_NORMAL, this);
+		bool canSeeHead = (trace_ent == m_eTarget || trace_fraction >= 0.98);
+		if (canSeeBody || canSeeHead) {
 			m_yapbLastEnemySeen = time;
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
-		} else if ((time - m_yapbLastEnemySeen) > 0.2) {
+		} else {
 			m_yapbLastEnemyOrigin = m_eTarget.origin;
 			m_eTarget = __NULL__;
 		}
