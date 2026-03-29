@@ -2163,15 +2163,12 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
-	/* call parent for entity lifecycle only — save/restore angles
-	 * so Nuclide's aim system doesn't fight with YaPB's */
-	vector savedAngles = v_angle;
-	vector savedInputAngles = input_angles;
-	super::RunAI();
-	v_angle = savedAngles;
-	input_angles = savedInputAngles;
+	/* DO NOT call super::RunAI() — Nuclide's bot AI pipeline
+	 * (routing, aim, movement) fights with YaPB's graph-based system.
+	 * We handle everything: perception, navigation, aim, movement, weapons. */
 	input_movevalues = [0, 0, 0];
 	input_buttons = 0;
+	input_angles = v_angle;
 
 	/* clamp pitch */
 	if (v_angle[0] > 45) v_angle[0] = 45;
@@ -2194,7 +2191,8 @@ csbot::RunAI(void)
 		}
 	}
 
-	/* perception: parent already called SeeThink, we just add sound */
+	/* perception: call SeeThink ourselves (no super::RunAI) */
+	SeeThink();
 	YaPB_SoundAwareness();
 
 	/* task brain */
