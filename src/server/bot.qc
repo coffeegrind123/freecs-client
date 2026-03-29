@@ -176,6 +176,8 @@ class csbot:NSBot
 	float m_yapbBaseAggression;
 	float m_yapbBaseFear;
 	float m_yapbShootTime;
+	float m_yapbLastMoveTime;
+	float m_yapbObjectiveTime;
 	float m_yapbSeeTime;
 	float m_yapbHeardTime;
 	vector m_yapbHeardPos;
@@ -1089,8 +1091,8 @@ csbot::YaPB_CheckGrenadeThrow(void)
 	if (m_eTarget == __NULL__ || m_eTarget.health <= 0)
 		return;
 
-	/* never throw grenades at close range */
-	if (m_flEnemyDist < 500)
+	/* never throw grenades at close/medium range */
+	if (m_flEnemyDist < 600)
 		return;
 
 	int curTask = YaPB_TaskGetType();
@@ -1107,7 +1109,7 @@ csbot::YaPB_CheckGrenadeThrow(void)
 
 	player pl = (player)self;
 
-	if ((pl.g_items & ITEM_HEGRENADE) && dist > 300 && dist < 900) {
+	if ((pl.g_items & ITEM_HEGRENADE) && dist > 600 && dist < 1200) {
 		for (entity e = world; (e = find(e, ::classname, "player"));) {
 			if (e == this || e.health <= 0) continue;
 			if (e.team == this.team && vlen(e.origin - m_eTarget.origin) < 256)
@@ -1120,7 +1122,7 @@ csbot::YaPB_CheckGrenadeThrow(void)
 		return;
 	}
 
-	if ((pl.g_items & ITEM_FLASHBANG) && dist > 400 && dist < 1200 && random() < 0.6) {
+	if ((pl.g_items & ITEM_FLASHBANG) && dist > 600 && dist < 1500 && random() < 0.6) {
 		m_yapbNadeType = WEAPON_FLASHBANG;
 		m_yapbNadeTarget = m_eTarget.origin + m_eTarget.velocity * 0.5 + [0, 0, 110];
 		m_yapbNadeThrowTime = time + 1.0;
@@ -1504,47 +1506,32 @@ csbot::YaPB_StuckCheck(void)
 			YaPB_DoorThink();
 		}
 		if (m_yapbStuckCount > 2) {
-			/* check if the obstacle is actually passable before jumping */
+			/* check if the obstacle is jumpable (clear at jump apex) */
 			makevectors(v_angle);
-			traceline(origin + [0,0,36], origin + [0,0,36] + v_forward * 64, MOVE_NORMAL, this);
+			traceline(origin + [0,0,45], origin + [0,0,45] + v_forward * 48, MOVE_NORMAL, this);
 			if (trace_fraction >= 1.0) {
-				/* head height is clear — jump can get us over */
 				input_buttons |= INPUT_BUTTON2;
 				input_buttons |= INPUT_BUTTON8;
 			} else {
-				/* head blocked too — check how high the wall is */
-				traceline(origin + [0,0,72], origin + [0,0,72] + v_forward * 64, MOVE_NORMAL, this);
-				if (trace_fraction < 1.0) {
-					/* wall is taller than jump height — don't jump, repath */
-					if (m_yapbStuckCount > 4) {
-						YaPB_Nav_Clear();
-						m_yapbStuckCount = 0;
-						return;
-					}
-				} else {
-					input_buttons |= INPUT_BUTTON2;
-					input_buttons |= INPUT_BUTTON8;
-				}
-			}
-		}
-		if (m_yapbStuckCount > 5) {
-			/* corner detection: trace 45 left + right */
-			makevectors(v_angle);
-			traceline(origin, origin + v_forward * 20 + v_right * 20, MOVE_NORMAL, this);
-			float rightBlocked = trace_fraction;
-			traceline(origin, origin + v_forward * 20 - v_right * 20, MOVE_NORMAL, this);
-			float leftBlocked = trace_fraction;
-			if (rightBlocked < 0.5 && leftBlocked < 0.5) {
-				v_angle[1] += 180;
-				input_angles = v_angle;
+				/* impassable wall — repath immediately, don't keep jumping */
 				YaPB_Nav_Clear();
 				m_yapbStuckCount = 0;
 				return;
 			}
 		}
-		if (m_yapbStuckCount > 8)
-			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
-		if (m_yapbStuckCount > 10) {
+		if (m_yapbStuckCount > 4) {
+			/* try strafing around the obstacle */
+			makevectors(v_angle);
+			traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
+			float rightClear = trace_fraction;
+			traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
+			float leftClear = trace_fraction;
+			if (rightClear > leftClear)
+				input_movevalues[1] = GetRunSpeed();
+			else
+				input_movevalues[1] = -GetRunSpeed();
+		}
+		if (m_yapbStuckCount > 6) {
 			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
@@ -1888,12 +1875,12 @@ csbot::YaPB_CombatThink(void)
 		float dot = dir * v_forward;
 
 		float threshold;
-		if (dist < 128)
+		if (dist < 200)
+			threshold = 0.70;
+		else if (dist < 800)
 			threshold = 0.80;
-		else if (dist < 768)
-			threshold = 0.90;
 		else
-			threshold = 0.95;
+			threshold = 0.85;
 
 		if (dot >= threshold) {
 			/* check ALL teammates in fire cone (YaPB isFriendInLineOfFire) */
@@ -2357,6 +2344,26 @@ csbot::RunAI(void)
 	if (g_cs_roundswon_ct != g_yapbPrevRoundsWonCT) {
 		g_yapbLastWinnerTeam = TEAM_CT;
 		g_yapbPrevRoundsWonCT = g_cs_roundswon_ct;
+	}
+
+	/* anti-freeze: if bot hasn't moved for 3 seconds, force new objective */
+	if (vlen(input_movevalues) > 10)
+		m_yapbLastMoveTime = time;
+	if (time - m_yapbLastMoveTime > 3.0 && health > 0) {
+		YaPB_Nav_Clear();
+		YaPB_TaskClear();
+		CreateObjective();
+		m_yapbLastMoveTime = time;
+		input_movevalues[0] = GetRunSpeed();
+	}
+
+	/* periodic objective re-evaluation (every 15 seconds) */
+	if (time > m_yapbObjectiveTime && health > 0) {
+		m_yapbObjectiveTime = time + 15.0;
+		int curTask = YaPB_TaskGetType();
+		if (curTask == YAPB_TASK_NORMAL && !YaPB_Nav_HasPath()) {
+			CreateObjective();
+		}
 	}
 
 	/* COMMIT all inputs */
