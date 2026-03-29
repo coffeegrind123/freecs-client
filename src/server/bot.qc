@@ -372,6 +372,8 @@ csbot::RunToHostages(void)
 }
 
 void csbot::Roam(vector roamOrigin, int maxDistance) {
+	if (!g_graphLoaded) return;
+
 	int angle = random(0, 360);
 	int distance = random(0, maxDistance);
 	float radian = angle * 3.145238095238 / 180;
@@ -381,8 +383,9 @@ void csbot::Roam(vector roamOrigin, int maxDistance) {
 
 	float flBestDist = COST_INFINITE;
 	int iBestNodeIndex = -1;
-	for (int i = 0; i < g_iNodes; i++) {
-		float fDist = vlen(g_pNodes[i].origin - randLoc) - g_pNodes[i].radius;
+	for (int i = 0; i < g_graphNodeCount; i++) {
+		vector nodePos = Graph_NodeOrigin(i);
+		float fDist = vlen(nodePos - randLoc) - Graph_NodeRadius(i);
 		if (fDist > (float)maxDistance)
 			continue;
 		if (fDist < flBestDist) {
@@ -394,7 +397,7 @@ void csbot::Roam(vector roamOrigin, int maxDistance) {
 	if (iBestNodeIndex == -1)
 		return;
 
-	SmartRoute(g_pNodes[iBestNodeIndex].origin);
+	SmartRoute(Graph_NodeOrigin(iBestNodeIndex));
 }
 
 /* ============================================================
@@ -424,15 +427,8 @@ entity csbot::GetVIPSafetyZoneByIndex(int index) {
 }
 
 void csbot::SmartRoute(vector dest) {
-	/* use YaPB A* to find path, then feed nodes to Nuclide's movement */
+	if (!g_graphLoaded) return;
 	YaPB_Nav_FindPath(dest);
-	if (YaPB_Nav_HasPath()) {
-		/* route Nuclide to the first graph node */
-		vector firstNode = YaPB_GetNavTarget();
-		RouteToPosition(firstNode);
-	} else {
-		RouteToPosition(dest);
-	}
 }
 
 void csbot::AimLerp(vector aimpos, float flLerp) {
@@ -681,7 +677,7 @@ csbot::YaPB_TaskExecute(void)
 		if (m_yapbTaskCount > 0) {
 			entity leader = (team == TEAM_T) ? g_yapbLeaderT : g_yapbLeaderCT;
 			if (leader != world && leader.health > 0 && vlen(leader.origin - origin) < 2000) {
-				if (m_iNodes <= 0)
+				if (!YaPB_Nav_HasPath())
 					SmartRoute(leader.origin);
 			} else {
 				YaPB_TaskPop();
@@ -725,18 +721,19 @@ csbot::YaPB_TaskNormal(void)
 	}
 
 	/* slow down near destination */
-	if (m_iNodes > 0 && m_iCurNode >= 0) {
-		float goalDist = vlen(m_pRoute[m_iCurNode].dest - origin);
+	if (YaPB_Nav_HasPath()) {
+		vector navTarget = YaPB_GetNavTarget();
+		float goalDist = vlen(navTarget - origin);
 		if (goalDist < 200)
 			input_movevalues[0] = GetRunSpeed() * 0.5;
 	}
 
 	/* only request new objective when we have no active path */
-	if (!YaPB_Nav_HasPath() && m_iNodes <= 0) {
+	if (!YaPB_Nav_HasPath()) {
 		CreateObjective();
 
 		/* if STILL no path, roam randomly */
-		if (!YaPB_Nav_HasPath() && m_iNodes <= 0 && m_eTarget == __NULL__) {
+		if (!YaPB_Nav_HasPath() && m_eTarget == __NULL__) {
 			RunToConfront();
 			if (vlen(input_movevalues) < 10)
 				input_movevalues[0] = GetRunSpeed() * 0.5;
@@ -792,7 +789,7 @@ csbot::YaPB_TaskHunt(void)
 		return;
 	}
 
-	if (m_iNodes <= 0) {
+	if (!YaPB_Nav_HasPath()) {
 		YaPB_Radio(RADIO_COM_GO);
 		SmartRoute(huntPos);
 	}
@@ -810,14 +807,14 @@ csbot::YaPB_TaskSeekCover(void)
 	YaPB_Radio(RADIO_CT_BACKUP);
 
 	/* YaPB tasks.cpp:419-505 — graph-based cover finding */
-	if (m_iNodes <= 0) {
+	if (!YaPB_Nav_HasPath()) {
 		float bestDist = COST_INFINITE;
 		int bestNode = -1;
 		vector enemyPos = m_yapbLastEnemyOrigin;
 		int checked = 0;
 
-		for (int i = 0; i < g_iNodes && checked < 50; i++) {
-			vector nodePos = g_pNodes[i].origin;
+		for (int i = 0; i < g_graphNodeCount && checked < 50; i++) {
+			vector nodePos = Graph_NodeOrigin(i);
 			float nodeDist = vlen(nodePos - origin);
 			float enemyDist = vlen(nodePos - enemyPos);
 
@@ -836,14 +833,14 @@ csbot::YaPB_TaskSeekCover(void)
 		}
 
 		if (bestNode >= 0)
-			SmartRoute(g_pNodes[bestNode].origin);
+			SmartRoute(Graph_NodeOrigin(bestNode));
 		else {
 			vector awayDir = normalize(origin - enemyPos);
 			Roam(origin + awayDir * 500, 300);
 		}
 	}
 
-	if (m_iNodes <= 0) {
+	if (!YaPB_Nav_HasPath()) {
 		YaPB_TaskPop();
 		/* crouch + reload at cover position */
 		input_buttons |= INPUT_BUTTON8;
@@ -1018,7 +1015,7 @@ csbot::YaPB_TaskEscapeBomb(void)
 	vector awayDir = normalize(origin - eBomb.origin);
 	vector escapePos = origin + awayDir * 1500;
 
-	if (m_iNodes <= 0)
+	if (!YaPB_Nav_HasPath())
 		Roam(escapePos, 500);
 
 	input_movevalues[0] = GetRunSpeed();
@@ -1044,23 +1041,24 @@ csbot::YaPB_TaskBlind(void)
 			input_buttons |= INPUT_BUTTON0;
 			vector blindAim = m_yapbLastEnemyOrigin + m_yapbAimErrorVec * 3.0;
 			vector blindAng = vectoangles(blindAim - origin);
-			input_angles = v_angle = angles = blindAng;
+			v_angle = blindAng;
+			input_angles = blindAng;
 		}
 	}
 
 	/* node-based movement for Hard+ */
-	if (m_yapbDifficulty >= YAPB_DIFF_HARD && m_iNodes <= 0) {
+	if (m_yapbDifficulty >= YAPB_DIFF_HARD && !YaPB_Nav_HasPath()) {
 		float bestDist = COST_INFINITE;
 		int bestNode = -1;
-		for (int i = 0; i < g_iNodes && i < 100; i++) {
-			float d = vlen(g_pNodes[i].origin - origin);
+		for (int i = 0; i < g_graphNodeCount && i < 100; i++) {
+			float d = vlen(Graph_NodeOrigin(i) - origin);
 			if (d > 50 && d < 500 && d < bestDist) {
 				bestDist = d;
 				bestNode = i;
 			}
 		}
 		if (bestNode >= 0)
-			SmartRoute(g_pNodes[bestNode].origin);
+			SmartRoute(Graph_NodeOrigin(bestNode));
 	}
 
 	if (random() < 0.2)
@@ -1145,26 +1143,22 @@ csbot::YaPB_CheckGrenadeThrow(void)
 void
 csbot::YaPB_TaskThrowGrenade(void)
 {
-	/* abort grenade if enemy too close (they closed distance after task was pushed) */
-	if (m_eTarget != __NULL__ && m_flEnemyDist < 500) {
-		m_yapbNadeType = 0;
-		YaPB_TaskPop();
-		YaPB_SelectBestWeapon();
-		return;
-	}
 	if (m_yapbNadeType == 0) {
 		YaPB_TaskPop();
 		return;
 	}
 
+	/* switch to grenade if not holding it yet */
 	if (activeweapon != m_yapbNadeType) {
 		activeweapon = m_yapbNadeType;
 		Weapons_Draw((player)self);
+		m_yapbWeaponCheckTime = time + 3.0;
 		return;
 	}
 
 	input_movevalues = [0, 0, 0];
 
+	/* aim at throw target */
 	vector throwDir = m_yapbNadeTarget - origin;
 	float throwDist = vlen(throwDir);
 	float pitchUp = -10 - (throwDist / 100);
@@ -1172,16 +1166,23 @@ csbot::YaPB_TaskThrowGrenade(void)
 
 	vector throwAng = vectoangles(throwDir);
 	throwAng[0] = pitchUp;
-	input_angles = v_angle = angles = throwAng;
+	v_angle = throwAng;
+	input_angles = throwAng;
 
-	if (time >= m_yapbNadeThrowTime) {
+	/* grenade throw sequence:
+	 * phase 1 (before throwTime): hold attack to pull pin
+	 * phase 2 (after throwTime): release attack to throw
+	 * phase 3 (after throwTime + 0.5): done, switch back */
+	if (time < m_yapbNadeThrowTime) {
+		/* hold attack — pulling pin */
 		input_buttons |= INPUT_BUTTON0;
-
-		if (time >= m_yapbNadeThrowTime + 0.3) {
-			m_yapbNadeType = 0;
-			YaPB_TaskPop();
-			YaPB_SelectBestWeapon();
-		}
+	} else if (time < m_yapbNadeThrowTime + 0.5) {
+		/* release attack — grenade is being thrown (don't press anything) */
+	} else {
+		/* throw complete — clean up */
+		m_yapbNadeType = 0;
+		m_yapbWeaponCheckTime = time + 0.5;
+		YaPB_TaskPop();
 	}
 }
 
@@ -1286,6 +1287,7 @@ csbot::YaPB_SelectBestWeapon(void)
 	if (bestWeap != activeweapon && bestWeap != WEAPON_KNIFE) {
 		activeweapon = bestWeap;
 		Weapons_Draw(pl);
+		m_yapbWeaponCheckTime = time + 2.0;
 	}
 }
 
@@ -1304,6 +1306,10 @@ csbot::WeaponThink(void)
 	    curTask == YAPB_TASK_THROWSM)
 		return;
 
+	/* don't touch weapons during draw cooldown */
+	if (time < m_yapbWeaponCheckTime)
+		return;
+
 	/* if holding knife but has other weapons, switch to best */
 	if (activeweapon == WEAPON_KNIFE) {
 		YaPB_SelectBestWeapon();
@@ -1319,7 +1325,6 @@ csbot::WeaponThink(void)
 		if (a_ammo2 != 0) {
 			input_buttons &= ~INPUT_BUTTON0;
 			input_buttons |= INPUT_BUTTON4;
-			return;
 		} else {
 			/* out of ammo for current weapon — try to switch */
 			YaPB_SelectBestWeapon();
@@ -1327,10 +1332,9 @@ csbot::WeaponThink(void)
 			if (a_ammo1 == 0 && a_ammo2 == 0) {
 				activeweapon = WEAPON_KNIFE;
 				Weapons_Draw((player)self);
+				m_yapbWeaponCheckTime = time + 2.0;
 			}
 		}
-	} else {
-		YaPB_SelectBestWeapon();
 	}
 }
 
@@ -1343,6 +1347,8 @@ csbot::YaPB_Radio(float msg)
 {
 	if (time < m_yapbRadioTime)
 		return;
+	if (health <= 0)
+		return;
 	m_yapbRadioTime = time + 3.0;
 
 	float personalityScale = 0.5;
@@ -1354,9 +1360,11 @@ csbot::YaPB_Radio(float msg)
 	if (random() > personalityScale)
 		return;
 
-	float fTeam = this.team;
-	if (fTeam == TEAM_VIP) fTeam = TEAM_CT;
-	Radio_TeamMessage(msg, fTeam);
+	/* send as player-attributed radio (same as human players) */
+	entity oldSelf = self;
+	self = this;
+	CSEv_Radio_f(msg);
+	self = oldSelf;
 }
 
 void
@@ -1366,7 +1374,7 @@ csbot::YaPB_RadioThink(void)
 		return;
 	if (health <= 0)
 		return;
-	if (g_cs_gamestate != GAME_ACTIVE)
+	if (g_cs_gamestate != GAME_ACTIVE && g_cs_gamestate != GAME_FREEZE)
 		return;
 
 	/* enemy spotted (once per round) */
@@ -1412,8 +1420,8 @@ csbot::YaPB_LadderThink(void)
 	entity e;
 	for (e = findradius(origin, 128); e; e = e.chain) {
 		if (e.classname == "func_ladder") {
-			if (m_iNodes > 0 && m_iCurNode >= 0) {
-				vector dest = m_pRoute[m_iCurNode].dest;
+			if (YaPB_Nav_HasPath()) {
+				vector dest = YaPB_GetNavTarget();
 				if (dest[2] > origin[2] + 16) {
 					input_movevalues[0] = GetRunSpeed();
 					v_angle[0] = -60;
@@ -1443,7 +1451,7 @@ csbot::YaPB_DoorThink(void)
 			m_yapbDoorWaitTime = time + 1.0;
 
 			if (m_yapbDoorRetries > 5) {
-				RouteClear();
+				YaPB_Nav_Clear();
 				m_yapbDoorRetries = 0;
 				m_yapbStuckCount = 0;
 			}
@@ -1467,32 +1475,33 @@ csbot::YaPB_StuckCheck(void)
 
 	if (speed < 10.0 && vlen(input_movevalues) > 50.0) {
 		m_yapbStuckCount++;
-		if (m_yapbStuckCount > 2) {
+		if (m_yapbStuckCount > 1) {
 			YaPB_LadderThink();
 			YaPB_DoorThink();
 		}
-		if (m_yapbStuckCount > 8) input_buttons |= INPUT_BUTTON2;
-		if (m_yapbStuckCount > 6) {
-			/* corner detection (sandbot technique): trace 45° left + right */
+		if (m_yapbStuckCount > 2) {
+			/* first response: crouch-jump (handles most obstacles/ramps) */
+			input_buttons |= INPUT_BUTTON2;
+			input_buttons |= INPUT_BUTTON8;
+		}
+		if (m_yapbStuckCount > 5) {
+			/* corner detection: trace 45° left + right */
 			makevectors(v_angle);
 			traceline(origin, origin + v_forward * 20 + v_right * 20, MOVE_NORMAL, this);
 			float rightBlocked = trace_fraction;
 			traceline(origin, origin + v_forward * 20 - v_right * 20, MOVE_NORMAL, this);
 			float leftBlocked = trace_fraction;
 			if (rightBlocked < 0.5 && leftBlocked < 0.5) {
-				/* stuck in corner — turn around */
 				v_angle[1] += 180;
 				input_angles = v_angle;
-				RouteClear();
+				YaPB_Nav_Clear();
 				m_yapbStuckCount = 0;
 				return;
 			}
 		}
-		if (m_yapbStuckCount > 14) input_buttons |= INPUT_BUTTON8;
-		if (m_yapbStuckCount > 12)
+		if (m_yapbStuckCount > 8)
 			input_movevalues[1] = (random() < 0.5 ? 1 : -1) * GetRunSpeed();
-		if (m_yapbStuckCount > 18) {
-			RouteClear();
+		if (m_yapbStuckCount > 12) {
 			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
@@ -1650,18 +1659,13 @@ csbot::YaPB_AimThink(void)
 			vector lookDir = normalize(navTarget - origin);
 			lookDir[2] = 0;
 			aimTarget = origin + lookDir * 200;
-		} else if (m_iNodes && m_iCurNode >= 0) {
-			vector navTarget = m_pRoute[m_iCurNode].dest;
-			vector lookDir = normalize(navTarget - origin);
-			lookDir[2] = 0;
-			aimTarget = origin + lookDir * 200;
 		} else {
 			/* no target, no route: hold angles, reset all velocity */
 			m_yapbLookYawVel = 0;
 			m_yapbLookPitchVel = 0;
 			m_yapbAimSpeedX = 0;
 			m_yapbAimSpeedY = 0;
-			input_angles = v_angle = angles;
+			input_angles = v_angle;
 			return;
 		}
 	}
@@ -1754,7 +1758,8 @@ csbot::YaPB_AimThink(void)
 			curAngles[0] = bound(-45, curAngles[0], 45);
 			m_yapbLookYawVel = 0;
 			m_yapbLookPitchVel = 0;
-			input_angles = v_angle = angles = curAngles;
+			v_angle = curAngles;
+			input_angles = curAngles;
 			return;
 		}
 
@@ -1764,13 +1769,14 @@ csbot::YaPB_AimThink(void)
 
 		float maxTurnSpeed = 200.0 + diff * 60.0;
 
-		/* YaPB vision.cpp:197-205 — snap under 1 degree, spring otherwise */
-		if (fabs(yawOff) < 1.0) {
-			m_yapbLookYawVel = 0;
+		/* YaPB vision.cpp:197-205 — snap under threshold, spring otherwise */
+		if (fabs(yawOff) < 0.5) {
+			m_yapbLookYawVel *= 0.5;
 			curAngles[1] = desiredAngles[1];
 		} else {
 			float acc = bound(-accelerate, stiffness * yawOff - damping * m_yapbLookYawVel, accelerate);
 			m_yapbLookYawVel += dt * acc;
+			m_yapbLookYawVel = bound(-maxTurnSpeed, m_yapbLookYawVel, maxTurnSpeed);
 			curAngles[1] += dt * m_yapbLookYawVel;
 		}
 
@@ -1778,14 +1784,20 @@ csbot::YaPB_AimThink(void)
 		while (pitchOff > 180) pitchOff -= 360;
 		while (pitchOff < -180) pitchOff += 360;
 
-		float accP = bound(-accelerate, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, accelerate);
-		m_yapbLookPitchVel += dt * accP;
-		m_yapbLookPitchVel = bound(-maxTurnSpeed, m_yapbLookPitchVel, maxTurnSpeed);
-		curAngles[0] += dt * m_yapbLookPitchVel;
+		if (fabs(pitchOff) < 0.5) {
+			m_yapbLookPitchVel *= 0.5;
+			curAngles[0] = desiredAngles[0];
+		} else {
+			float accP = bound(-accelerate, 2.0 * stiffness * pitchOff - damping * m_yapbLookPitchVel, accelerate);
+			m_yapbLookPitchVel += dt * accP;
+			m_yapbLookPitchVel = bound(-maxTurnSpeed, m_yapbLookPitchVel, maxTurnSpeed);
+			curAngles[0] += dt * m_yapbLookPitchVel;
+		}
 		curAngles[0] = bound(-45, curAngles[0], 45);
 	}
 
-	input_angles = v_angle = angles = curAngles;
+	v_angle = curAngles;
+	input_angles = curAngles;
 }
 
 void
@@ -1826,16 +1838,48 @@ csbot::YaPB_CombatThink(void)
 			}
 
 			input_buttons |= INPUT_BUTTON0;
-			/* intelligent fire pause based on recoil (E-Bot technique)
-			 * pause when punchangle exceeds threshold (spray too wild) */
+
+			/* burst fire for rifles and SMGs based on distance.
+			 * close range: longer bursts. long range: short taps.
+			 * pistols/shotguns/snipers: single shots with pacing. */
+			bool isRifle = (activeweapon == WEAPON_AK47 || activeweapon == WEAPON_M4A1 ||
+			                activeweapon == WEAPON_AUG || activeweapon == WEAPON_SG552 ||
+			                activeweapon == WEAPON_FAMAS || activeweapon == WEAPON_GALIL);
+			bool isSMG = (activeweapon == WEAPON_MP5 || activeweapon == WEAPON_P90 ||
+			              activeweapon == WEAPON_UMP45 || activeweapon == WEAPON_MAC10 ||
+			              activeweapon == WEAPON_TMP);
+			bool isSniper = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
+			                 activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
+
 			float recoilMag = vlen(punchangle);
-			float recoilThreshold = 2.0 + diff * 1.5;
-			if (recoilMag > recoilThreshold && dist > 300) {
-				/* recoil too high for this range — pause to reset */
-				float pauseLen = 0.15 + random() * 0.2;
-				m_yapbShootTime = time + pauseLen;
+
+			if (isRifle || isSMG) {
+				/* burst length based on distance and difficulty */
+				int burstLen;
+				float pauseLen;
+
+				if (dist < 300) {
+					burstLen = 6 + diff * 2;
+					pauseLen = 0.08 + random() * 0.12;
+				} else if (dist < 700) {
+					burstLen = 3 + diff;
+					pauseLen = 0.15 + random() * 0.2;
+				} else {
+					burstLen = 1 + (diff / 2);
+					pauseLen = 0.25 + random() * 0.3;
+				}
+
+				float recoilThreshold = 1.5 + diff * 1.0;
+				if (recoilMag > recoilThreshold) {
+					m_yapbShootTime = time + pauseLen;
+				} else {
+					m_yapbShootTime = time + 0.08;
+				}
+			} else if (isSniper) {
+				m_yapbShootTime = time + 0.8 + random() * 0.5;
 			} else {
-				m_yapbShootTime = time + 0.08;
+				/* pistols, shotguns: paced shots */
+				m_yapbShootTime = time + 0.15 + random() * 0.1;
 			}
 		}
 	}
@@ -1928,6 +1972,12 @@ csbot::SeeThink(void)
 		return;
 	m_yapbSeeTime = time + react;
 
+	/* YaPB target selection: pick the closest visible enemy.
+	 * Stick with current target if still visible (prevent flipping). */
+	entity bestEnemy = __NULL__;
+	float bestDist = 99999.0;
+	int bestParts = 0;
+
 	for (entity w = world; (w = findfloat(w, ::takedamage, DAMAGE_YES));) {
 		if (w.classname != "player")
 			continue;
@@ -1938,7 +1988,6 @@ csbot::SeeThink(void)
 		if (!YaPB_IsInFOV(w, 75.0))
 			continue;
 
-		/* body-part visibility (YaPB tracks Head|Body|Other) */
 		int parts = 0;
 		vector eyePos = origin + view_ofs;
 
@@ -1950,26 +1999,42 @@ csbot::SeeThink(void)
 		if (trace_ent == w || trace_fraction >= 0.98)
 			parts |= 2;
 
-		if (parts) {
-			m_yapbEnemyParts = parts;
-
-			/* re-acquisition: instant reaction for same enemy (YaPB combat.cpp:508-546) */
-			if (w == m_yapbLastEnemyEnt)
-				m_yapbSeeTime = time;
-
-			m_yapbLastEnemyEnt = w;
-			SetEnemy(w);
-			return;
+		if (!parts) {
+			/* seenThru: sense enemy through walls — navigate toward
+			 * them but never lock on as a combat target */
+			if (random() < g_yapbSeenThru[diff]) {
+				m_yapbHeardPos = w.origin;
+				m_yapbHeardTime = time;
+			}
+			continue;
 		}
 
-		/* seenThru: chance to detect through walls */
-		if (random() < g_yapbSeenThru[diff]) {
-			m_yapbEnemyParts = 2;
-			m_yapbLastEnemyEnt = w;
-			SetEnemy(w);
-			return;
+		if (parts) {
+			float dist = vlen(w.origin - origin);
+
+			/* strongly prefer keeping current target (YaPB target persistence) */
+			if (w == m_eTarget)
+				dist *= 0.5;
+
+			if (dist < bestDist) {
+				bestDist = dist;
+				bestEnemy = w;
+				bestParts = parts;
+			}
 		}
 	}
+
+	if (bestEnemy != __NULL__) {
+		m_yapbEnemyParts = bestParts;
+
+		if (bestEnemy == m_yapbLastEnemyEnt)
+			m_yapbSeeTime = time;
+
+		m_yapbLastEnemyEnt = bestEnemy;
+		SetEnemy(bestEnemy);
+		return;
+	}
+
 }
 
 /* ============================================================
@@ -1981,13 +2046,23 @@ csbot::CreateObjective(void)
 {
 	if (g_cs_bombzones > 0) {
 		if (g_cs_bombplanted) {
-			return;
+			if (team == TEAM_CT) {
+				RunToBomb();
+				return;
+			}
+			/* T: stay near bomb */
+			entity eBomb = find(world, ::model, "models/w_c4.mdl");
+			if (eBomb != world) {
+				Roam(eBomb.origin, 500);
+				return;
+			}
 		}
 		if (team == TEAM_T) {
 			if (g_items & ITEM_C4BOMB) {
 				RunToRandomBombsite();
 				return;
 			}
+			/* pick up dropped bomb */
 			entity e = find(world, ::model, "models/w_backpack.mdl");
 			if (e != world) {
 				SmartRoute(getEntityCenterPos(e));
@@ -2025,7 +2100,7 @@ csbot::CreateObjective(void)
 		RunToConfront();
 	}
 
-	if (m_iNodes <= 0) {
+	if (!YaPB_Nav_HasPath()) {
 		/* reduced camp chance — only camp away from spawn */
 		float spawnDist = 99999;
 		entity sp = find(world, ::classname, (team == TEAM_T) ? "info_player_deathmatch" : "info_player_start");
@@ -2074,8 +2149,15 @@ csbot::RunAI(void)
 {
 	if (!m_yapbInitialized) YaPB_Init();
 
-	/* call parent — it handles movement via Nuclide routes */
+	/* call parent for entity lifecycle only — save/restore angles
+	 * so Nuclide's aim system doesn't fight with YaPB's */
+	vector savedAngles = v_angle;
+	vector savedInputAngles = input_angles;
 	super::RunAI();
+	v_angle = savedAngles;
+	input_angles = savedInputAngles;
+	input_movevalues = [0, 0, 0];
+	input_buttons = 0;
 
 	/* clamp pitch */
 	if (v_angle[0] > 45) v_angle[0] = 45;
@@ -2115,13 +2197,16 @@ csbot::RunAI(void)
 	/* task execution (combat, plant, defuse, camp, etc.) */
 	YaPB_TaskExecute();
 
-	/* graph path following: feed next node to Nuclide's movement system */
+	/* graph path following: direct movement toward current graph node */
 	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
 		vector nt = YaPB_GetNavTarget();
 		int navFlags = YaPB_GetNavFlags();
 
-		/* update Nuclide route target to current graph node */
-		RouteToPosition(nt);
+		/* move directly toward graph node */
+		vector moveDir = normalize(nt - origin);
+		makevectors(v_angle);
+		input_movevalues[0] = (moveDir * v_forward) * GetRunSpeed();
+		input_movevalues[1] = (moveDir * v_right) * GetRunSpeed();
 
 		/* crouch only at the actual crouch node, not while approaching it */
 		float nodeDist = vlen(nt - origin);
@@ -2134,6 +2219,54 @@ csbot::RunAI(void)
 		}
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
+
+		/* proactive obstacle detection: crouch-jump over barriers.
+		 * trace at knee height along movement direction — if blocked
+		 * but head height is clear, crouch-jump to get over it. */
+		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
+			vector fwd = normalize([moveDir[0], moveDir[1], 0]);
+			vector feetPos = origin + [0, 0, -24];
+			vector kneePos = origin + [0, 0, -8];
+			vector waistPos = origin;
+			vector headPos = origin + [0, 0, 36];
+
+			/* trace at knee height forward */
+			traceline(kneePos, kneePos + fwd * 40, MOVE_NORMAL, this);
+			float kneeBlocked = trace_fraction;
+
+			if (kneeBlocked < 1.0) {
+				/* something at knee level — check if head is clear */
+				traceline(headPos, headPos + fwd * 40, MOVE_NORMAL, this);
+				float headClear = trace_fraction;
+
+				if (headClear >= 1.0) {
+					/* obstacle is low enough to jump over — crouch-jump */
+					input_buttons |= INPUT_BUTTON2;
+					input_buttons |= INPUT_BUTTON8;
+				} else {
+					/* head blocked too — check if it's a ramp/slope we can walk up.
+					 * trace from above the obstacle down to find the surface height */
+					vector aheadTop = headPos + fwd * 48;
+					traceline(aheadTop, aheadTop - [0, 0, 72], MOVE_NORMAL, this);
+					float surfaceZ = aheadTop[2] - 72 * trace_fraction;
+					float stepHeight = surfaceZ - feetPos[2];
+
+					if (stepHeight > 0 && stepHeight < 40) {
+						/* short step/ramp — crouch-jump */
+						input_buttons |= INPUT_BUTTON2;
+						input_buttons |= INPUT_BUTTON8;
+					}
+				}
+			} else {
+				/* knee clear but check for low obstacles at feet */
+				traceline(feetPos, feetPos + fwd * 40, MOVE_NORMAL, this);
+				if (trace_fraction < 1.0) {
+					/* foot-level obstacle (ramp lip, small step) — crouch-jump */
+					input_buttons |= INPUT_BUTTON2;
+					input_buttons |= INPUT_BUTTON8;
+				}
+			}
+		}
 	}
 
 	/* teammate avoidance */

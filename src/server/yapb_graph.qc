@@ -1,9 +1,34 @@
 /*
- * yapb_graph.qc — YaPB graph data structures, loader, spatial hash
- * Loads .yapb files (converted from YaPB .graph format)
+ * yapb_graph.qc — YaPB native .graph file loader with ULZ decompression
+ * Reads .graph files directly from the yapb/graphs repository.
+ * No external conversion step needed.
+ *
+ * File format (from YaPB storage.h / graph.h):
+ *   StorageHeader (24 bytes):
+ *     int32 magic        — 0x59415042 ("YAPB") or 0x544f4255 ("UBTO")
+ *     int32 version      — StorageVersion (2 for current)
+ *     int32 options      — StorageOption bitmask
+ *     int32 length       — node count
+ *     int32 compressed   — compressed data size
+ *     int32 uncompressed — decompressed data size
+ *   [compressed Path data] — ULZ compressed
+ *   [optional ExtenHeader] — 68 bytes if StorageOption::Exten set
+ *
+ * Each Path struct (220 bytes = 55 int32s):
+ *   [0]    number (int32)
+ *   [1]    flags (int32)
+ *   [2-4]  origin x,y,z (float)
+ *   [5-7]  campStart x,y,z (float)
+ *   [8-10] campEnd x,y,z (float)
+ *   [11]   radius (float)
+ *   [12]   light (float)
+ *   [13]   display (float)
+ *   [14-53] 8 PathLinks, each 5 int32s:
+ *     velocity x,y,z (float), distance (int32), flags|index (uint16+int16)
+ *   [54]   PathVis: stand(uint16) + crouch(uint16)
  */
 
-/* Node flags (from YaPB graph.h) */
+/* Node flags (from YaPB graph.h NodeFlag enum) */
 #define YAPB_NF_BUTTON      0x001
 #define YAPB_NF_LIFT        0x002
 #define YAPB_NF_CROUCH      0x004
@@ -19,22 +44,29 @@
 #define YAPB_NF_TONLY       0x20000000
 #define YAPB_NF_CTONLY      0x40000000
 
-/* Link flags */
+/* Link flags (from YaPB graph.h PathFlag enum) */
 #define YAPB_LF_JUMP        0x0001
 
-/* Max constants */
+/* Limits */
 #define YAPB_MAX_NODES      4096
 #define YAPB_MAX_LINKS      8
 #define YAPB_GRAPH_LOADED   1
 
-/* Per-node data stored in flat arrays for QuakeC compatibility.
- * YaPB Path struct is 220 bytes with 8 links of 20 bytes each.
- * We store node fields and link fields in separate arrays. */
+/* StorageHeader magic values */
+#define YAPB_MAGIC          0x59415042
+#define YAPB_MAGIC_UB       0x544f4255
+
+/* ULZ decompression constants (from YaPB crlib/ulz.h) */
+#define ULZ_MIN_MATCH       4
+#define ULZ_EXCESS          16
+
+/* ============================================================
+ * GRAPH DATA — flat arrays for QuakeC compatibility
+ * ============================================================ */
 
 var int g_graphNodeCount;
 var int g_graphLoaded;
 
-/* Node arrays (indexed by node ID) */
 var float *g_graphOriginX;
 var float *g_graphOriginY;
 var float *g_graphOriginZ;
@@ -47,7 +79,7 @@ var float *g_graphCampEndX;
 var float *g_graphCampEndY;
 var float *g_graphCampEndZ;
 
-/* Link arrays (indexed by node*8 + linkSlot) */
+/* Link arrays indexed by node * YAPB_MAX_LINKS + slot */
 var int *g_graphLinkIndex;
 var int *g_graphLinkDist;
 var int *g_graphLinkFlags;
@@ -57,6 +89,135 @@ var int *g_graphLinkFlags;
 #define GRAPH_BUCKET_MAX    32
 var int *g_graphHashBuckets;
 var int *g_graphHashCounts;
+
+/* ============================================================
+ * BYTE-LEVEL ACCESS HELPERS
+ * FTEQW memory-mapped files return int*; these helpers extract
+ * and set individual bytes at arbitrary byte offsets.
+ * Assumes little-endian (x86/ARM).
+ * ============================================================ */
+
+static int _RB(int *data, int off) {
+	return (data[off >> 2] >> ((off & 3) << 3)) & 0xFF;
+}
+
+static void _WB(int *data, int off, int val) {
+	int idx = off >> 2;
+	int shift = (off & 3) << 3;
+	data[idx] = (data[idx] & ~(0xFF << shift)) | ((val & 0xFF) << shift);
+}
+
+static int _R16LE(int *data, int off) {
+	return _RB(data, off) | (_RB(data, off + 1) << 8);
+}
+
+/* ============================================================
+ * ULZ DECOMPRESSION (from YaPB crlib/ulz.h)
+ *
+ * Token byte layout:
+ *   bits 7-5: literal run length (0 if token < 32)
+ *             if == 7, extended by decodeVarInt
+ *   bit  4:   high bit of match distance
+ *   bits 3-0: match length - 4
+ *             if == 15, extended by decodeVarInt
+ *
+ * Match distance = (bit4 << 12) + uint16_LE
+ *   giving 17-bit range (max 131071)
+ * ============================================================ */
+
+static int g_ulzSrcPos;
+
+static int ULZ_DecodeVarInt(int *data, int end) {
+	int val = 0;
+	for (int i = 0; i <= 21; i += 7) {
+		if (g_ulzSrcPos >= end) return val;
+		int cur = _RB(data, g_ulzSrcPos);
+		g_ulzSrcPos++;
+		val += cur << i;
+		if (cur < 128) break;
+	}
+	return val;
+}
+
+static int ULZ_Decompress(int *src, int srcLen, int *dst, int dstLen) {
+	g_ulzSrcPos = 0;
+	int dp = 0;
+
+	while (g_ulzSrcPos < srcLen) {
+		int token = _RB(src, g_ulzSrcPos);
+		g_ulzSrcPos++;
+
+		/* literal run (top 3 bits) */
+		if (token >= 32) {
+			int run = token >> 5;
+			if (run == 7)
+				run += ULZ_DecodeVarInt(src, srcLen);
+
+			if ((dstLen - dp) < run || (srcLen - g_ulzSrcPos) < run)
+				return -1;
+
+			for (int i = 0; i < run; i++) {
+				_WB(dst, dp, _RB(src, g_ulzSrcPos));
+				dp++;
+				g_ulzSrcPos++;
+			}
+
+			if (g_ulzSrcPos >= srcLen) break;
+		}
+
+		/* match length (bottom 4 bits + MIN_MATCH) */
+		int length = (token & 15) + ULZ_MIN_MATCH;
+		if (length == (15 + ULZ_MIN_MATCH))
+			length += ULZ_DecodeVarInt(src, srcLen);
+
+		if ((srcLen - g_ulzSrcPos) < 2) return -1;
+		if ((dstLen - dp) < length) return -1;
+
+		/* match distance: bit 4 gives high bit, plus 16-bit LE value */
+		int dist = ((token & 16) << 12) + _R16LE(src, g_ulzSrcPos);
+		g_ulzSrcPos += 2;
+
+		if (dist == 0 || dp < dist) return -1;
+
+		/* copy match from earlier in output */
+		int cp = dp - dist;
+		if (dist >= length) {
+			/* non-overlapping: try word-aligned bulk copy */
+			int words = length >> 2;
+			int rem = length & 3;
+			if ((cp & 3) == 0 && (dp & 3) == 0 && words > 0) {
+				for (int i = 0; i < words; i++)
+					dst[(dp >> 2) + i] = dst[(cp >> 2) + i];
+				cp += words << 2;
+				dp += words << 2;
+				for (int i = 0; i < rem; i++) {
+					_WB(dst, dp, _RB(dst, cp));
+					dp++;
+					cp++;
+				}
+			} else {
+				for (int i = 0; i < length; i++) {
+					_WB(dst, dp, _RB(dst, cp));
+					dp++;
+					cp++;
+				}
+			}
+		} else {
+			/* overlapping: must copy byte by byte */
+			for (int i = 0; i < length; i++) {
+				_WB(dst, dp, _RB(dst, cp));
+				dp++;
+				cp++;
+			}
+		}
+	}
+
+	return dp;
+}
+
+/* ============================================================
+ * SPATIAL HASH
+ * ============================================================ */
 
 static int Graph_SpatialHash(vector pos) {
 	int hx = (int)(pos[0] + 4096) / 256;
@@ -85,6 +246,10 @@ static void Graph_BuildSpatialHash(void) {
 	}
 }
 
+/* ============================================================
+ * NODE ACCESSORS
+ * ============================================================ */
+
 int Graph_NearestNode(vector pos) {
 	if (!g_graphLoaded) return -1;
 
@@ -92,7 +257,6 @@ int Graph_NearestNode(vector pos) {
 	int bestNode = -1;
 	float bestDist = 999999.0;
 
-	/* check the hash bucket first */
 	int c = g_graphHashCounts[h];
 	for (int i = 0; i < c; i++) {
 		int n = g_graphHashBuckets[h * GRAPH_BUCKET_MAX + i];
@@ -107,7 +271,6 @@ int Graph_NearestNode(vector pos) {
 		}
 	}
 
-	/* if nothing in bucket or too far, brute force */
 	if (bestNode == -1 || bestDist > 500) {
 		for (int i = 0; i < g_graphNodeCount; i++) {
 			vector npos;
@@ -141,6 +304,22 @@ float Graph_NodeRadius(int node) {
 	return g_graphRadius[node];
 }
 
+vector Graph_CampStart(int node) {
+	vector v;
+	v[0] = g_graphCampStartX[node];
+	v[1] = g_graphCampStartY[node];
+	v[2] = g_graphCampStartZ[node];
+	return v;
+}
+
+vector Graph_CampEnd(int node) {
+	vector v;
+	v[0] = g_graphCampEndX[node];
+	v[1] = g_graphCampEndY[node];
+	v[2] = g_graphCampEndZ[node];
+	return v;
+}
+
 int Graph_LinkIndex(int node, int slot) {
 	return g_graphLinkIndex[node * YAPB_MAX_LINKS + slot];
 }
@@ -152,6 +331,10 @@ int Graph_LinkDist(int node, int slot) {
 int Graph_LinkFlags(int node, int slot) {
 	return g_graphLinkFlags[node * YAPB_MAX_LINKS + slot];
 }
+
+/* ============================================================
+ * MEMORY MANAGEMENT
+ * ============================================================ */
 
 static void Graph_Free(void) {
 	if (g_graphOriginX) { memfree(g_graphOriginX); g_graphOriginX = 0; }
@@ -174,67 +357,11 @@ static void Graph_Free(void) {
 	g_graphLoaded = 0;
 }
 
-/*
- * Load a .yapb file (pre-decompressed YaPB graph).
- * File format: int32 nodeCount, then nodeCount * 220 bytes of Path data.
- *
- * YaPB Path struct (220 bytes):
- *   int32 number, flags (8 bytes)
- *   float origin.x, .y, .z (12 bytes)
- *   float start.x, .y, .z (12 bytes)
- *   float end.x, .y, .z (12 bytes)
- *   float radius, light, display (12 bytes)
- *   PathLink links[8] (8 * 20 = 160 bytes)
- *     each link: float vel.x,.y,.z (12), int32 dist (4), uint16 flags (2), int16 index (2)
- *   PathVis: uint16 stand, crouch (4 bytes)
- *
- * Total per node: 8 + 12 + 12 + 12 + 12 + 160 + 4 = 220 bytes
- */
-void Graph_Load(string mname) {
-	Graph_Free();
+/* ============================================================
+ * NODE PARSING — from decompressed Path array
+ * ============================================================ */
 
-	/* try multiple paths — FTEQW may look in different locations */
-	string filename = sprintf("graphs/%s.yapb", mname);
-	filestream f = fopen(filename, FILE_MMAP_READ);
-
-	if (f < 0) {
-		filename = sprintf("data/graphs/%s.yapb", mname);
-		f = fopen(filename, FILE_MMAP_READ);
-	}
-
-	if (f < 0) {
-		print(sprintf("YaPB graph not found for map: %s\n", mname));
-		return;
-	}
-
-	/* FILE_MMAP_READ: fgets returns pointer to entire file in memory */
-	int fileSize = fsize(f);
-	int *data = (int *)fgets(f);
-
-	if (!data || fileSize < 8) {
-		dprint(sprintf("YaPB graph empty or invalid: %s\n", filename));
-		fclose(f);
-		return;
-	}
-
-	/* first 4 bytes = node count */
-	int nodeCount = data[0];
-
-	if (nodeCount <= 0 || nodeCount > YAPB_MAX_NODES) {
-		dprint(sprintf("Bad node count in %s\n", filename));
-		fclose(f);
-		return;
-	}
-
-	/* validate file size: 4 + nodeCount * 220 */
-	int expectedSize = 4 + nodeCount * 220;
-	if (fileSize < expectedSize) {
-		dprint(sprintf("YaPB graph file too small: %s\n", filename));
-		fclose(f);
-		return;
-	}
-
-	g_graphNodeCount = nodeCount;
+static void Graph_ParseNodes(int *data, int nodeCount) {
 	int n = nodeCount;
 
 	g_graphOriginX = (float *)memalloc(n * 4);
@@ -252,26 +379,11 @@ void Graph_Load(string mname) {
 	g_graphLinkDist = (int *)memalloc(n * YAPB_MAX_LINKS * 4);
 	g_graphLinkFlags = (int *)memalloc(n * YAPB_MAX_LINKS * 4);
 
-	/* parse nodes from mmap'd data.
-	 * Each Path struct is 220 bytes = 55 ints.
-	 * Layout per node (in int32 offsets from node start):
-	 *   [0] number, [1] flags
-	 *   [2-4] origin x,y,z (as float)
-	 *   [5-7] start x,y,z (as float)
-	 *   [8-10] end x,y,z (as float)
-	 *   [11] radius (float), [12] light (float), [13] display (float)
-	 *   [14-18] link0: vel_x,y,z(float), dist(int), flags|index(int)
-	 *   [19-23] link1, ... [49-53] link7
-	 *   [54] pathvis
-	 */
-	int *nodeBase = data + 1;
-
 	for (int i = 0; i < nodeCount; i++) {
-		int *p = nodeBase + i * 55;
+		int *p = data + i * 55;
+		float *fp = (float *)p;
 
 		g_graphFlags[i] = p[1];
-
-		float *fp = (float *)p;
 		g_graphOriginX[i] = fp[2];
 		g_graphOriginY[i] = fp[3];
 		g_graphOriginZ[i] = fp[4];
@@ -283,7 +395,6 @@ void Graph_Load(string mname) {
 		g_graphCampEndZ[i] = fp[10];
 		g_graphRadius[i] = fp[11];
 
-		/* parse 8 links (5 ints each, starting at offset 14) */
 		for (int j = 0; j < YAPB_MAX_LINKS; j++) {
 			int linkOff = 14 + j * 5;
 			int dist = p[linkOff + 3];
@@ -299,8 +410,96 @@ void Graph_Load(string mname) {
 			g_graphLinkFlags[slot] = linkFlags;
 		}
 	}
+}
+
+/* ============================================================
+ * GRAPH LOADING — reads native YaPB .graph files
+ *
+ * Search order:
+ *   1. graphs/{mapname}.graph
+ *   2. data/graphs/{mapname}.graph
+ * ============================================================ */
+
+void Graph_Load(string mname) {
+	Graph_Free();
+
+	string filename = sprintf("graphs/%s.graph", mname);
+	filestream f = fopen(filename, FILE_MMAP_READ);
+
+	if (f < 0) {
+		filename = sprintf("data/graphs/%s.graph", mname);
+		f = fopen(filename, FILE_MMAP_READ);
+	}
+
+	if (f < 0) {
+		print(sprintf("YaPB graph not found for map: %s\n", mname));
+		return;
+	}
+
+	int fileSize = fsize(f);
+	int *rawData = (int *)fgets(f);
+
+	if (!rawData || fileSize < 24) {
+		dprint(sprintf("YaPB graph file too small: %s\n", filename));
+		fclose(f);
+		return;
+	}
+
+	/* StorageHeader (24 bytes = 6 int32s) */
+	int magic = rawData[0];
+	int version = rawData[1];
+	int options = rawData[2];
+	int nodeCount = rawData[3];
+	int compressedSize = rawData[4];
+	int uncompressedSize = rawData[5];
+
+	if (magic != YAPB_MAGIC && magic != YAPB_MAGIC_UB) {
+		dprint(sprintf("Bad magic in graph: %s (0x%x)\n", filename, magic));
+		fclose(f);
+		return;
+	}
+
+	if (nodeCount <= 0 || nodeCount > YAPB_MAX_NODES) {
+		dprint(sprintf("Bad node count in graph %s: %d\n", filename, nodeCount));
+		fclose(f);
+		return;
+	}
+
+	if (fileSize < 24 + compressedSize) {
+		dprint(sprintf("Graph file truncated: %s\n", filename));
+		fclose(f);
+		return;
+	}
+
+	int expectedBytes = nodeCount * 220;
+	if (uncompressedSize < expectedBytes) {
+		dprint(sprintf("Uncompressed size too small in %s: %d < %d\n",
+			filename, uncompressedSize, expectedBytes));
+		fclose(f);
+		return;
+	}
+
+	/* allocate decompression buffer (round up to int boundary + excess) */
+	int dstBytes = uncompressedSize + ULZ_EXCESS;
+	int *decompressed = (int *)memalloc(((dstBytes + 3) >> 2) << 2);
+
+	/* compressed data starts immediately after the 24-byte header */
+	int *compressedData = rawData + 6;
+
+	int result = ULZ_Decompress(compressedData, compressedSize,
+		decompressed, uncompressedSize);
 
 	fclose(f);
+
+	if (result < 0) {
+		dprint(sprintf("ULZ decompression failed for %s\n", filename));
+		memfree(decompressed);
+		return;
+	}
+
+	g_graphNodeCount = nodeCount;
+	Graph_ParseNodes(decompressed, nodeCount);
+	memfree(decompressed);
 
 	Graph_BuildSpatialHash();
 	g_graphLoaded = YAPB_GRAPH_LOADED;

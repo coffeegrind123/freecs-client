@@ -67,8 +67,7 @@ void Floyd_Free(void) {
 
 /*
  * Route to a position using YaPB graph (called from csbot methods).
- * Falls back to Nuclide RouteToPosition if no graph.
- * Must be called in bot context (self = csbot).
+ * Requires graph to be loaded. Must be called in bot context (self = csbot).
  */
 void YaPB_RouteTo(vector dest) {
 	if (g_graphLoaded) {
