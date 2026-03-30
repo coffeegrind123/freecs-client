@@ -179,6 +179,7 @@ class csbot:NSBot
 	float m_yapbLastMoveTime;
 	float m_yapbObjectiveTime;
 	float m_yapbCrouchJumpEnd;
+	bool m_yapbCrouchJumpAirborne;
 	float m_yapbSeeTime;
 	float m_yapbHeardTime;
 	vector m_yapbHeardPos;
@@ -635,18 +636,39 @@ csbot::YaPB_TaskFilter(void)
 		entity eBomb = find(world, ::model, "models/w_c4.mdl");
 		if (eBomb != world) {
 			if (team == TEAM_CT && curTask != YAPB_TASK_DEFUSE) {
-				YaPB_TaskPush(YAPB_TASK_DEFUSE, eBomb.origin, 0);
-			}
-			float bombDist = vlen(eBomb.origin - origin);
-			if (team == TEAM_T && bombDist < 1200) {
-				/* nothing — T roams near bomb via normal task */
+				/* only one CT should defuse — check if another is already on it */
+				bool someoneDefusing = false;
+				for (entity e = world; (e = find(e, ::classname, "player"));) {
+					if (e == this || e.health <= 0) continue;
+					if (clienttype(e) != CLIENTTYPE_REAL && e.team == TEAM_CT) {
+						csbot cb = (csbot)e;
+						if (cb.YaPB_TaskGetType() == YAPB_TASK_DEFUSE) {
+							someoneDefusing = true;
+							break;
+						}
+					}
+				}
+				if (!someoneDefusing)
+					YaPB_TaskPush(YAPB_TASK_DEFUSE, eBomb.origin, 0);
 			}
 		}
 	}
 
 	if (team == TEAM_T && (g_items & ITEM_C4BOMB) && !g_cs_bombplanted) {
 		if (m_gflagsBackup & GF_BOMBZONE) {
-			if (curTask != YAPB_TASK_PLANT)
+			/* only one T should plant */
+			bool someonePlanting = false;
+			for (entity e = world; (e = find(e, ::classname, "player"));) {
+				if (e == this || e.health <= 0) continue;
+				if (clienttype(e) != CLIENTTYPE_REAL && e.team == TEAM_T) {
+					csbot cb = (csbot)e;
+					if (cb.YaPB_TaskGetType() == YAPB_TASK_PLANT) {
+						someonePlanting = true;
+						break;
+					}
+				}
+			}
+			if (!someonePlanting && curTask != YAPB_TASK_PLANT)
 				YaPB_TaskPush(YAPB_TASK_PLANT, origin, 0);
 		}
 	}
@@ -2264,10 +2286,21 @@ csbot::RunAI(void)
 	input_angles = v_angle;
 
 	/* crouch-jump: hold crouch while airborne */
-	if (time < m_yapbCrouchJumpEnd) {
-		input_buttons |= INPUT_BUTTON8;
-		if (flags & FL_ONGROUND)
+	if (m_yapbCrouchJumpEnd > 0) {
+		if (!(flags & FL_ONGROUND)) {
+			/* airborne — hold crouch */
+			input_buttons |= INPUT_BUTTON8;
+			m_yapbCrouchJumpAirborne = true;
+		} else if (m_yapbCrouchJumpAirborne) {
+			/* landed after being airborne — done */
 			m_yapbCrouchJumpEnd = 0;
+			m_yapbCrouchJumpAirborne = false;
+		}
+		/* timeout safety */
+		if (time > m_yapbCrouchJumpEnd) {
+			m_yapbCrouchJumpEnd = 0;
+			m_yapbCrouchJumpAirborne = false;
+		}
 	}
 
 	/* clamp pitch to engine limits only */
@@ -2403,12 +2436,6 @@ csbot::RunAI(void)
 							input_movevalues[1] -= GetRunSpeed() * 0.6;
 					}
 				}
-			} else {
-				/* no waist obstacle — check head clearance for narrow spaces */
-				traceline(origin + [0,0,36], origin + [0,0,36] + obsFwd * 40, MOVE_NORMAL, this);
-				if (trace_fraction < 1.0) {
-					input_buttons |= INPUT_BUTTON8;
-				}
 			}
 		}
 	}
@@ -2486,13 +2513,18 @@ csbot::RunAI(void)
 void
 CSBot_BombPlantedNotify(void)
 {
+	bool defuserAssigned = false;
 	for (entity a = world; (a = find(a, classname, "player"));) {
 		if (clienttype(a) != CLIENTTYPE_REAL) {
 			csbot targ = (csbot)a;
 			if (targ.health <= 0)
 				continue;
 			if (targ.team == TEAM_CT) {
-				targ.YaPB_TaskPush(YAPB_TASK_DEFUSE, [0,0,0], 0);
+				/* only assign one CT to defuse, others cover */
+				if (!defuserAssigned) {
+					targ.YaPB_TaskPush(YAPB_TASK_DEFUSE, [0,0,0], 0);
+					defuserAssigned = true;
+				}
 				targ.YaPB_Radio(RADIO_BOMBPL);
 			} else {
 				targ.Roam(targ.origin, 500);

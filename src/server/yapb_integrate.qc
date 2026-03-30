@@ -129,18 +129,20 @@ int YaPB_NavNeedsJump(void) {
  */
 void YaPB_TeamAvoidance(void) {
 	entity hindrance = world;
-	float bestDist = 250 * 250;
+	float bestDist = 200 * 200;
 
+	/* avoid ALL nearby players, not just teammates */
 	for (entity e = world; (e = find(e, ::classname, "player"));) {
 		if (e == self || e.health <= 0) continue;
-		if (e.team != self.team) continue;
 
 		float dx = e.origin[0] - self.origin[0];
 		float dy = e.origin[1] - self.origin[1];
 		float dz = e.origin[2] - self.origin[2];
 		float distSq = dx*dx + dy*dy + dz*dz;
 
-		if (distSq < bestDist) {
+		/* prioritize avoiding teammates (closer threshold) */
+		float checkDist = (e.team == self.team) ? bestDist : bestDist * 0.5;
+		if (distSq < checkDist) {
 			bestDist = distSq;
 			hindrance = e;
 		}
@@ -148,15 +150,16 @@ void YaPB_TeamAvoidance(void) {
 
 	if (hindrance == world) return;
 
-	/* strafe away from teammate */
+	/* strafe away */
 	makevectors(self.v_angle);
 	vector toMate = normalize(hindrance.origin - self.origin);
 	float side = toMate * v_right;
 
+	float avoidStrength = (hindrance.team == self.team) ? 120 : 80;
 	if (side > 0)
-		input_movevalues[1] -= 100;
+		input_movevalues[1] -= avoidStrength;
 	else
-		input_movevalues[1] += 100;
+		input_movevalues[1] += avoidStrength;
 }
 
 /* ============================================================
