@@ -1655,6 +1655,12 @@ csbot::YaPB_AimThink(void)
 		}
 		spot += m_yapbAimErrorVec;
 
+		/* recoil compensation: pull aim point down by punchangle.
+		 * real players drag mouse down to counter spray climb.
+		 * scale by difficulty — experts compensate fully. */
+		float recoilComp = 0.3 + diff * 0.15;
+		spot[2] -= punchangle[0] * recoilComp * 2.0;
+
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
 		if (diff >= YAPB_DIFF_EXPERT) {
 			float hOff = 0;
@@ -1763,7 +1769,7 @@ csbot::YaPB_AimThink(void)
 
 		curAngles[0] += dt * m_yapbAimSpeedX;
 		curAngles[1] += dt * m_yapbAimSpeedY;
-		curAngles[0] = bound(-45, curAngles[0], 45);
+		curAngles[0] = bound(-89, curAngles[0], 89);
 	} else {
 		/* critically-damped spring for smooth aiming (no oscillation) */
 		bool importantAim = (m_eTarget != __NULL__ && m_eTarget.health > 0);
@@ -1793,7 +1799,7 @@ csbot::YaPB_AimThink(void)
 			while (pitchOff < -180) pitchOff += 360;
 			curAngles[1] += yawOff * navLerp;
 			curAngles[0] += pitchOff * navLerp;
-			curAngles[0] = bound(-45, curAngles[0], 45);
+			curAngles[0] = bound(-89, curAngles[0], 89);
 			m_yapbLookYawVel = 0;
 			m_yapbLookPitchVel = 0;
 			v_angle = curAngles;
@@ -1831,7 +1837,7 @@ csbot::YaPB_AimThink(void)
 			m_yapbLookPitchVel = bound(-maxTurnSpeed, m_yapbLookPitchVel, maxTurnSpeed);
 			curAngles[0] += dt * m_yapbLookPitchVel;
 		}
-		curAngles[0] = bound(-45, curAngles[0], 45);
+		curAngles[0] = bound(-89, curAngles[0], 89);
 	}
 
 	v_angle = curAngles;
@@ -1851,13 +1857,13 @@ csbot::YaPB_CombatThink(void)
 	bool isSniperWep = (activeweapon == WEAPON_AWP || activeweapon == WEAPON_SCOUT ||
 	                    activeweapon == WEAPON_G3SG1 || activeweapon == WEAPON_SG550);
 	if (isSniperWep) {
-		player pl = (player)self;
-		if (dist > 300 && pl.mode_temp == 0) {
+		player pl = (player)this;
+		if (dist > 300 && pl.viewzoom >= 1.0) {
 			pl.mode_temp = 1;
 			pl.viewzoom = 0.45;
 			m_yapbShootTime = time + 0.3;
 			return;
-		} else if (dist <= 300 && pl.mode_temp != 0) {
+		} else if (dist <= 300 && pl.viewzoom < 1.0) {
 			pl.mode_temp = 0;
 			pl.viewzoom = 1.0;
 		}
@@ -1956,7 +1962,7 @@ csbot::YaPB_CombatThink(void)
 			else
 				m_yapbStrafeDir = (random() < 0.5) ? -1.0 : 1.0;
 		}
-		input_movevalues[1] = m_yapbStrafeDir * GetRunSpeed() * 0.8;
+		input_movevalues[1] = m_yapbStrafeDir * GetRunSpeed() * 0.4;
 	}
 
 	/* knife rush: charge + snap aim at enemy for guaranteed hits */
@@ -2226,9 +2232,9 @@ csbot::RunAI(void)
 	input_buttons = 0;
 	input_angles = v_angle;
 
-	/* clamp pitch */
-	if (v_angle[0] > 45) v_angle[0] = 45;
-	if (v_angle[0] < -45) v_angle[0] = -45;
+	/* clamp pitch to engine limits only */
+	if (v_angle[0] > 89) v_angle[0] = 89;
+	if (v_angle[0] < -89) v_angle[0] = -89;
 	input_angles = v_angle;
 
 	/* enemy validation: strict LOS — drop target immediately when not visible */
@@ -2269,7 +2275,9 @@ csbot::RunAI(void)
 	YaPB_TaskExecute();
 
 	/* graph path following: direct movement toward current graph node */
-	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK) {
+	if (YaPB_Nav_HasPath() && curTask != YAPB_TASK_ATTACK &&
+	    curTask != YAPB_TASK_THROWHE && curTask != YAPB_TASK_THROWFB &&
+	    curTask != YAPB_TASK_THROWSM) {
 		vector nt = YaPB_GetNavTarget();
 		int navFlags = YaPB_GetNavFlags();
 
@@ -2308,30 +2316,42 @@ csbot::RunAI(void)
 			input_buttons |= INPUT_BUTTON2;
 
 		/* proactive obstacle avoidance: strafe around walls,
-		 * only crouch-jump if obstacle is actually jumpable */
+		 * crouch-jump if jumpable, shoot breakables (vents) */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
 			vector obsFwd = normalize([moveDir[0], moveDir[1], 0]);
 
 			traceline(origin, origin + obsFwd * 40, MOVE_NORMAL, this);
 			if (trace_fraction < 1.0) {
-				traceline(origin + [0,0,45], origin + [0,0,45] + obsFwd * 40, MOVE_NORMAL, this);
-				if (trace_fraction >= 1.0) {
-					/* short obstacle — crouch-jump over */
-					input_buttons |= INPUT_BUTTON2;
-					input_buttons |= INPUT_BUTTON8;
+				/* check if it's a breakable (vent, window, etc.) */
+				if (trace_ent.classname == "func_breakable" ||
+				    trace_ent.classname == "func_pushable") {
+					/* shoot it */
+					vector breakAng = vectoangles(trace_ent.origin - (origin + view_ofs));
+					if (breakAng[0] > 180) breakAng[0] -= 360;
+					v_angle = breakAng;
+					input_angles = breakAng;
+					input_buttons |= INPUT_BUTTON0;
+					input_movevalues = [0, 0, 0];
 				} else {
-					/* wall — strafe around it */
-					vector flatAngle2 = v_angle;
-					flatAngle2[0] = 0;
-					makevectors(flatAngle2);
-					traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
-					float rClear = trace_fraction;
-					traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
-					float lClear = trace_fraction;
-					if (rClear > lClear)
-						input_movevalues[1] += GetRunSpeed() * 0.6;
-					else
-						input_movevalues[1] -= GetRunSpeed() * 0.6;
+					traceline(origin + [0,0,45], origin + [0,0,45] + obsFwd * 40, MOVE_NORMAL, this);
+					if (trace_fraction >= 1.0) {
+						/* short obstacle — crouch-jump over */
+						input_buttons |= INPUT_BUTTON2;
+						input_buttons |= INPUT_BUTTON8;
+					} else {
+						/* wall — strafe around it */
+						vector flatAngle2 = v_angle;
+						flatAngle2[0] = 0;
+						makevectors(flatAngle2);
+						traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
+						float rClear = trace_fraction;
+						traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
+						float lClear = trace_fraction;
+						if (rClear > lClear)
+							input_movevalues[1] += GetRunSpeed() * 0.6;
+						else
+							input_movevalues[1] -= GetRunSpeed() * 0.6;
+					}
 				}
 			}
 		}
@@ -2807,6 +2827,10 @@ CSBot_RestartRound(void)
 			targ.m_actionIsPlanting = FALSE;
 			targ.m_actionIsDefusing = FALSE;
 			targ.YaPB_TaskClear();
+			/* reset sniper scope on round restart */
+			player pl = (player)a;
+			pl.mode_temp = 0;
+			pl.viewzoom = 1.0;
 		}
 	}
 }
