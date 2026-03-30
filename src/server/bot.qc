@@ -1508,28 +1508,52 @@ csbot::YaPB_StuckCheck(void)
 			YaPB_DoorThink();
 		}
 		if (m_yapbStuckCount > 1) {
-			/* immediately check if obstacle is passable */
-			makevectors(v_angle);
-			traceline(origin + [0,0,45], origin + [0,0,45] + v_forward * 48, MOVE_NORMAL, this);
-			if (trace_fraction < 1.0) {
-				/* impassable — strafe around like teammate avoidance */
-				traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
-				float rightClear = trace_fraction;
-				traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
-				float leftClear = trace_fraction;
-				if (rightClear > leftClear)
-					input_movevalues[1] = GetRunSpeed();
-				else
-					input_movevalues[1] = -GetRunSpeed();
-				input_movevalues[0] = GetRunSpeed() * 0.3;
+			/* trace forward in movement direction (not aim direction) */
+			vector stuckFwd;
+			if (YaPB_Nav_HasPath()) {
+				vector nt = YaPB_GetNavTarget();
+				stuckFwd = normalize(nt - origin);
+				stuckFwd[2] = 0;
+				stuckFwd = normalize(stuckFwd);
 			} else {
-				/* jumpable — one crouch-jump attempt */
-				input_buttons |= INPUT_BUTTON2;
-				input_buttons |= INPUT_BUTTON8;
+				makevectors(v_angle);
+				stuckFwd = v_forward;
+				stuckFwd[2] = 0;
+				stuckFwd = normalize(stuckFwd);
+			}
+
+			/* check at waist level — is there even an obstacle? */
+			traceline(origin, origin + stuckFwd * 48, MOVE_NORMAL, this);
+			if (trace_fraction >= 1.0) {
+				/* no obstacle in movement direction — might be a narrow space, try crouching */
+				traceline(origin + [0,0,36], origin + [0,0,36] + stuckFwd * 48, MOVE_NORMAL, this);
+				if (trace_fraction < 1.0) {
+					/* head blocked but waist clear — crouch to fit */
+					input_buttons |= INPUT_BUTTON8;
+				}
+			} else {
+				/* obstacle ahead — check height with crouch-jump clearance (62u) */
+				traceline(origin + [0,0,62], origin + [0,0,62] + stuckFwd * 48, MOVE_NORMAL, this);
+				if (trace_fraction >= 1.0) {
+					/* crouch-jumpable */
+					input_buttons |= INPUT_BUTTON2;
+					input_buttons |= INPUT_BUTTON8;
+				} else {
+					/* too tall — strafe around */
+					makevectors(v_angle);
+					traceline(origin, origin + v_right * 80, MOVE_NORMAL, this);
+					float rightClear = trace_fraction;
+					traceline(origin, origin - v_right * 80, MOVE_NORMAL, this);
+					float leftClear = trace_fraction;
+					if (rightClear > leftClear)
+						input_movevalues[1] = GetRunSpeed();
+					else
+						input_movevalues[1] = -GetRunSpeed();
+					input_movevalues[0] = GetRunSpeed() * 0.3;
+				}
 			}
 		}
 		if (m_yapbStuckCount > 3) {
-			/* give up quickly — repath */
 			YaPB_Nav_Clear();
 			m_yapbStuckCount = 0;
 			m_yapbDoorRetries = 0;
@@ -2303,9 +2327,9 @@ csbot::RunAI(void)
 			input_movevalues[1] = side * speed;
 		}
 
-		/* crouch only at the actual crouch node, not while approaching it */
+		/* crouch at crouch/narrow nodes */
 		float nodeDist = vlen(nt - origin);
-		if ((navFlags & YAPB_NF_CROUCH) && nodeDist < 100)
+		if ((navFlags & (YAPB_NF_CROUCH | YAPB_NF_NARROW)) && nodeDist < 200)
 			input_buttons |= INPUT_BUTTON8;
 		if (navFlags & YAPB_NF_LADDER) {
 			if (nt[2] > origin[2] + 16) v_angle[0] = -45;
@@ -2315,17 +2339,15 @@ csbot::RunAI(void)
 		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
 			input_buttons |= INPUT_BUTTON2;
 
-		/* proactive obstacle avoidance: strafe around walls,
-		 * crouch-jump if jumpable, shoot breakables (vents) */
+		/* proactive obstacle avoidance */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
 			vector obsFwd = normalize([moveDir[0], moveDir[1], 0]);
 
 			traceline(origin, origin + obsFwd * 40, MOVE_NORMAL, this);
 			if (trace_fraction < 1.0) {
-				/* check if it's a breakable (vent, window, etc.) */
+				/* breakable? shoot it */
 				if (trace_ent.classname == "func_breakable" ||
 				    trace_ent.classname == "func_pushable") {
-					/* shoot it */
 					vector breakAng = vectoangles(trace_ent.origin - (origin + view_ofs));
 					if (breakAng[0] > 180) breakAng[0] -= 360;
 					v_angle = breakAng;
@@ -2333,13 +2355,13 @@ csbot::RunAI(void)
 					input_buttons |= INPUT_BUTTON0;
 					input_movevalues = [0, 0, 0];
 				} else {
-					traceline(origin + [0,0,45], origin + [0,0,45] + obsFwd * 40, MOVE_NORMAL, this);
+					/* check crouch-jump clearance (62u) */
+					traceline(origin + [0,0,62], origin + [0,0,62] + obsFwd * 40, MOVE_NORMAL, this);
 					if (trace_fraction >= 1.0) {
-						/* short obstacle — crouch-jump over */
 						input_buttons |= INPUT_BUTTON2;
 						input_buttons |= INPUT_BUTTON8;
 					} else {
-						/* wall — strafe around it */
+						/* too tall — strafe around */
 						vector flatAngle2 = v_angle;
 						flatAngle2[0] = 0;
 						makevectors(flatAngle2);
@@ -2352,6 +2374,12 @@ csbot::RunAI(void)
 						else
 							input_movevalues[1] -= GetRunSpeed() * 0.6;
 					}
+				}
+			} else {
+				/* no waist obstacle — check head clearance for narrow spaces */
+				traceline(origin + [0,0,36], origin + [0,0,36] + obsFwd * 40, MOVE_NORMAL, this);
+				if (trace_fraction < 1.0) {
+					input_buttons |= INPUT_BUTTON8;
 				}
 			}
 		}
