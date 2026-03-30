@@ -178,6 +178,7 @@ class csbot:NSBot
 	float m_yapbShootTime;
 	float m_yapbLastMoveTime;
 	float m_yapbObjectiveTime;
+	float m_yapbCrouchJumpEnd;
 	float m_yapbSeeTime;
 	float m_yapbHeardTime;
 	vector m_yapbHeardPos;
@@ -1541,9 +1542,10 @@ csbot::YaPB_StuckCheck(void)
 				float sObsHeight = sObsTopZ - sGroundZ;
 
 				if (sObsHeight <= 72 && sObsHeight > 0) {
-					/* crouch-jumpable */
+					/* crouch-jumpable — hold crouch through the arc */
 					input_buttons |= INPUT_BUTTON2;
 					input_buttons |= INPUT_BUTTON8;
+					m_yapbCrouchJumpEnd = time + 0.8;
 				} else {
 					/* too tall — strafe around */
 					makevectors(v_angle);
@@ -2261,6 +2263,13 @@ csbot::RunAI(void)
 	input_buttons = 0;
 	input_angles = v_angle;
 
+	/* crouch-jump: hold crouch while airborne */
+	if (time < m_yapbCrouchJumpEnd) {
+		input_buttons |= INPUT_BUTTON8;
+		if (flags & FL_ONGROUND)
+			m_yapbCrouchJumpEnd = 0;
+	}
+
 	/* clamp pitch to engine limits only */
 	if (v_angle[0] > 89) v_angle[0] = 89;
 	if (v_angle[0] < -89) v_angle[0] = -89;
@@ -2341,8 +2350,11 @@ csbot::RunAI(void)
 			else if (nt[2] < origin[2] - 16) v_angle[0] = 45;
 			input_angles = v_angle;
 		}
-		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND))
+		if (YaPB_NavNeedsJump() && (flags & FL_ONGROUND)) {
 			input_buttons |= INPUT_BUTTON2;
+			input_buttons |= INPUT_BUTTON8;
+			m_yapbCrouchJumpEnd = time + 0.8;
+		}
 
 		/* proactive obstacle avoidance */
 		if ((flags & FL_ONGROUND) && vlen(input_movevalues) > 50) {
@@ -2372,9 +2384,10 @@ csbot::RunAI(void)
 					float obsHeight = obsTopZ - groundZ;
 
 					if (obsHeight <= 72 && obsHeight > 0) {
-						/* jumpable from ground level — crouch-jump */
+						/* jumpable from ground level — crouch-jump + hold */
 						input_buttons |= INPUT_BUTTON2;
 						input_buttons |= INPUT_BUTTON8;
+						m_yapbCrouchJumpEnd = time + 0.8;
 					} else {
 						/* too tall or can't measure — strafe around */
 						vector flatAngle2 = v_angle;
