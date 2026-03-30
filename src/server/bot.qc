@@ -1532,9 +1532,15 @@ csbot::YaPB_StuckCheck(void)
 					input_buttons |= INPUT_BUTTON8;
 				}
 			} else {
-				/* obstacle ahead — check height with crouch-jump clearance (62u) */
-				traceline(origin + [0,0,72], origin + [0,0,72] + stuckFwd * 48, MOVE_NORMAL, this);
-				if (trace_fraction >= 1.0) {
+				/* obstacle ahead — measure its height from ground */
+				vector sObsPoint = origin + stuckFwd * 24;
+				traceline(sObsPoint + [0,0,128], sObsPoint, MOVE_NORMAL, this);
+				float sObsTopZ = sObsPoint[2] + 128 * (1.0 - trace_fraction);
+				traceline(origin, origin - [0,0,64], MOVE_NORMAL, this);
+				float sGroundZ = origin[2] - 64 * trace_fraction;
+				float sObsHeight = sObsTopZ - sGroundZ;
+
+				if (sObsHeight <= 72 && sObsHeight > 0) {
 					/* crouch-jumpable */
 					input_buttons |= INPUT_BUTTON2;
 					input_buttons |= INPUT_BUTTON8;
@@ -1679,11 +1685,10 @@ csbot::YaPB_AimThink(void)
 		}
 		spot += m_yapbAimErrorVec;
 
-		/* recoil compensation: pull aim point down by punchangle.
-		 * punchangle[0] is negative when recoil pushes view up,
-		 * so subtracting it pulls the aim point DOWN. */
-		float recoilComp = 0.5 + diff * 0.2;
-		spot[2] -= punchangle[0] * recoilComp * 3.5;
+		/* recoil compensation: punchangle[0] is negative when recoil
+		 * pushes the view UP. Adding it to spot[2] pulls aim DOWN. */
+		float recoilComp = 0.6 + diff * 0.2;
+		spot[2] += punchangle[0] * recoilComp * 4.0;
 
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
 		if (diff >= YAPB_DIFF_EXPERT) {
@@ -2355,13 +2360,23 @@ csbot::RunAI(void)
 					input_buttons |= INPUT_BUTTON0;
 					input_movevalues = [0, 0, 0];
 				} else {
-					/* check crouch-jump clearance (62u) */
-					traceline(origin + [0,0,72], origin + [0,0,72] + obsFwd * 40, MOVE_NORMAL, this);
-					if (trace_fraction >= 1.0) {
+					/* measure obstacle height: trace down from well above to find top surface */
+					vector obsPoint = origin + obsFwd * 24;
+					traceline(obsPoint + [0,0,128], obsPoint, MOVE_NORMAL, this);
+					float obsTopZ = obsPoint[2] + 128 * (1.0 - trace_fraction);
+
+					/* find ground below bot */
+					traceline(origin, origin - [0,0,64], MOVE_NORMAL, this);
+					float groundZ = origin[2] - 64 * trace_fraction;
+
+					float obsHeight = obsTopZ - groundZ;
+
+					if (obsHeight <= 72 && obsHeight > 0) {
+						/* jumpable from ground level — crouch-jump */
 						input_buttons |= INPUT_BUTTON2;
 						input_buttons |= INPUT_BUTTON8;
 					} else {
-						/* too tall — strafe around */
+						/* too tall or can't measure — strafe around */
 						vector flatAngle2 = v_angle;
 						flatAngle2[0] = 0;
 						makevectors(flatAngle2);
