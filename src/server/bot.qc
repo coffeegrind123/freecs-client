@@ -1533,7 +1533,7 @@ csbot::YaPB_StuckCheck(void)
 				}
 			} else {
 				/* obstacle ahead — check height with crouch-jump clearance (62u) */
-				traceline(origin + [0,0,62], origin + [0,0,62] + stuckFwd * 48, MOVE_NORMAL, this);
+				traceline(origin + [0,0,72], origin + [0,0,72] + stuckFwd * 48, MOVE_NORMAL, this);
 				if (trace_fraction >= 1.0) {
 					/* crouch-jumpable */
 					input_buttons |= INPUT_BUTTON2;
@@ -1680,10 +1680,10 @@ csbot::YaPB_AimThink(void)
 		spot += m_yapbAimErrorVec;
 
 		/* recoil compensation: pull aim point down by punchangle.
-		 * real players drag mouse down to counter spray climb.
-		 * scale by difficulty — experts compensate fully. */
-		float recoilComp = 0.3 + diff * 0.15;
-		spot[2] -= punchangle[0] * recoilComp * 2.0;
+		 * punchangle[0] is negative when recoil pushes view up,
+		 * so subtracting it pulls the aim point DOWN. */
+		float recoilComp = 0.5 + diff * 0.2;
+		spot[2] -= punchangle[0] * recoilComp * 3.5;
 
 		/* expert weapon height offset (YaPB combat.cpp:785-818 getCustomHeight) */
 		if (diff >= YAPB_DIFF_EXPERT) {
@@ -2356,7 +2356,7 @@ csbot::RunAI(void)
 					input_movevalues = [0, 0, 0];
 				} else {
 					/* check crouch-jump clearance (62u) */
-					traceline(origin + [0,0,62], origin + [0,0,62] + obsFwd * 40, MOVE_NORMAL, this);
+					traceline(origin + [0,0,72], origin + [0,0,72] + obsFwd * 40, MOVE_NORMAL, this);
 					if (trace_fraction >= 1.0) {
 						input_buttons |= INPUT_BUTTON2;
 						input_buttons |= INPUT_BUTTON8;
