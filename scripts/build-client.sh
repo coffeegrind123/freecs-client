@@ -65,8 +65,9 @@ mkdir -p "$BUILD_DIR" "$DL_DIR"
 # =============================================================================
 # 1. Clone and patch FTEQW
 # =============================================================================
-if [ ! -d "$FTEQW_DIR" ]; then
+if [ ! -d "$FTEQW_DIR/engine" ]; then
     msg "Cloning FTEQW..."
+    rm -rf "$FTEQW_DIR"
     git clone --depth 1 https://github.com/fte-team/fteqw.git "$FTEQW_DIR"
 fi
 
@@ -177,35 +178,7 @@ mkdir -p "$NUCLIDE_DIR/platform"
 MENU_DAT="$NUCLIDE_DIR/platform/menu.dat"
 [ -f "$MENU_DAT" ] || err "menu.dat compilation failed"
 
-# =============================================================================
-# 4b. Convert YaPB graph files to .yapb format
-# =============================================================================
-GRAPH_SRC="$REPO_DIR/ext/yapb-graphs/graph"
-GRAPH_OUT="$REPO_DIR/data/graphs"
-
-if [ -d "$GRAPH_SRC" ]; then
-    CONVERTER="$BUILD_DIR/convert-graph"
-    if [ ! -f "$CONVERTER" ]; then
-        msg "Compiling graph converter..."
-        gcc -O2 -o "$CONVERTER" "$REPO_DIR/scripts/convert-graph.c"
-    fi
-
-    if [ -f "$CONVERTER" ]; then
-        mkdir -p "$GRAPH_OUT"
-        # only convert CS maps (de_, cs_, as_) that aren't already converted
-        msg "Converting YaPB graph files..."
-        converted=0
-        for f in "$GRAPH_SRC"/de_*.graph "$GRAPH_SRC"/cs_*.graph "$GRAPH_SRC"/as_*.graph; do
-            [ -f "$f" ] || continue
-            base=$(basename "$f" .graph)
-            out="$GRAPH_OUT/$base.yapb"
-            [ -f "$out" ] && continue
-            "$CONVERTER" "$f" "$out" 2>/dev/null && converted=$((converted + 1))
-        done
-        total=$(ls "$GRAPH_OUT"/*.yapb 2>/dev/null | wc -l)
-        msg "Graphs: $converted new, $total total .yapb files"
-    fi
-fi
+msg "Graph files: $(ls "$REPO_DIR/graphs/"*.graph 2>/dev/null | wc -l) .graph files in repo"
 
 if [ "$QC_ONLY" -eq 1 ]; then
     msg "QuakeC compile complete (--qc-only)."
@@ -290,7 +263,7 @@ gamedll "dlls/hl.dll"
 cldll "1"
 LIBLIST
 
-    for item in cfg data decls fonts gfx maps particles progs resource scripts \
+    for item in cfg data decls fonts gfx graphs maps particles progs resource scripts \
                 progs.dat csprogs.dat hud.dat quake.rc icon.tga \
                 default_aliases.cfg default_cstrike.cfg default_cvar.cfg; do
         [ -e "$REPO_DIR/$item" ] && cp -a "$REPO_DIR/$item" "$PKG/cstrike/"
